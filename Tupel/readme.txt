@@ -29,3 +29,8 @@ for no skimming, use noselection
 
   keepparticlecoll    = cms.bool(False),
 to keep the particle flow objects and gen level particles. Needed for UE studies. To keep, switch to True
+// To Update the branch on github
+git remote add Tupel_MiniAOD_TTbar_76X git@github.com:UGent/Tupel //to be on the specific branch
+git add <file name>
+git push Tupel_MiniAOD_TTbar_76X Tupel_MiniAOD_TTbar_76X
+
