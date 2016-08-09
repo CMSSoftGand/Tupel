@@ -8,7 +8,7 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 from JetMETCorrections.Configuration.DefaultJEC_cff import *
 from JetMETCorrections.Configuration.JetCorrectionServices_cff import *
-runOnData= False #True #data/MC switch
+runOnData= True #True #data/MC switch
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -30,8 +30,8 @@ else:
 
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("/store/mc/RunIIFall15MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext3-v1/00000/00DF0A73-17C2-E511-B086-E41D2D08DE30.root")
-
+#    fileNames = cms.untracked.vstring("/store/data/Run2015D/SingleMuon/MINIAOD/16Dec2015-v1/10000/00006301-CAA8-E511-AD39-549F35AD8BC9.root")
+    fileNames = cms.untracked.vstring("/store/data/Run2015D/SingleElectron/MINIAOD/16Dec2015-v1/20000/04BC97E5-01A7-E511-8E96-00259059649C.root")
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
@@ -81,23 +81,15 @@ updateJetCollection(
    process,
    jetSource = cms.InputTag('slimmedJets'),
    labelName = 'UpdatedJEC',
-   jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None')  # Do not forget 'L2L3Residual' on data!
+   jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']), 'None')  # Do not forget 'L2L3Residual' on data!
 )
 
-from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-#from runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 
-#default configuration for miniAOD reprocessing, change the isData flag to run on data
-#for a full met computation, remove the pfCandColl input
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 runMetCorAndUncFromMiniAOD(process,
                            isData=runOnData,
                            metType = 'PF',
-#                           pfCandColl=cms.InputTag("slimmedMETs"),
-#                           recoMetFromPFCs=True,
-#                           reclusterJets=False,
-#                           jetFlav="AK4PF",
                            postfix=''
-#                           jecUncFile="Fall15_25nsV2_MC_Uncertainty_AK4PFchs.txt"
                            )
 
 process.load('Configuration.StandardSequences.Services_cff')
@@ -132,33 +124,39 @@ process.jer = cms.ESSource("PoolDBESSource",
         )
 
 process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
+#if runOnData:
+#    process.patPFMetT1T2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+#    process.patPFMetT1T2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+#    process.patPFMetT2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+#    process.patPFMetT2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+#    process.shiftedPatJetEnDown.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
+#    process.shiftedPatJetEnUp.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
 
+#process.pseudoTop = cms.EDProducer("PseudoTopProducer",
+#    finalStates = cms.InputTag("packedGenParticles"),
+#    genParticles = cms.InputTag("prunedGenParticles"),
+#    jetConeSize = cms.double(0.4),
+#    maxJetEta = cms.double(2.4),
+#    minJetPt = cms.double(20),
+#    leptonConeSize = cms.double(0.1),
 
-process.pseudoTop = cms.EDProducer("PseudoTopProducer",
-    finalStates = cms.InputTag("packedGenParticles"),
-    genParticles = cms.InputTag("prunedGenParticles"),
-    jetConeSize = cms.double(0.4),
-    maxJetEta = cms.double(2.4),
-    minJetPt = cms.double(20),
-    leptonConeSize = cms.double(0.1),
-
-     minLeptonPt = cms.double(20),#new?
-     maxLeptonEta= cms.double(2.4),#new?
-     minLeptonPtDilepton = cms.double(20),#new?
-     maxLeptonEtaDilepton= cms.double(2.4),#new?
-     minDileptonMassDilepton= cms.double(0.),#new?
-     minLeptonPtSemilepton = cms.double(20),#new?
-     maxLeptonEtaSemilepton= cms.double(2.4),#new?
-     minVetoLeptonPtSemilepton= cms.double(15.),#new?
-     maxVetoLeptonEtaSemilepton= cms.double(2.4),#new?
-     minMETSemiLepton=cms.double(0.),#new?
-     minMtWSemiLepton=cms.double(0.),#new?
-    tMass = cms.double(172.5),
-    wMass = cms.double(80.4)
-)
+#     minLeptonPt = cms.double(20),#new?
+#     maxLeptonEta= cms.double(2.4),#new?
+#     minLeptonPtDilepton = cms.double(20),#new?
+#     maxLeptonEtaDilepton= cms.double(2.4),#new?
+#     minDileptonMassDilepton= cms.double(0.),#new?
+#     minLeptonPtSemilepton = cms.double(20),#new?
+#     maxLeptonEtaSemilepton= cms.double(2.4),#new?
+#     minVetoLeptonPtSemilepton= cms.double(15.),#new?
+#     maxVetoLeptonEtaSemilepton= cms.double(2.4),#new?
+#     minMETSemiLepton=cms.double(0.),#new?
+#     minMtWSemiLepton=cms.double(0.),#new?
+#    tMass = cms.double(172.5),
+#    wMass = cms.double(80.4)
+#)
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('simulation_ntuple.root' )
+                                   fileName = cms.string('data_ntuple.root' )
 )
 
 #process.selectedMuons = cms.EDFilter("CandPtrSelector", src = cms.InputTag("slimmedMuons"), cut = cms.string('''abs(eta)<2.5 && pt>10. &&
@@ -183,19 +181,19 @@ process.TFileService = cms.Service("TFileService",
 jetsrcc="updatedPatJetsUpdatedJEC"
 
 process.tupel = cms.EDAnalyzer("Tupel",
-  triggerfilters      = cms.InputTag("TriggerResults","","PAT"),
+  triggerfilters      = cms.InputTag("TriggerResults","","RECO"),
   triggerEvent = cms.InputTag( "patTriggerEvent" ),
   #triggerSummaryLabel = cms.InputTag("hltTriggerSummaryAOD","","HLT"), 
   photonSrc   = cms.InputTag("slimmedPhotons"),
   electronSrc = cms.InputTag("slimmedElectrons"),
   muonSrc     = cms.InputTag("slimmedMuons"),
   #tauSrc      = cms.untracked.InputTag("slimmedPatTaus"),
-#  jetSrc      = cms.untracked.InputTag("slimmedJets"),
-    pfcandSrc	   = cms.InputTag("packedPFCandidates"),
-    jetSrc      = cms.InputTag(jetsrcc),
+  #jetSrc      = cms.untracked.InputTag("slimmedJets"),
+  pfcandSrc	   = cms.InputTag("packedPFCandidates"),
+  jetSrc      = cms.InputTag(jetsrcc),
   metSrc      = cms.InputTag("patMETsPF"),
   genSrc      = cms.InputTag("prunedGenParticles"),
- pgenSrc       =cms.InputTag("packedGenParticles"),
+  pgenSrc       =cms.InputTag("packedGenParticles"),
   gjetSrc       = cms.InputTag('slimmedGenJets'),
   muonMatch    = cms.string( 'muonTriggerMatchHLTMuons' ),
   muonMatch2    = cms.string( 'muonTriggerMatchHLTMuons2' ),
@@ -204,20 +202,23 @@ process.tupel = cms.EDAnalyzer("Tupel",
   keepparticlecoll    = cms.bool(True),
   mSrcRho      = cms.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now
   CalojetLabel = cms.InputTag('slimmedJets'), #same collection now BB 
-#  jecunctable = cms.string(jecunctable_),
+  #jecunctable = cms.string(jecunctable_),
   #metSource = cms.VInputTag("slimmedMETs","slimmedMETs","slimmedMETs","slimmedMETs"), #no MET corr yet
-  metSource = cms.VInputTag("slimmedMETs","slimmedMETs"),
+  metSource = cms.VInputTag("slimmedMETs_RERUN","slimmedMETs","slimmedMETsPuppi"),
   lheSource=cms.InputTag('source')
-
-)
+  )
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter(
     "PrimaryVertexObjectFilter",
-    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0),maxd0 = cms.double(2.0) ),
+    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0),maxd0 = cms.double(2) ),
     src=cms.InputTag('offlineSlimmedPrimaryVertices')
     )
-
+process.GoodVertexFilter = cms.EDFilter("VertexSelector",
+    src = cms.InputTag("offlinePrimaryVertices"),
+    cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho < 2"),
+    filter = cms.bool(True)   # otherwise it won't filter the events, just produce an empty vertex collection.
+    )
 
 #process.load('RecoJets.Configuration.RecoPFJets_cff')
 #-------------------- Turn-on the FastJet density calculation -----------------------
@@ -231,14 +232,12 @@ process.p = cms.Path(
 #+process.selectedElectrons 
 # +process.goodOfflinePrimaryVertices 
 #+process.kt6PFJets
-process.pseudoTop
-#+process.JetResolutionESProducer_AK4PFchs
-#+process.JetResolutionESProducer_SF_AK4PFchs 
-+ process.tupel 
+#process.pseudoTop
+ process.tupel 
 )
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 process.MessageLogger.suppressWarning = cms.untracked.vstring('ecalLaserCorrFilter','manystripclus53X','toomanystripclus53X')
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
@@ -247,10 +246,9 @@ process.options.allowUnscheduled = cms.untracked.bool(True)
 process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('test.root'),
 #    outputCommands = cms.untracked.vstring(['drop *','keep patJets_patJets_*_*','keep *_*_*_PAT','keep recoTracks_unp*_*_*','keep recoVertexs_unp*_*_*'])
-#    outputCommands = cms.untracked.vstring(['drop *'])
-outputCommands = cms.untracked.vstring(['drop *', 'keep *_slimmedMETs*_*_*'])
+    outputCommands = cms.untracked.vstring(['drop *'])
 )
-process.endpath= cms.EndPath(process.out)
+#process.endpath= cms.EndPath(process.out)
 
 
 #from PhysicsTools.PatAlgos.tools.trigTools import *
