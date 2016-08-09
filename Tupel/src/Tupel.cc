@@ -143,12 +143,14 @@ edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   // ----------member data ---------------------------
   TTree *myTree;
   double MyWeight;
-  unsigned int event,run,lumi;
+  unsigned int event,run,lumi_;
   int realdata,bxnumber;
   double EvtInfo_NumVtx,PU_npT,PU_npIT,nup;
     double wtot_write=0;
     bool accept=false;
   //particles
+  std::vector<double> Uncorec_METPt;
+  std::vector<double> Uncorec_METPhi;
   std::vector<double> METPt;
   std::vector<double> METPx;
   std::vector<double> METPy;
@@ -158,6 +160,7 @@ edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   std::vector<double> METsigxy;
   std::vector<double> METsigy2;   
   std::vector<double> METsig;
+  std::vector<double> METUncPt;
   std::vector<double> Dr01LepPt;
   std::vector<double> Dr01LepEta;
   std::vector<double> Dr01LepPhi;
@@ -216,7 +219,6 @@ edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   std::vector<double> GjPz;
   std::vector<double> GjChargedFraction;
 std::vector<double> GjConstId;
-std::vector<double>GjConstMomId;
 std::vector<double> GjNConst;
 std::vector<double> GjConstPt;
 std::vector<double> GjConstCharge;
@@ -340,6 +342,14 @@ std::vector<double> patJetPfAk04ConstE;
   std::vector<double> patMuon_PF_IsoDY_;
   std::vector<double> patMuon_Mu17_Mu8_Matched_;
   std::vector<double> patMuon_Mu17_TkMu8_Matched_; 
+  std::vector<unsigned>  patElecIdveto_;
+  std::vector<unsigned>  patElecIdloose_;
+  std::vector<unsigned>  patElecIdmedium_;
+  std::vector<unsigned>  patElecIdtight_;
+  std::vector<unsigned>  patElecIdnonTrig80_;
+  std::vector<unsigned>  patElecIdnonTrig90_;
+  std::vector<unsigned>  patElecIdTrig80_;
+  std::vector<unsigned>  patElecIdTrig90_;
 
     std::vector<double> patElecdEtaIn_;
     std::vector<double> patElecdPhiIn_;
@@ -425,6 +435,7 @@ std::vector<double> patPfCandVertexRef;
     double HLT_TkMu18;
 
   double HLT_Elec17_Elec8; //TO BE USED
+  double HLT_Ele23_WPLoose_Gsf_v; //TO BE USED
   double Flag_HBHENoiseFilter; //TO BE USED
   double Flag_HBHENoiseIsoFilter; //TO BE USED
   double Flag_CSCTightHalo2015Filter; //TO BE USED
@@ -477,7 +488,8 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
   convToken_=consumes<reco::ConversionCollection>(edm::InputTag("reducedEgamma","reducedConversions"));//hardcode
   genInfoToken_=consumes<GenEventInfoProduct>(edm::InputTag ("generator"));//hardcode
   HLTToken_=consumes<edm::TriggerResults>(edm::InputTag ("TriggerResults","","HLT"));//hardcode
-  HLTTokenFilters_=consumes<edm::TriggerResults>(edm::InputTag ("TriggerResults","","RECO"));//hardcode
+//  HLTTokenFilters_=consumes<edm::TriggerResults>(edm::InputTag ("TriggerResults","","PAT"));//hardcode
+  HLTTokenFilters_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerfilters"));//hardcode
   lheEventSrc_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
   PupSrc_=consumes<std::vector< PileupSummaryInfo> >(edm::InputTag ("slimmedAddPileupInfo"));//hardcode
 
@@ -534,7 +546,13 @@ JME::JetResolutionScaleFactor resolution_sf;
   iEvent.getByToken(packedgenParticleSrc_, packedgenParticles_h);
   const vector<pat::PackedGenParticle>* packedgenParticles  = packedgenParticles_h.failedToGet () ? 0 : &*packedgenParticles_h;
 
-
+/*  edm::Handle<std::vector <reco::GenJet> >genjetColl;
+  iEvent.getByToken(gjetSrc_, genjetColl);
+  std::vector<const reco::GenJet*> genjets_v;
+  for ( auto& x : *genjetColl ) {
+       genjets_v.push_back(&x);
+       }
+*/
   
   // get muon collection
   edm::Handle<pat::MuonCollection > muons;
@@ -621,7 +639,7 @@ patPfCandVertexRef.clear();
     event=0;
     realdata=0;
     run=0;
-    lumi=0;
+    lumi_=0;
     bxnumber=0;
     EvtInfo_NumVtx=0;
     PU_npT=0;
@@ -630,6 +648,8 @@ patPfCandVertexRef.clear();
     nup=0;
     rhoPrime=0;
     AEff=0; 
+    Uncorec_METPt.clear();
+    Uncorec_METPhi.clear();
     METPt.clear();
     METPx.clear();
     METPy.clear();
@@ -639,6 +659,7 @@ patPfCandVertexRef.clear();
     METsigxy.clear();
     METsigy2.clear();
     METsig.clear();   
+    METUncPt.clear();   
     Dr01LepPt.clear();
     Dr01LepEta.clear();
     Dr01LepPhi.clear();
@@ -697,7 +718,6 @@ St03NumberMom.clear();
     GjPz.clear();
     GjChargedFraction.clear();
       GjConstId.clear();
-GjConstMomId.clear();
 GjNConst.clear();
       GjConstPt.clear();
 GjConstCharge.clear();
@@ -819,6 +839,14 @@ patJetPfAk04PartonFlavour_.clear();
     patMuon_Mu17_Mu8_Matched_.clear();
     patMuon_Mu17_TkMu8_Matched_.clear();
     //electrons
+    patElecIdveto_.clear();
+    patElecIdloose_.clear();
+    patElecIdmedium_.clear();
+    patElecIdtight_.clear();
+    patElecIdnonTrig80_.clear();
+    patElecIdnonTrig90_.clear();
+    patElecIdTrig80_.clear();
+    patElecIdTrig90_.clear();
     patElecdEtaIn_.clear();
     patElecdPhiIn_.clear();
     patElechOverE_.clear();
@@ -861,6 +889,7 @@ patJetPfAk04PartonFlavour_.clear();
     HLT_Mu17_Mu8=0;
     HLT_Mu17_TkMu8=0;
     HLT_Elec17_Elec8=0;
+    HLT_Ele23_WPLoose_Gsf_v=0;
     HLT_IsoMu24_eta2p1=0;
       HLT_IsoMu17_eta2p1=0;
       HLT_IsoMu20=0;
@@ -890,7 +919,7 @@ patJetPfAk04PartonFlavour_.clear();
     ///////////////////end clear vector////////////////////// 
     event = iEvent.id().event();
     run = iEvent.id().run();
-    lumi = iEvent.luminosityBlock();
+    lumi_ = iEvent.luminosityBlock();
     bxnumber = iEvent.bunchCrossing();
     realdata = iEvent.isRealData();
     
@@ -901,6 +930,8 @@ patJetPfAk04PartonFlavour_.clear();
         if(!metH.isValid())continue;
         //cout<<"MET"<<imet<<"  "<<metSources[imet]<<"  "<<metH->ptrAt(0)->pt()<<endl;
 
+        Uncorec_METPt.push_back(metH->at(0).uncorPt()); 
+        Uncorec_METPhi.push_back(metH->at(0).uncorPhi()); 
         METPt.push_back(metH->at(0).pt()); 
         METPx.push_back(metH->at(0).px()); 
         METPy.push_back(metH->at(0).py()); 
@@ -910,6 +941,9 @@ patJetPfAk04PartonFlavour_.clear();
         METsigxy.push_back(metH->at(0).getSignificanceMatrix()(0,1)); 
         METsigy2.push_back(metH->at(0).getSignificanceMatrix()(1,1)); 
         METsig.push_back(metH->at(0).significance()); 
+//https://github.com/BristolTopGroup/NTupleProduction/blob/master/src/BristolNTuple_MET.cc
+        METUncPt.push_back(metH->at(0).shiftedPt(pat::MET::METUncertainty(1) )); 
+//	std::cout<<"this is met pt unc: "<<METUncPt.at(0)<<endl;
         //Output object in EDM format
         //std::auto_ptr<llvvMet> metOut(new llvvMet());
         //llvvMet& met = *metOut;
@@ -1342,8 +1376,8 @@ int ngjets=0;
 
 
 
-//      edm::Handle<reco::GenJetCollection> genjetColl;
-      //iEvent.getByToken("ak5GenJets", genjetColl);
+//      edm::Handle<std::vector <reco::GenJet> >genjetColl;
+//      iEvent.getByToken("gjetSrc_", genjetColl);
 //          iEvent.getByToken(gjetSrc_, genjetColl);
 //      if(!genjetColl.failedToGet()){
 //      const reco::GenJetCollection & genjet = *genjetColl;
@@ -1375,9 +1409,8 @@ int ngjets=0;
           for(unsigned int idx =0; idx<genjets.at(k)->numberOfDaughters();idx++){
 
           //cout<<genjets.at(k)->eta()<<endl;
-          cout<<genjets.at(k)->numberOfDaughters()<< "  "<<idx<<"  "<<genjets.at(k)->daughter(idx)->pdgId()<<"  "<<genjets.at(k)->daughter(idx)->numberOfMothers()<<"  "<<genjets.at(k)->daughter(idx)->mother()->pdgId()<<endl;
+          //cout<<genjets.at(k)->numberOfDaughters()<< "  "<<idx<<"  "<<genjets.at(k)->daughter(idx)->pdgId()<<"  "<<endl;
           //cout<<genjets.at(k)->daughter(idx)->pt()<<"  "<<genjets.at(k)->daughter(idx)->eta()<<"  "<<genjets.at(k)->daughter(idx)->phi()<<"  "<<genjets.at(k)->daughter(idx)->energy()<<endl<<endl;
-            GjConstMomId.push_back(genjets.at(k)->daughter(idx)->mother()->pdgId());
             GjConstId.push_back(genjets.at(k)->daughter(idx)->pdgId());
             GjConstPt.push_back(genjets.at(k)->daughter(idx)->pt());
             GjConstCharge.push_back(genjets.at(k)->daughter(idx)->charge());
@@ -1436,6 +1469,7 @@ int ngjets=0;
     int Mu17_Mu8=0;
     int Mu17_TkMu8=0;
     int Elec17_Elec8=0;
+    int Ele23_WPLoose_Gsf_v=0;
     int IsoMu24_eta2p1=0;
     int IsoMu17_eta2p1=0;
     int IsoMu20=0;
@@ -1468,12 +1502,12 @@ int ngjets=0;
       for (int i = 0; i < ntrigs; i++) {
 	trigname.push_back(trigNames->triggerName(i));
 	trigaccept.push_back(HLTResHandle->accept(i));
-
 	if (trigaccept[i]){
 	  if(std::string(trigname[i]).find("HLT_IsoMu24_eta2p1")!=std::string::npos) IsoMu24_eta2p1=1;
 	  if(std::string(trigname[i]).find("HLT_Mu17_Mu8")!=std::string::npos) Mu17_Mu8=1;
 	  if(std::string(trigname[i]).find("HLT_Mu17_TkMu8")!=std::string::npos) Mu17_TkMu8=1;
 	  if(std::string(trigname[i]).find("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL")!=std::string::npos) Elec17_Elec8=1;
+	  if(std::string(trigname[i]).find("HLT_Ele23_WPLoose_Gsf_v")!=std::string::npos) Ele23_WPLoose_Gsf_v=1;
 
 	  if(std::string(trigname[i]).find("HLT_IsoMu17_eta2p1_v")!=std::string::npos)IsoMu17_eta2p1=1;
 	  if(std::string(trigname[i]).find("HLT_IsoMu20_v")!=std::string::npos)IsoMu20=1;
@@ -1501,6 +1535,7 @@ int ngjets=0;
 
     HLT_Mu17_TkMu8=Mu17_TkMu8;
     HLT_Elec17_Elec8=Elec17_Elec8;
+    HLT_Ele23_WPLoose_Gsf_v=Ele23_WPLoose_Gsf_v;
     
 
       HLT_IsoMu17_eta2p1=IsoMu17_eta2p1;
@@ -1536,7 +1571,7 @@ int ngjets=0;
       ntrigs = (int)trigNames->size();
       for (int i = 0; i < ntrigs; i++) {
 
-        if(HLTResHandle->accept(i)){
+        if(HLTResFiltersHandle->accept(i)){
 
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseFilter")!=std::string::npos)Flag_HBHENoiseFilter=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseIsoFilter")!=std::string::npos)Flag_HBHENoiseIsoFilter=1.;
@@ -1556,7 +1591,7 @@ int ngjets=0;
     if(muon){
     for (unsigned int j = 0; j < muons->size(); ++j){
       const std::vector<pat::Muon> & mu = *muons;
-      if(mu[j].isGlobalMuon()){ 
+//     if(recomu[j].isGlobalMuon()){ 
         if((channel_!="noselection")&&(mu[j].pt()<15 || abs(mu[j].eta())>2.4))continue;
         if((channel_=="noselection")&&(mu[j].pt()<10 || abs(mu[j].eta())>3.0))continue;
 	//const pat::TriggerObjectRef trigRef( matchHelper.triggerMatchObject( muons,j,muonMatch_, iEvent, *triggerEvent ) );
@@ -1611,17 +1646,15 @@ int ngjets=0;
 	
 	int idpass=0;
         int tightid=0, medid=0, looseid=0;
-        bool isTight=0;       
- /*for (const pat::Muon &mu : *muons)
-        {*/
-        if(!( pvHandle->empty() && pvHandle->front().isFake())){
-        const reco::Vertex &vtx = pvHandle->front();
-	isTight=muon::isTightMuon(mu[j],vtx);
-        }
-        bool isMedium(muon::isMediumMuon(mu[j]));
-        bool isLoose(muon::isLooseMuon(mu[j]));
-        if (isTight)tightid=1;if (isMedium)medid=1;if (isLoose)looseid=1;
-        
+  bool isTight=0;
+  if(!( pvHandle->empty() && pvHandle->front().isFake())){
+     const reco::Vertex &vtx = pvHandle->front();
+     isTight=muon::isTightMuon(mu[j],vtx);
+     }
+     bool isMedium(muon::isMediumMuon(mu[j]));
+     bool isLoose(muon::isLooseMuon(mu[j]));
+     if (isTight)tightid=1;if (isMedium)medid=1;if (isLoose)looseid=1;
+
         patMuonLooseId_.push_back(looseid);
         patMuonMediumId_.push_back(medid);
         patMuonTightId_.push_back(tightid);
@@ -1662,14 +1695,13 @@ int ngjets=0;
 	patMuon_PF_IsoSumNeutralHadronEt_.push_back(mu[j].pfIsolationR03().sumNeutralHadronEt);
 	patMuon_PF_IsoDY_.push_back((mu[j].pfIsolationR03().sumChargedHadronPt+mu[j].pfIsolationR03().sumNeutralHadronEt)/mu[j].pt());
 	if(mu[j].pt()>22 && abs(mu[j].eta())<2.4 &&idpass>0 &&fabs(RelativeIsolationDBetaCorr)<0.15)MuFill++;
-      }
+//    }
     }
     }
             //cout<<"eeeeeeeeeeeeeeeeeeeeeee"<<endl;
     //electrons B.B.
     
     int ElecFill=0;
-    
     if(electron){
     auto_ptr<vector<pat::Electron> > electronColl( new vector<pat::Electron> (*electrons) );
     for (unsigned int j=0; j < electronColl->size();++j){
@@ -1740,44 +1772,28 @@ int ngjets=0;
 	std::cout << std::flush;
 	elecIdsListed_ = true;
       }
-     unsigned elecid = 0;
-      /*if(!realdata){
+     unsigned int elecid = 0;
+     unsigned int elecid_veto = 0,elecid_loose=0,elecid_medium=0,elecid_tight=0,elecid_nonTrig80=0,elecid_nonTrig90=0,elecid_Trig80=0,elecid_Trig90=0;
+           if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"))) elecid_veto= 1;
+           if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"))) elecid_loose= 1;
+           if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-medium"))) elecid_medium= 1;
+           if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"))) elecid_tight= 1;
+           if(el.electronID(std::string("mvaEleID-Spring15-25ns-nonTrig-V1-wp80"))) elecid_nonTrig80= 1;
+           if(el.electronID(std::string("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"))) elecid_nonTrig90= 1;
+           if(el.electronID(std::string("mvaEleID-Spring15-25ns-Trig-V1-wp80"))) elecid_Trig80= 1;
+           if(el.electronID(std::string("mvaEleID-Spring15-25ns-Trig-V1-wp90"))) elecid_Trig90= 1;
 
-      if(el.electronID(std::string("cutBasedElectronID-CSA14-50ns-V1-standalone-veto"))) elecid |= 1;
-      if(el.electronID(std::string("cutBasedElectronID-CSA14-50ns-V1-standalone-loose"))) elecid |= 2;
-      if(el.electronID(std::string("cutBasedElectronID-CSA14-50ns-V1-standalone-medium"))) elecid |= 4;
-      if(el.electronID(std::string("cutBasedElectronID-CSA14-50ns-V1-standalone-tight"))) elecid |= 8;
-      if(el.electronID(std::string("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-veto"))) elecid |= 16;
-      if(el.electronID(std::string("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-loose"))) elecid |= 32;
-      if(el.electronID(std::string("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-medium"))) elecid |= 64;
-      if(el.electronID(std::string("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-tight"))) elecid |= 128;
-
-     }
-
-if(realdata){
-
-      if(el.electronID(std::string("cutBasedElectronID-Spring15-50ns-V1-standalone-veto"))) elecid |= 1;
-      if(el.electronID(std::string("cutBasedElectronID-Spring15-50ns-V1-standalone-loose"))) elecid |= 2;
-      if(el.electronID(std::string("cutBasedElectronID-Spring15-50ns-V1-standalone-medium"))) elecid |= 4;
-      if(el.electronID(std::string("cutBasedElectronID-Spring15-50ns-V1-standalone-tight"))) elecid |= 8;
-
-      if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"))) elecid |= 16;
-      if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"))) elecid |= 32;
-      if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-medium"))) elecid |= 64;
-      if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"))) elecid |= 128;
-
-      if(el.electronID(std::string("cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"))) elecid |= 256;
-      if(el.electronID(std::string("cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"))) elecid |= 512;
-      if(el.electronID(std::string("cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"))) elecid |= 1024; 
-      if(el.electronID(std::string("cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"))) elecid |= 2048; 
-
-     }*/
-
+           patElecIdveto_.push_back(elecid_veto);
+           patElecIdloose_.push_back(elecid_loose);
+           patElecIdmedium_.push_back(elecid_medium);
+           patElecIdtight_.push_back(elecid_tight);
+           patElecIdnonTrig80_.push_back(elecid_nonTrig80);
+           patElecIdnonTrig90_.push_back(elecid_nonTrig90);
+           patElecIdTrig80_.push_back(elecid_Trig80);
+           patElecIdTrig90_.push_back(elecid_Trig90);         
+//           cout<<"id is:  "<<el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"))<<endl;
       patElecId_.push_back(elecid);
-
-
       double Elec17_Elec8_Matched=0;
-      
       patElecTrig_.push_back(Elec17_Elec8_Matched);//no matching yet...BB 
       reco::Vertex::Point pos(0,0,0);
       if(vtx_h->size() > 0) pos = vtx_h->at(0).position();
@@ -1845,10 +1861,7 @@ if(realdata){
     //for(edm::View<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
 
     for ( unsigned int i=0; i<jets->size(); ++i ) {
-
-
       const pat::Jet & jet = jets->at(i);
-
         if((channel_!="noselection")&&(jet.pt()<15 || abs(jet.eta())>2.5))continue;
         if((channel_=="noselection")&&(jet.pt()<15 || abs(jet.eta())>5.0))continue;
     //  cout<<"I am here"<<endl;                     
@@ -1926,7 +1939,9 @@ if(realdata){
   //    smearUp = getJER(jet.eta(), 1); //JER nominal=0, up=+1, down=-1
   //    smearDn = getJER(jet.eta(), -1); //JER nominal=0, up=+1, down=-1
       if(!realdata){
-	bool matchGen=false;
+//      for (unsigned int j=0; j<genjets_v.size();++j){
+//           const reco::GetJet* & gjet = genjets_v.at(j);
+        bool matchGen=false;
         JME::JetParameters parameters_1;
         parameters_1.setJetPt(jet.pt());
         parameters_1.setJetEta(jet.eta());
@@ -1944,22 +1959,28 @@ if(realdata){
         smear=gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r);
         smearUp=gRandom->Gaus(jet.pt(),sqrt(sf_up*sf_up-1)*r);
         smearDn=gRandom->Gaus(jet.pt(),sqrt(sf_dn*sf_dn-1)*r);
-
+TLorentzVector gjet_v;
+TLorentzVector jet_v;
 	if (jet.genJet()){
+    TLorentzVector jet_vv;
+    TLorentzVector gjet_vv;
+    jet_vv.SetPtEtaPhiE(jet.pt(),jet.eta(),jet.phi(),jet.energy());
+    gjet_vv.SetPtEtaPhiE(jet.genJet()->pt(),jet.genJet()->eta(),jet.genJet()->phi(),jet.genJet()->energy());
+    double DR_gj_j=jet_vv.DeltaR(gjet_vv);
+//    double DPt_gj_j=fabs(jet.pt()-jet.genJet()->pt());
+//    if( DR_gj_j<0.2 &&DPt_gj_j<3*r ){
+    if( DR_gj_j<0.2 ){
 	  matchGen=true;
-          TLorentzVector jet_vv;
-           TLorentzVector gjet_vv;
-          jet_vv.SetPtEtaPhiE(jet.pt(),jet.eta(),jet.phi(),jet.energy());
-          gjet_vv.SetPtEtaPhiE(jet.genJet()->pt(),jet.genJet()->eta(),jet.genJet()->phi(),jet.genJet()->energy());
-          double DR_gj_j=jet_vv.DeltaR(gjet_vv);
-          double DPt_gj_j=fabs(jet.pt()-jet.genJet()->pt());
-          if( DR_gj_j<0.2 &&DPt_gj_j<3*r ){
           //cout<<"Burdayım ulan "<<endl;
 	  MGjPt.push_back(jet.genJet()->pt());
 	  MGjeta.push_back(jet.genJet()->eta());
 	  MGjphi.push_back(jet.genJet()->phi());
 	  MGjE.push_back(jet.genJet()->energy());
+gjet_v.SetPtEtaPhiE(jet.genJet()->pt(),jet.genJet()->eta(),jet.genJet()->phi(),jet.genJet()->energy());
+jet_v.SetPtEtaPhiE(jet.pt(),jet.eta(),jet.phi(),jet.energy());
+double dR_ = gjet_v.DeltaR(jet_v);
 
+if (run==1 && lumi_ == 160932 && event == 32053787)cout<<"DR_: "<<dR_<<endl;
           smear=std::max(0.0,jet.genJet()->pt() +sf *( jet.pt()-jet.genJet()->pt() ) );
           smearUp=std::max(0.0,jet.genJet()->pt() +sf_up *( jet.pt()-jet.genJet()->pt() ) );
           smearDn=std::max(0.0,jet.genJet()->pt() +sf_dn *( jet.pt()-jet.genJet()->pt() ) );
@@ -1977,7 +1998,9 @@ if(realdata){
       patJetPfAk04EnJERSmear.push_back(smearE);
       patJetPfAk04EnJERSmearUp.push_back(smearUpE);
       patJetPfAk04EnJERSmearDn.push_back(smearDnE);
+//    }
     }
+    
     //end jets
                 //cout<<"gggggggggggggggggggggg"<<endl;
        accept=false;
@@ -2073,6 +2096,8 @@ Tupel::beginJob()
     myTree->Branch("patPfpvAssociationQuality",&patPfpvAssociationQuality);
     }
 
+    myTree->Branch("Uncorec_METPt",&Uncorec_METPt);
+    myTree->Branch("Uncorec_METPhi",&Uncorec_METPhi);
     myTree->Branch("METPt",&METPt);
     myTree->Branch("METPx",&METPx);
     myTree->Branch("METPy",&METPy);
@@ -2082,10 +2107,11 @@ Tupel::beginJob()
     myTree->Branch("METsigxy",&METsigxy);
     myTree->Branch("METsigy2",&METsigy2);
     myTree->Branch("METsig",&METsig);
+    myTree->Branch("METUncPt",&METUncPt);
     myTree->Branch("event",&event);
     myTree->Branch("realdata",&realdata);
     myTree->Branch("run",&run);
-    myTree->Branch("lumi",&lumi);
+    myTree->Branch("lumi_",&lumi_);
     myTree->Branch("bxnumber",&bxnumber);
     myTree->Branch("EvtInfo_NumVtx",&EvtInfo_NumVtx);
     myTree->Branch("PU_npT",&PU_npT);
@@ -2141,7 +2167,6 @@ Tupel::beginJob()
     myTree->Branch("GjPz",&GjPz);
     myTree->Branch("GjChargedFraction",&GjChargedFraction);
     myTree->Branch("GjConstId",&GjConstId);
-    myTree->Branch("GjConstMomId",&GjConstMomId);
     myTree->Branch("GjNConst",&GjNConst);
     myTree->Branch("GjConstPt",&GjConstPt);
     myTree->Branch("GjConstCharge",&GjConstCharge);
@@ -2168,6 +2193,7 @@ Tupel::beginJob()
     myTree->Branch("HLT_Mu17_Mu8",&HLT_Mu17_Mu8);
     myTree->Branch("HLT_Mu17_TkMu8",&HLT_Mu17_TkMu8);
     myTree->Branch("HLT_Elec17_Elec8",&HLT_Elec17_Elec8);
+    myTree->Branch("HLT_Ele23_WPLoose_Gsf_v",&HLT_Ele23_WPLoose_Gsf_v);
     myTree->Branch("HLT_IsoMu24_eta2p1",&HLT_IsoMu24_eta2p1);
      myTree->Branch("HLT_IsoMu17_eta2p1",&HLT_IsoMu17_eta2p1); 
      myTree->Branch("HLT_IsoMu20",&HLT_IsoMu20); 
@@ -2233,6 +2259,14 @@ Tupel::beginJob()
     myTree->Branch("patMuon_Mu17_TkMu8_Matched_",&patMuon_Mu17_TkMu8_Matched_);
 
     myTree->Branch("patElecId_",&patElecId_);
+    myTree->Branch("patElecIdveto_",&patElecIdveto_);
+    myTree->Branch("patElecIdloose_",&patElecIdloose_);
+    myTree->Branch("patElecIdmedium_",&patElecIdmedium_);
+    myTree->Branch("patElecIdtight_",&patElecIdtight_);
+    myTree->Branch("patElecIdnonTrig80_",&patElecIdnonTrig80_);
+    myTree->Branch("patElecIdnonTrig90_",&patElecIdnonTrig90_);
+    myTree->Branch("patElecIdTrig80_",&patElecIdTrig80_);
+    myTree->Branch("patElecIdTrig90_",&patElecIdTrig90_);
     myTree->Branch("patElecdEtaIn_",&patElecdEtaIn_);
     myTree->Branch("patElecdPhiIn_",&patElecdPhiIn_);
     myTree->Branch("patElechOverE_",&patElechOverE_);

@@ -30,10 +30,10 @@ else:
 
 
 process.source = cms.Source("PoolSource",
-#    fileNames = cms.untracked.vstring("/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt50ns_MCRUN2_74_V9A-v1/00000/0066F143-F8FD-E411-9A0B-D4AE526A0D2E.root")
-  fileNames = cms.untracked.vstring("/store/data/Run2015D/SingleMuon/MINIAOD/16Dec2015-v1/10000/00006301-CAA8-E511-AD39-549F35AD8BC9.root")
+#    fileNames = cms.untracked.vstring("/store/data/Run2015D/SingleMuon/MINIAOD/16Dec2015-v1/10000/00006301-CAA8-E511-AD39-549F35AD8BC9.root")
+    fileNames = cms.untracked.vstring("/store/data/Run2015D/SingleElectron/MINIAOD/16Dec2015-v1/20000/04BC97E5-01A7-E511-8E96-00259059649C.root")
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 #from CondCore.DBCommon.CondDBSetup_cfi import *
 #import os
@@ -84,14 +84,46 @@ updateJetCollection(
    jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']), 'None')  # Do not forget 'L2L3Residual' on data!
 )
 
-#from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 
-#default configuration for miniAOD reprocessing, change the isData flag to run on data
-#for a full met computation, remove the pfCandColl input
-#runMetCorAndUncFromMiniAOD(process,
-#                           isData=runOnData,
-#                           )
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+runMetCorAndUncFromMiniAOD(process,
+                           isData=runOnData,
+                           metType = 'PF',
+                           postfix=''
+                           )
 
+process.load('Configuration.StandardSequences.Services_cff')
+process.load("JetMETCorrections.Modules.JetResolutionESProducer_cfi")
+
+
+from CondCore.DBCommon.CondDBSetup_cfi import *
+import os
+process.jer = cms.ESSource("PoolDBESSource",
+        CondDBSetup,
+        toGet = cms.VPSet(
+            # Resolution
+            cms.PSet(
+                record = cms.string('JetResolutionRcd'),
+                tag    = cms.string('JR_Fall15_25nsV2_MC_PtResolution_AK4PFchs'),
+                label  = cms.untracked.string('AK4PFchs_pt')
+                ),
+            
+            cms.PSet(
+                record = cms.string('JetResolutionRcd'),
+                tag = cms.string('JR_Fall15_25nsV2_MC_PhiResolution_AK4PFchs'),
+                label = cms.untracked.string('AK4PFchs_phi')
+                ),
+            # Scale factors
+            cms.PSet(
+                record = cms.string('JetResolutionScaleFactorRcd'),
+                tag    = cms.string('JR_Fall15_25nsV2_MC_SF_AK4PFchs'),
+                label  = cms.untracked.string('AK4PFchs')
+                ),
+            ),
+        connect = cms.string('sqlite:Fall15_25nsV2_MC.db')
+        )
+
+process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
 #if runOnData:
 #    process.patPFMetT1T2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
 #    process.patPFMetT1T2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
@@ -124,7 +156,7 @@ updateJetCollection(
 #)
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('withJEC_DYJetsToLL_ntuple.root' )
+                                   fileName = cms.string('data_ntuple.root' )
 )
 
 #process.selectedMuons = cms.EDFilter("CandPtrSelector", src = cms.InputTag("slimmedMuons"), cut = cms.string('''abs(eta)<2.5 && pt>10. &&
@@ -149,42 +181,44 @@ process.TFileService = cms.Service("TFileService",
 jetsrcc="updatedPatJetsUpdatedJEC"
 
 process.tupel = cms.EDAnalyzer("Tupel",
-#  trigger      = cms.InputTag( "patTrigger" ),
+  triggerfilters      = cms.InputTag("TriggerResults","","RECO"),
   triggerEvent = cms.InputTag( "patTriggerEvent" ),
   #triggerSummaryLabel = cms.InputTag("hltTriggerSummaryAOD","","HLT"), 
   photonSrc   = cms.InputTag("slimmedPhotons"),
   electronSrc = cms.InputTag("slimmedElectrons"),
   muonSrc     = cms.InputTag("slimmedMuons"),
   #tauSrc      = cms.untracked.InputTag("slimmedPatTaus"),
-#  jetSrc      = cms.untracked.InputTag("slimmedJets"),
-    pfcandSrc	   = cms.InputTag("packedPFCandidates"),
-
-    jetSrc      = cms.InputTag(jetsrcc),
+  #jetSrc      = cms.untracked.InputTag("slimmedJets"),
+  pfcandSrc	   = cms.InputTag("packedPFCandidates"),
+  jetSrc      = cms.InputTag(jetsrcc),
   metSrc      = cms.InputTag("patMETsPF"),
   genSrc      = cms.InputTag("prunedGenParticles"),
- pgenSrc       =cms.InputTag("packedGenParticles"),
+  pgenSrc       =cms.InputTag("packedGenParticles"),
   gjetSrc       = cms.InputTag('slimmedGenJets'),
   muonMatch    = cms.string( 'muonTriggerMatchHLTMuons' ),
   muonMatch2    = cms.string( 'muonTriggerMatchHLTMuons2' ),
   elecMatch    = cms.string( 'elecTriggerMatchHLTElecs' ),
-  channel    = cms.string( 'smu' ),
+  channel    = cms.string( 'noselection' ),
   keepparticlecoll    = cms.bool(True),
   mSrcRho      = cms.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now
   CalojetLabel = cms.InputTag('slimmedJets'), #same collection now BB 
-#  jecunctable = cms.string(jecunctable_),
+  #jecunctable = cms.string(jecunctable_),
   #metSource = cms.VInputTag("slimmedMETs","slimmedMETs","slimmedMETs","slimmedMETs"), #no MET corr yet
   metSource = cms.VInputTag("slimmedMETs_RERUN","slimmedMETs","slimmedMETsPuppi"),
   lheSource=cms.InputTag('source')
-
-)
+  )
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter(
     "PrimaryVertexObjectFilter",
-    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0) ),
+    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0),maxd0 = cms.double(2) ),
     src=cms.InputTag('offlineSlimmedPrimaryVertices')
     )
-
+process.GoodVertexFilter = cms.EDFilter("VertexSelector",
+    src = cms.InputTag("offlinePrimaryVertices"),
+    cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho < 2"),
+    filter = cms.bool(True)   # otherwise it won't filter the events, just produce an empty vertex collection.
+    )
 
 #process.load('RecoJets.Configuration.RecoPFJets_cff')
 #-------------------- Turn-on the FastJet density calculation -----------------------
