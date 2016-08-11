@@ -1,13 +1,13 @@
 Instructions for ntuple Producer
 ssh -Y <uname>@lxplus.cern.ch
-cmsrel CMSSW_7_6_5
-cd CMSSW_7_6_5/src
+cmsrel CMSSW_8_0_11
+cd CMSSW_8_0_11/src
 cmsenv
 git-cms-merge-topic 13960
 //to fetch the most recent pseudotop producer.
-git clone -b Tupel_MiniAOD_TTbar_76X git@github.com:UGent/Tupel
+git clone -b Tupel_MiniAOD_TTbar_80X git@github.com:UGent/Tupel
 // met corrections
-git cms-merge-topic cms-met:metTool76X
+git cms-merge-topic cms-met:metTool80X
 scram b -j 10
 
 // eos mount (active for ~24 hours)
@@ -15,8 +15,8 @@ mkdir ~/eos
 eosmount ~/eos
 
 cd /Tupel/Tupel/
-cmsRun simple_run_76X_cfg.py
-cmsRun simple_run_76X_data_cfg.py
+cmsRun simple_run_80X_cfg.py
+cmsRun simple_run_80X_data_cfg.py
 (or crab ...)
 
 extra info:
