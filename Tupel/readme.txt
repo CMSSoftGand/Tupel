@@ -16,6 +16,9 @@ mkdir ~/eos
 eosmount ~/eos
 
 cd /Tupel/Tupel/
+// Make symbolic link
+ln -s data/era2016/Spring16_25nsV6_DATA.db
+ln -s data/era2016/Spring16_25nsV6_MC.db
 cmsRun simple_run_80X_cfg.py
 cmsRun simple_run_80X_data_cfg.py
 (or crab ...)
