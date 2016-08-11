@@ -22,7 +22,7 @@ ln -s data/era2016/Spring16_25nsV6_MC.db
 // To run the analyzer locally
 cmsRun scripts/simple_run_80X_cfg.py
 // To submit the whole samples via crab run the following command
-python scripts/submitToGrid.py -j data/era2016/test_samples.json -c ${CMSSW_BASE}/src/Tupel/Tupel/scripts/simple_run_80X_cfg.py --lfn /store/user/mgul/test -s
+python scripts/submitToGrid.py -j data/era2016/samples.json -c ${CMSSW_BASE}/src/Tupel/Tupel/scripts/simple_run_80X_cfg.py --lfn /store/user/mgul/test -s
 
 
 extra info:
