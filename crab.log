@@ -1,0 +1,168 @@
+DEBUG 2016-08-12 10:11:14,620: 	 Executing command: 'submit'
+DEBUG 2016-08-12 10:11:14,621: 	 Found CRAB cache file /afs/cern.ch/user/m/mgul/.crab3
+DEBUG 2016-08-12 10:11:14,631: 	 Checking credentials
+DEBUG 2016-08-12 10:11:14,631: 	 Found proxy file /tmp/x509up_u29426
+DEBUG 2016-08-12 10:11:14,631: 	 Getting proxy life time left
+DEBUG 2016-08-12 10:11:15,237: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u29426 -timeleft
+ output : 42507
+
+ error: 
+ retcode : 0
+DEBUG 2016-08-12 10:11:15,845: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u29426 -actimeleft
+ output : 42506
+
+ error: 
+ retcode : 0
+DEBUG 2016-08-12 10:11:15,845: 	 Proxy valid for 11:48:27 hours
+INFO 2016-08-12 10:11:15,845: 	 Will use CRAB configuration file grid/Data13TeV_SingleMuon_2016B_cfg.py
+DEBUG 2016-08-12 10:11:15,845: 	 Loading CRAB configuration file.
+ERROR 2016-08-12 10:11:15,849: 	 Error while loading CRAB configuration:
+invalid syntax (Data13TeV_SingleMuon_2016B_cfg.py, line 26)
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2016-08-12 10:11:15,849: 	 Caught exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/bin/crab", line 160, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/bin/crab", line 146, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 298, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 84, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+invalid syntax (Data13TeV_SingleMuon_2016B_cfg.py, line 26)
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+DEBUG 2016-08-12 10:11:16,421: 	 Executing command: 'submit'
+DEBUG 2016-08-12 10:11:16,421: 	 Found CRAB cache file /afs/cern.ch/user/m/mgul/.crab3
+DEBUG 2016-08-12 10:11:16,444: 	 Checking credentials
+DEBUG 2016-08-12 10:11:16,445: 	 Found proxy file /tmp/x509up_u29426
+DEBUG 2016-08-12 10:11:16,445: 	 Getting proxy life time left
+DEBUG 2016-08-12 10:11:17,052: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u29426 -timeleft
+ output : 42506
+
+ error: 
+ retcode : 0
+DEBUG 2016-08-12 10:11:17,662: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u29426 -actimeleft
+ output : 42504
+
+ error: 
+ retcode : 0
+DEBUG 2016-08-12 10:11:17,663: 	 Proxy valid for 11:48:26 hours
+INFO 2016-08-12 10:11:17,663: 	 Will use CRAB configuration file grid/MC13TeV_TTJets_powheg_cfg.py
+DEBUG 2016-08-12 10:11:17,663: 	 Loading CRAB configuration file.
+ERROR 2016-08-12 10:11:17,665: 	 Error while loading CRAB configuration:
+invalid syntax (MC13TeV_TTJets_powheg_cfg.py, line 25)
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2016-08-12 10:11:17,666: 	 Caught exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/bin/crab", line 160, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/bin/crab", line 146, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 298, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 84, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+invalid syntax (MC13TeV_TTJets_powheg_cfg.py, line 25)
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+DEBUG 2016-08-12 10:12:57,434: 	 Executing command: 'submit'
+DEBUG 2016-08-12 10:12:57,435: 	 Found CRAB cache file /afs/cern.ch/user/m/mgul/.crab3
+DEBUG 2016-08-12 10:12:57,446: 	 Checking credentials
+DEBUG 2016-08-12 10:12:57,446: 	 Found proxy file /tmp/x509up_u29426
+DEBUG 2016-08-12 10:12:57,446: 	 Getting proxy life time left
+DEBUG 2016-08-12 10:12:58,254: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u29426 -timeleft
+ output : 42404
+
+ error: 
+ retcode : 0
+DEBUG 2016-08-12 10:12:58,760: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u29426 -actimeleft
+ output : 42403
+
+ error: 
+ retcode : 0
+DEBUG 2016-08-12 10:12:58,760: 	 Proxy valid for 11:46:44 hours
+INFO 2016-08-12 10:12:58,760: 	 Will use CRAB configuration file grid/Data13TeV_SingleMuon_2016B_cfg.py
+DEBUG 2016-08-12 10:12:58,760: 	 Loading CRAB configuration file.
+ERROR 2016-08-12 10:12:58,763: 	 Error while loading CRAB configuration:
+invalid syntax (Data13TeV_SingleMuon_2016B_cfg.py, line 26)
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2016-08-12 10:12:58,763: 	 Caught exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/bin/crab", line 160, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/bin/crab", line 146, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 298, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 84, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+invalid syntax (Data13TeV_SingleMuon_2016B_cfg.py, line 26)
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+DEBUG 2016-08-12 10:12:59,320: 	 Executing command: 'submit'
+DEBUG 2016-08-12 10:12:59,320: 	 Found CRAB cache file /afs/cern.ch/user/m/mgul/.crab3
+DEBUG 2016-08-12 10:12:59,327: 	 Checking credentials
+DEBUG 2016-08-12 10:12:59,327: 	 Found proxy file /tmp/x509up_u29426
+DEBUG 2016-08-12 10:12:59,327: 	 Getting proxy life time left
+DEBUG 2016-08-12 10:12:59,931: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u29426 -timeleft
+ output : 42403
+
+ error: 
+ retcode : 0
+DEBUG 2016-08-12 10:13:00,536: 	 Executing : 
+ command : voms-proxy-info -file /tmp/x509up_u29426 -actimeleft
+ output : 42401
+
+ error: 
+ retcode : 0
+DEBUG 2016-08-12 10:13:00,536: 	 Proxy valid for 11:46:43 hours
+INFO 2016-08-12 10:13:00,536: 	 Will use CRAB configuration file grid/MC13TeV_TTJets_powheg_cfg.py
+DEBUG 2016-08-12 10:13:00,536: 	 Loading CRAB configuration file.
+ERROR 2016-08-12 10:13:00,540: 	 Error while loading CRAB configuration:
+invalid syntax (MC13TeV_TTJets_powheg_cfg.py, line 25)
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2016-08-12 10:13:00,540: 	 Caught exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/bin/crab", line 160, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/bin/crab", line 146, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 298, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/crab3/slc6_amd64_gcc493/cms/crabclient/3.3.1607.patch2/lib/python2.7/site-packages/CRABClient/Commands/SubCommand.py", line 84, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+invalid syntax (MC13TeV_TTJets_powheg_cfg.py, line 25)
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
