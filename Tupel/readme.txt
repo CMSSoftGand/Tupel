@@ -37,6 +37,8 @@ brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_
 // Pileup weighting. To update the pileup distributions run the script below. It will store the data pileup distributions for different min.bias cross section in data/pileupWgts.root
 python scripts/runPileupEstimation.py --json data/era2016/Data13TeV_SingleMuon_lumis.json --out data/era2016/pileupWgts.root
 
+// B-tagging. To apply corrections to the simulation one needs the expected efficiencies stored somwewhere. The script below will project the jet pT spectrum from the TTbar sample before and after applying b-tagging, to compute the expecte efficiencies. The result will be stored in data/expTageff.root
+>> 
 
 extra info:
 
