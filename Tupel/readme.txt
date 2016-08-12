@@ -28,7 +28,11 @@ python scripts/submitToGrid.py -j data/era2016/test_samples.json -c ${CMSSW_BASE
 //  get crab report
 crab report grid/crab_Data13TeV_SingleMuon_2016B/
 //  Merge json files
-mergeJSON.py grid/crab_Data13TeV_SingleMuon_2016B/results/processedLumis.json grid/crab_Data13TeV_SingleMuon_2016C/results/processedLumis.json grid/crab_Data13TeV_SingleMuon_2016D/results/processedLumis.json --output data/era2016/Data13TeV_DoubleMuon_lumis.json
+mergeJSON.py grid/crab_Data13TeV_SingleMuon_2016B/results/processedLumis.json grid/crab_Data13TeV_SingleMuon_2016C/results/processedLumis.json grid/crab_Data13TeV_SingleMuon_2016D/results/processedLumis.json --output data/era2016/Data13TeV_SingleMuon_lumis.json
+
+// You can then run the brilcalc tool to get the integrated luminosity in total and per run (see https://twiki.cern.ch/twiki/bin/view/CMS/2015LumiNormtag for more details).
+export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH
+brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json -i data/era2016/Data13TeV_SingleMuon_lumis.json
 
 
 
