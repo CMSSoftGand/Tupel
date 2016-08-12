@@ -34,6 +34,8 @@ mergeJSON.py grid/crab_Data13TeV_SingleMuon_2016B/results/processedLumis.json gr
 export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH
 brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json -i data/era2016/Data13TeV_SingleMuon_lumis.json
 
+// Pileup weighting. To update the pileup distributions run the script below. It will store the data pileup distributions for different min.bias cross section in data/pileupWgts.root
+python scripts/runPileupEstimation.py --json data/era2016/Data13TeV_SingleMuon_lumis.json --out data/era2016/pileupWgts.root
 
 
 extra info:
