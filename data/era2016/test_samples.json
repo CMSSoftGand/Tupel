@@ -1,0 +1,10 @@
+{
+"MC13TeV_TTJets_powheg" :               [832,    0, "/TT_TuneCUETP8M1_13TeV-powheg-pythia8/RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3_ext3-v1/MINIAODSIM", "t#bar{t}", 920, true,false,1],
+"Data13TeV_SingleMuon_2016B":       [1.0,  1, "/SingleMuon/Run2016B-PromptReco-v2/MINIAOD",     "Data", 1, false, false, 1]
+}
+
+
+
+
+
+
