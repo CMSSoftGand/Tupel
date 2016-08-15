@@ -152,7 +152,7 @@ process.p = cms.Path(
 )
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.MessageLogger.suppressWarning = cms.untracked.vstring('ecalLaserCorrFilter','manystripclus53X','toomanystripclus53X')
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
@@ -164,7 +164,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring(['drop *'])
 outputCommands = cms.untracked.vstring(['drop *', 'keep *_slimmedMETs*_*_*'])
 )
-process.endpath= cms.EndPath(process.out)
+#process.endpath= cms.EndPath(process.out)
 
 
 #from PhysicsTools.PatAlgos.tools.trigTools import *
