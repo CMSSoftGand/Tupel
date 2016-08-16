@@ -1959,8 +1959,6 @@ int ngjets=0;
         smear=gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r);
         smearUp=gRandom->Gaus(jet.pt(),sqrt(sf_up*sf_up-1)*r);
         smearDn=gRandom->Gaus(jet.pt(),sqrt(sf_dn*sf_dn-1)*r);
-TLorentzVector gjet_v;
-TLorentzVector jet_v;
 	if (jet.genJet()){
     TLorentzVector jet_vv;
     TLorentzVector gjet_vv;
@@ -1976,11 +1974,6 @@ TLorentzVector jet_v;
 	  MGjeta.push_back(jet.genJet()->eta());
 	  MGjphi.push_back(jet.genJet()->phi());
 	  MGjE.push_back(jet.genJet()->energy());
-gjet_v.SetPtEtaPhiE(jet.genJet()->pt(),jet.genJet()->eta(),jet.genJet()->phi(),jet.genJet()->energy());
-jet_v.SetPtEtaPhiE(jet.pt(),jet.eta(),jet.phi(),jet.energy());
-double dR_ = gjet_v.DeltaR(jet_v);
-
-if (run==1 && lumi_ == 160932 && event == 32053787)cout<<"DR_: "<<dR_<<endl;
           smear=std::max(0.0,jet.genJet()->pt() +sf *( jet.pt()-jet.genJet()->pt() ) );
           smearUp=std::max(0.0,jet.genJet()->pt() +sf_up *( jet.pt()-jet.genJet()->pt() ) );
           smearDn=std::max(0.0,jet.genJet()->pt() +sf_dn *( jet.pt()-jet.genJet()->pt() ) );
