@@ -143,7 +143,7 @@ edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   // ----------member data ---------------------------
   TTree *myTree;
   double MyWeight;
-  unsigned int event,run,lumi_;
+  unsigned int event,run,lumi;
   int realdata,bxnumber;
   double EvtInfo_NumVtx,PU_npT,PU_npIT,nup;
     double wtot_write=0;
@@ -639,7 +639,7 @@ patPfCandVertexRef.clear();
     event=0;
     realdata=0;
     run=0;
-    lumi_=0;
+    lumi=0;
     bxnumber=0;
     EvtInfo_NumVtx=0;
     PU_npT=0;
@@ -919,7 +919,7 @@ patJetPfAk04PartonFlavour_.clear();
     ///////////////////end clear vector////////////////////// 
     event = iEvent.id().event();
     run = iEvent.id().run();
-    lumi_ = iEvent.luminosityBlock();
+    lumi = iEvent.luminosityBlock();
     bxnumber = iEvent.bunchCrossing();
     realdata = iEvent.isRealData();
     
@@ -1959,8 +1959,6 @@ int ngjets=0;
         smear=gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r);
         smearUp=gRandom->Gaus(jet.pt(),sqrt(sf_up*sf_up-1)*r);
         smearDn=gRandom->Gaus(jet.pt(),sqrt(sf_dn*sf_dn-1)*r);
-TLorentzVector gjet_v;
-TLorentzVector jet_v;
 	if (jet.genJet()){
     TLorentzVector jet_vv;
     TLorentzVector gjet_vv;
@@ -1976,11 +1974,7 @@ TLorentzVector jet_v;
 	  MGjeta.push_back(jet.genJet()->eta());
 	  MGjphi.push_back(jet.genJet()->phi());
 	  MGjE.push_back(jet.genJet()->energy());
-gjet_v.SetPtEtaPhiE(jet.genJet()->pt(),jet.genJet()->eta(),jet.genJet()->phi(),jet.genJet()->energy());
-jet_v.SetPtEtaPhiE(jet.pt(),jet.eta(),jet.phi(),jet.energy());
-double dR_ = gjet_v.DeltaR(jet_v);
 
-if (run==1 && lumi_ == 160932 && event == 32053787)cout<<"DR_: "<<dR_<<endl;
           smear=std::max(0.0,jet.genJet()->pt() +sf *( jet.pt()-jet.genJet()->pt() ) );
           smearUp=std::max(0.0,jet.genJet()->pt() +sf_up *( jet.pt()-jet.genJet()->pt() ) );
           smearDn=std::max(0.0,jet.genJet()->pt() +sf_dn *( jet.pt()-jet.genJet()->pt() ) );
@@ -2056,6 +2050,7 @@ Tupel::beginJob()
     myTree = new TTree("MuonTree","MuonTree");
     myTree->Branch("wtot_write",&wtot_write);
     myTree->Branch("accept",&accept);
+
     if(keepparticlecoll_){
       myTree->Branch("Packed01Pt",&Packed01Pt);
       myTree->Branch("Packed01Eta",&Packed01Eta);
@@ -2094,29 +2089,6 @@ Tupel::beginJob()
     myTree->Branch("patPfCandFromPv",&patPfCandFromPv);
     myTree->Branch("patPfCandVertexRef",&patPfCandVertexRef);
     myTree->Branch("patPfpvAssociationQuality",&patPfpvAssociationQuality);
-    }
-
-    myTree->Branch("Uncorec_METPt",&Uncorec_METPt);
-    myTree->Branch("Uncorec_METPhi",&Uncorec_METPhi);
-    myTree->Branch("METPt",&METPt);
-    myTree->Branch("METPx",&METPx);
-    myTree->Branch("METPy",&METPy);
-    myTree->Branch("METPz",&METPz);
-    myTree->Branch("METE",&METE);
-    myTree->Branch("METsigx2",&METsigx2);
-    myTree->Branch("METsigxy",&METsigxy);
-    myTree->Branch("METsigy2",&METsigy2);
-    myTree->Branch("METsig",&METsig);
-    myTree->Branch("METUncPt",&METUncPt);
-    myTree->Branch("event",&event);
-    myTree->Branch("realdata",&realdata);
-    myTree->Branch("run",&run);
-    myTree->Branch("lumi_",&lumi_);
-    myTree->Branch("bxnumber",&bxnumber);
-    myTree->Branch("EvtInfo_NumVtx",&EvtInfo_NumVtx);
-    myTree->Branch("PU_npT",&PU_npT);
-    myTree->Branch("PU_npIT",&PU_npIT);
-    myTree->Branch("MyWeight",&MyWeight);
     myTree->Branch("Dr01LepPt",&Dr01LepPt);
     myTree->Branch("Dr01LepEta",&Dr01LepEta);
     myTree->Branch("Dr01LepPhi",&Dr01LepPhi);
@@ -2137,6 +2109,36 @@ Tupel::beginJob()
     myTree->Branch("Bare01LepStatus",&Bare01LepStatus);
     myTree->Branch("Bare01LepMomId",&Bare01LepMomId);      
 
+    myTree->Branch("pseudoTop_pt",&pseudoTop_pt);
+    myTree->Branch("pseudoTop_eta",&pseudoTop_eta);
+    myTree->Branch("pseudoTop_phi",&pseudoTop_phi);
+    myTree->Branch("pseudoTop_energy",&pseudoTop_energy);
+    myTree->Branch("pseudoTop_pdgId",&pseudoTop_pdgId);
+    myTree->Branch("pseudoTop_charge",&pseudoTop_charge);
+    }
+
+    myTree->Branch("Uncorec_METPt",&Uncorec_METPt);
+    myTree->Branch("Uncorec_METPhi",&Uncorec_METPhi);
+    myTree->Branch("METPt",&METPt);
+    myTree->Branch("METPx",&METPx);
+    myTree->Branch("METPy",&METPy);
+    myTree->Branch("METPz",&METPz);
+    myTree->Branch("METE",&METE);
+    myTree->Branch("METsigx2",&METsigx2);
+    myTree->Branch("METsigxy",&METsigxy);
+    myTree->Branch("METsigy2",&METsigy2);
+    myTree->Branch("METsig",&METsig);
+    myTree->Branch("METUncPt",&METUncPt);
+    myTree->Branch("event",&event);
+    myTree->Branch("realdata",&realdata);
+    myTree->Branch("run",&run);
+    myTree->Branch("lumi",&lumi);
+    myTree->Branch("bxnumber",&bxnumber);
+    myTree->Branch("EvtInfo_NumVtx",&EvtInfo_NumVtx);
+    myTree->Branch("PU_npT",&PU_npT);
+    myTree->Branch("PU_npIT",&PU_npIT);
+    myTree->Branch("MyWeight",&MyWeight);
+
     myTree->Branch("St03Pt",&St03Pt);
     myTree->Branch("St03Eta",&St03Eta);
     myTree->Branch("St03Phi",&St03Phi);
@@ -2147,7 +2149,7 @@ Tupel::beginJob()
     myTree->Branch("St03MotherId",&St03MotherId);
     myTree->Branch("St03NumberMom",&St03NumberMom);    
 
-    
+/*    
     myTree->Branch("St01PhotonPt",&St01PhotonPt);
     myTree->Branch("St01PhotonEta",&St01PhotonEta);
     myTree->Branch("St01PhotonPhi",&St01PhotonPhi);
@@ -2157,7 +2159,7 @@ Tupel::beginJob()
     myTree->Branch("St01PhotonMomId",&St01PhotonMomId);
     myTree->Branch("St01PhotonNumberMom",&St01PhotonNumberMom);
     myTree->Branch("St01PhotonStatus",&St01PhotonStatus);
-    
+  */  
     myTree->Branch("GjPt",&GjPt);
     myTree->Branch("Gjeta",&Gjeta);
     myTree->Branch("Gjphi",&Gjphi);
@@ -2174,15 +2176,6 @@ Tupel::beginJob()
     myTree->Branch("GjConstPhi",&GjConstPhi);
     myTree->Branch("GjConstE",&GjConstE);
 
-
-    myTree->Branch("pseudoTop_pt",&pseudoTop_pt);
-    myTree->Branch("pseudoTop_eta",&pseudoTop_eta);
-    myTree->Branch("pseudoTop_phi",&pseudoTop_phi);
-    myTree->Branch("pseudoTop_energy",&pseudoTop_energy);
-    myTree->Branch("pseudoTop_pdgId",&pseudoTop_pdgId);
-    myTree->Branch("pseudoTop_charge",&pseudoTop_charge);
-
-
     myTree->Branch("matchGjet",&matchGjet);
     myTree->Branch("MGjPt",&MGjPt);
     myTree->Branch("MGjeta",&MGjeta);
@@ -2190,15 +2183,15 @@ Tupel::beginJob()
     myTree->Branch("MGjE",&MGjE); 
     
     //HLT
-    myTree->Branch("HLT_Mu17_Mu8",&HLT_Mu17_Mu8);
-    myTree->Branch("HLT_Mu17_TkMu8",&HLT_Mu17_TkMu8);
-    myTree->Branch("HLT_Elec17_Elec8",&HLT_Elec17_Elec8);
-    myTree->Branch("HLT_Ele23_WPLoose_Gsf_v",&HLT_Ele23_WPLoose_Gsf_v);
-    myTree->Branch("HLT_IsoMu24_eta2p1",&HLT_IsoMu24_eta2p1);
-     myTree->Branch("HLT_IsoMu17_eta2p1",&HLT_IsoMu17_eta2p1); 
+     myTree->Branch("HLT_Ele23_WPLoose_Gsf_v",&HLT_Ele23_WPLoose_Gsf_v);
      myTree->Branch("HLT_IsoMu20",&HLT_IsoMu20); 
-     myTree->Branch("HLT_IsoMu20_eta2p1",&HLT_IsoMu20_eta2p1); 
      myTree->Branch("HLT_IsoTkMu20",&HLT_IsoTkMu20); 
+/*    myTree->Branch("HLT_Mu17_Mu8",&HLT_Mu17_Mu8);
+     myTree->Branch("HLT_Mu17_TkMu8",&HLT_Mu17_TkMu8);
+     myTree->Branch("HLT_Elec17_Elec8",&HLT_Elec17_Elec8);
+     myTree->Branch("HLT_IsoMu24_eta2p1",&HLT_IsoMu24_eta2p1);
+     myTree->Branch("HLT_IsoMu17_eta2p1",&HLT_IsoMu17_eta2p1); 
+     myTree->Branch("HLT_IsoMu20_eta2p1",&HLT_IsoMu20_eta2p1); 
      myTree->Branch("HLT_IsoTkMu20_eta2p1",&HLT_IsoTkMu20_eta2p1);
      myTree->Branch("HLT_Mu20",&HLT_Mu20); 
      myTree->Branch("HLT_TkMu20",&HLT_TkMu20); 
@@ -2210,7 +2203,7 @@ Tupel::beginJob()
      myTree->Branch("HLT_IsoTkMu18_eta2p1",&HLT_IsoTkMu18_eta2p1); 
      myTree->Branch("HLT_Mu18",&HLT_Mu18); 
      myTree->Branch("HLT_TkMu18",&HLT_TkMu18); 
-     myTree->Branch("Flag_HBHENoiseFilter",&Flag_HBHENoiseFilter); 
+*/     myTree->Branch("Flag_HBHENoiseFilter",&Flag_HBHENoiseFilter); 
      myTree->Branch("Flag_HBHENoiseIsoFilter",&Flag_HBHENoiseIsoFilter); 
      myTree->Branch("Flag_CSCTightHalo2015Filter",&Flag_CSCTightHalo2015Filter); 
      myTree->Branch("Flag_EcalDeadCellTriggerPrimitiveFilter",&Flag_EcalDeadCellTriggerPrimitiveFilter); 
