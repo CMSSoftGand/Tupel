@@ -34,9 +34,8 @@ mergeJSON.py grid/crab_Data13TeV_SingleMuon_2016B/results/processedLumis.json gr
 export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH
 brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json -i data/era2016/Data13TeV_SingleMuon_lumis.json
 
-// To add output files and reduce the numbers of files use the following [1] command for iihe locally, and for eos change to eos files and run [2];
-[1]: python /user/mgul/Higgs_tottbar/anlyzer808/CMSSW_8_0_11/src/Tupel/Tupel/scripts/checkProductionIntegrity.py -i /store/user/mgul/808Tuples/7461ffa -o /store/user/mgul/test --nocheck 0
-[2]: python scripts/submitCheckProductionIntegrity.py -i /store/path to directory -o /store/path to output directory
+// To add output files and reduce the numbers of files use the following [1] command for iihe batch but there is a proxy problem during jot submission which should to be fixed. It creates a tmp_combine directory which consists of all the .sh files for datasets. (You can submit one-by-one. Some of the paths are coded which shouls to be changed) 
+[1]: python scripts/submitCheckProductionIntegrity.py -i /store/user/mgul/tuple_8011_new1/1c09f31 -o /store/user/mgul/Htottbar/1c09f31 --nocheck 0
 
 // Pileup weighting. To update the pileup distributions run the script below. It will store the data pileup distributions for different min.bias cross section in data/pileupWgts.root
 python scripts/runPileupEstimation.py --json data/era2016/Data13TeV_SingleMuon_lumis.json --out data/era2016/pileupWgts.root
