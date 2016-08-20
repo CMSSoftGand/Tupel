@@ -40,6 +40,15 @@
 #include <TLorentzVector.h>
 #include <TGraphAsymmErrors.h>
 #include <algorithm>
+<<<<<<< HEAD
+#include "data/era2016/NeutrinoSolver.cc"
+#include "data/era2016/NeutrinoSolver.h"
+//#include "/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/BTagCalibrationStandalone.h"
+//#include "/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/BTagCalibrationStandalone.cc"
+#include "/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/BtagUncertaintyComputer.h"
+#include "/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/BtagUncertaintyComputer.cc"
+#include "BTagCalibration.h"
+=======
 #include "plugins/NeutrinoSolver.cc"
 #include "interface/NeutrinoSolver.h"
 //#include "/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/BTagCalibrationStandalone.h"
@@ -47,11 +56,16 @@
 #include "interface/BtagUncertaintyComputer.h"
 #include "plugins/BtagUncertaintyComputer.cc"
 #include "interface/BTagCalibration.h"
+>>>>>>> 22e0d1f5b734148c99f2f8f885198e7750e4829b
 //#include "CondFormats/BTauObjects/interface/BTagCalibration.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 
 #include "simpleReader.h"
+<<<<<<< HEAD
+#include "/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/ttbar0/standalone_LumiReWeighting.h"
+=======
 #include "interface/standalone_LumiReWeighting.h"
+>>>>>>> 22e0d1f5b734148c99f2f8f885198e7750e4829b
 //#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 //#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 //#include "JetMETCorrections/Modules/interface/JetResolution.h"
@@ -93,7 +107,11 @@ using namespace std;
   //  bool is_mu (true);
   bool is_mu (false);
   bool run_sys (false);
+<<<<<<< HEAD
+  TString era("/user/mgul/Higgs_tottbar/anlyzer808/CMSSW_8_0_11/src/Tupel/Tupel/data/era2016/");
+=======
   TString era("/user/mgul/Higgs_tottbar/Anz_8011/CMSSW_8_0_11/src/Tupel/Tupel/data/era2016/");
+>>>>>>> 22e0d1f5b734148c99f2f8f885198e7750e4829b
   ////  standalone_LumiReWeighting puWeight(201525,0), puUp(201525,1), puDown(201525,-1);
           TString btagUncUrl(era+"btagSFactors.csv");
           gSystem->ExpandPathName(btagUncUrl);
@@ -345,6 +363,11 @@ TH2D* hdphi_mass = new TH2D("dphi_mass","dphi_mass",15,-3.15,3.15,15,0,1000);
         {
         if(jentry%1000==0)cout<<" << "<<jentry<<"/"<<nentries<<endl;
         double w=1;
+<<<<<<< HEAD
+        std::vector<TGraph *>puWgtGr;
+        std::vector<float> puWeight(3,1.0);
+        TString puWgtUrl("/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/pileupWgts.root");
+=======
         float iSecret;
         srand (time(NULL));
         iSecret = rand() % 100 + 1;
@@ -355,6 +378,7 @@ TH2D* hdphi_mass = new TH2D("dphi_mass","dphi_mass",15,-3.15,3.15,15,0,1000);
         std::vector<TGraph *>puWgtGr;
         std::vector<float> puWeight(3,1.0);
         TString puWgtUrl(era+"pileupWgts.root");
+>>>>>>> 22e0d1f5b734148c99f2f8f885198e7750e4829b
         if (!realdata){
           TFile *fIn=TFile::Open(puWgtUrl);
           if(fIn){
@@ -579,11 +603,18 @@ double trans_m_w=sqrt(pow(lep_vector[0].Pt() + v_met.Pt(), 2) - pow(lep_vector[0
         if (fabs(St03Id->at(i)) == 13) mu_id=St03Id->at(i);
         if (fabs(St03Id->at(i)) == 11) e_id=St03Id->at(i);
          }
+<<<<<<< HEAD
+      TString trigSFurl("/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/TriggerSF_v3.root");
+      TString mutrigSFurl("/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.root");
+      TString eselurl("/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/backgourd/ttbar/CutBasedID_TightWP_76X_18Feb.txt_SF2D.root");
+//      TString trigSFurl("/user/mgul/Higgs_tottbar/anlyzer765/CMSSW_7_6_5/src/data/singleMuon/singleMuonC/leptonEfficiencies.root");
+=======
       TString eltrigSFurl(era+"TriggerSF_v3.root");
       TString mutrigSFurl(era+"SingleMuonTrigger_Z_RunBCD_prompt80X_7p65.root");
       TString eselurl;
       if (elrun_below_273726)eselurl=era+"egammaEffiID_SF2D_below_273726.root";
       if (elrun_above_273726)eselurl=era+"egammaEffiID_SF2D_above_273726.root";
+>>>>>>> 22e0d1f5b734148c99f2f8f885198e7750e4829b
       std::map<TString,TH2 *> lepEffH;
       std::vector<float> lepTriggerSF(3,1.0),lepSelSF(3,1.0);
       if(!realdata)
@@ -610,11 +641,19 @@ double trans_m_w=sqrt(pow(lep_vector[0].Pt() + v_met.Pt(), 2) - pow(lep_vector[0
             float selSF(lepEffH[prefix+"_sel"]->GetBinContent(etaBinForEff,ptBinForEff));
             float selSFUnc(lepEffH[prefix+"_sel"]->GetBinError(etaBinForEff,ptBinForEff));
             lepSelSF[0]*=selSF;      lepSelSF[1]*=(selSF-selSFUnc);       lepSelSF[2]*=(selSF+selSFUnc);
+<<<<<<< HEAD
+//cout<<"minEtaForEff,  "<<minEtaForEff<<",  etaBinForEff, "<<etaBinForEff<<",   minPtForEff,   "<<minPtForEff<<",  selSF,  "<<selSF<<endl;
+          }
+        }
+    if (!is_mu){
+        TFile *fIn=TFile::Open(trigSFurl);
+=======
 //        cout<<"lepSelSF[0]:  "<<lepSelSF[0]<<",  
           }
         }
     if (!is_mu){
         TFile *fIn=TFile::Open(eltrigSFurl);
+>>>>>>> 22e0d1f5b734148c99f2f8f885198e7750e4829b
         lepEffH["Ele23_WPLoose_Gsf"]=(TH2 *)fIn->Get("Ele23_WPLoose_Gsf");
         for(auto& it : lepEffH) it.second->SetDirectory(0);
         fIn->Close();
@@ -639,9 +678,14 @@ double trans_m_w=sqrt(pow(lep_vector[0].Pt() + v_met.Pt(), 2) - pow(lep_vector[0
           }
       if (is_mu){
          TFile *mufIn=TFile::Open(mutrigSFurl);
+<<<<<<< HEAD
+         mufIn->cd("runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins");
+         gDirectory->Get("runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins");
+=======
          if (run_273158_274093)mufIn->cd("IsoMu20_OR_IsoTkMu20_PtEtaBins_Run273158_to_274093");
          if (run_274094_276097)mufIn->cd("IsoMu20_OR_IsoTkMu20_PtEtaBins_Run274094_to_276097");
          gDirectory->Get("efficienciesDATA");
+>>>>>>> 22e0d1f5b734148c99f2f8f885198e7750e4829b
          lepEffH["pt_abseta_ratio"]=(TH2 *)gDirectory->Get("pt_abseta_ratio");
          for(auto& it : lepEffH) it.second->SetDirectory(0);
          mufIn->Close();
