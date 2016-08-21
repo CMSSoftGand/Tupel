@@ -15,7 +15,7 @@ scram b -j8
 mkdir ~/eos
 eosmount ~/eos
 
-cd /Tupel/Tupel/
+cd Tupel/Tupel/
 // Make symbolic link
 ln -s data/era2016/Spring16_25nsV6_DATA.db
 ln -s data/era2016/Spring16_25nsV6_MC.db
@@ -41,7 +41,11 @@ brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_
 python scripts/runPileupEstimation.py --json data/era2016/Data13TeV_SingleMuon_lumis.json --out data/era2016/pileupWgts.root
 
 // B-tagging. To apply corrections to the simulation one needs the expected efficiencies stored somwewhere. The script below will project the jet pT spectrum from the TTbar sample before and after applying b-tagging, to compute the expecte efficiencies. The result will be stored in data/expTageff.root
->> 
+>> (incomplete)
+
+// to run the analyzer locally [1] and submit the for the whole sample is [2]:
+[1] ./job.sh 
+[2] python scripts/bash_ttbar.py -i /store/user/mgul/Tupel_8_0_11/1c09f31
 
 extra info:
 
