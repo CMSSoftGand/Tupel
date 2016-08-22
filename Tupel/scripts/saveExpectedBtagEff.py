@@ -8,11 +8,14 @@ import sys
 """
 def saveExpectedBtagEff(opt):
 
-    csvWP='discr_csvV2>%f'%opt.csv if opt.HiForest else 'j_csv>%f'%opt.csv
+    csvWP='discr_csvV2>%f'%opt.csv if opt.HiForest else 'patJetPfAk04BDiscCSVv2_>%f'%opt.csv
     inputDir=opt.input
     
     #open a file
     input_list=getEOSlslist(directory=inputDir)
+#    prefix="/pnfs/iihe/cms"
+#    input_list=[prefix+ x for x in my_list]
+#    print 'this is input llist: %s'%input_list
     data=ROOT.TChain('ak4PFJetAnalyzer/t') if opt.HiForest else ROOT.TChain('tupel/MuonTree') 
     for i in xrange(0,min(5,len(input_list))):
     #for i in xrange(0,len(input_list)):
@@ -31,11 +34,12 @@ def saveExpectedBtagEff(opt):
 
 
     #count number of tagged jets
-    flavConds=[('b',"abs(j_hadflav)==5"),
-              ('c',"abs(j_hadflav)==4"),
-              ('udsg','abs(j_hadflav)!=5 && abs(j_hadflav)!=4'),
-              ('pu','abs(j_hadflav)!=5 && abs(j_hadflav)!=4 && abs(j_g)<0')]
-    ptVar='j_pt'
+    flavConds=[('b',"abs(patJetPfAk04HadronFlavour_)==5"),
+              ('c',"abs(patJetPfAk04HadronFlavour_)==4"),
+              ('udsg','abs(patJetPfAk04HadronFlavour_)!=5 && abs(patJetPfAk04HadronFlavour_)!=4'),
+#              ('pu','abs(patJetPfAk04HadronFlavour_)!=5 && abs(patJetPfAk04HadronFlavour_)!=4 && abs(j_g)<0')]
+              ('pu','abs(patJetPfAk04HadronFlavour_)!=5 && abs(patJetPfAk04HadronFlavour_)!=4 ')]
+    ptVar='patJetPfAk04PtJERSmear'
     if opt.HiForest:
         flavConds=[('b',"abs(refparton_flavorForB)==5"),
                    ('c',"abs(refparton_flavorForB)==4"),
@@ -67,7 +71,7 @@ def main():
     usage = 'usage: %prog [options]'
     parser = optparse.OptionParser(usage)
     parser.add_option(      '--HiForest',  dest='HiForest', help='use HiForest trees',          default=False, action='store_true')
-    parser.add_option('-i', '--in',        dest='input',    help='input directory with files',  default='/store/cmst3/user/psilva/LJets2015/076fb7a/MC13TeV_TTJets', type='string')
+    parser.add_option('-i', '--in',        dest='input',    help='input directory with files',  default='/store/user/mgul/ntuple.root', type='string')
     parser.add_option('-o', '--out',       dest='output',   help='output file',                 default='data/expTageff.root',                                       type='string')
     parser.add_option(      '--csv',       dest='csv',      help='csv cut',                     default=0.800,                                                       type=float)
     (opt, args) = parser.parse_args()
