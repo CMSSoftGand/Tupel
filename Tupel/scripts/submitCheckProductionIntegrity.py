@@ -23,6 +23,7 @@ def main():
     #prepare output directory
     if opt.outDir is None: opt.outDir=opt.inDir
     pwd=os.getcwd()
+    os.system("cp $X509_USER_PROXY %s" % pwd)
     if os.path.exists("tmp_combine"):
         os.system("rm -rf tmp_combine/")
     os.system("mkdir tmp_combine/")
@@ -35,11 +36,11 @@ def main():
           fout.write("#!/bin/sh\n")
           fout.write("pwd=$PWD\n")
           fout.write("source $VO_CMS_SW_DIR/cmsset_default.sh\n")
-          fout.write("cd /user/mgul/Higgs_tottbar/anlyzer808/CMSSW_8_0_11/src\n")
+          fout.write("cd %s%s\n"%(pwd,"/../../"))
           fout.write("eval `scram runtime -sh`\n")
           fout.write("pwd\n")
-#          fout.write("export X509_USER_PROXY=/user/mgul/Higgs_tottbar/anlyzer808/CMSSW_8_0_11/src/Tupel/Tupel\n")
-          fout.write("python %s/scripts/checkProductionIntegrity.py -i /store/user/mgul/tuple_8011_new1/1c09f31/%s -o /store/user/mgul/test1 --nocheck 0 \n"% (pwd,dsetname))
+          fout.write("export X509_USER_PROXY=%s\n"% pwd)
+          fout.write("python %s/scripts/checkProductionIntegrity.py -i %s%s -o %s --nocheck 0 \n"% (pwd,opt.inDir,dsetname,opt.outDir))
         os.system("chmod 755 job_%s.sh"% dsetname)
    
    ###### sends bjobs ######
