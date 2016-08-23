@@ -47,6 +47,8 @@ python scripts/runPileupEstimation.py --json data/era2016/Data13TeV_SingleMuon_l
 [1] ./job.sh 
 [2] python scripts/bash_ttbar.py -i /store/user/mgul/Tupel_8_0_11/1c09f31
 
+// SF values can be calculated using script calc_SF.cpp
+
 extra info:
 
   channel    = cms.string( 'smu' ), 
