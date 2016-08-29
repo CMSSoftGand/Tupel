@@ -18,14 +18,15 @@ from JetMETCorrections.Configuration.JetCorrectionServices_cff import *
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v8' if options.runOnData else '80X_mcRun2_asymptotic_2016_v3')
-dataFile='/store/mc/RunIISpring16MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3_ext3-v1/00000/00485A9E-D51A-E611-8B05-0CC47A78A340.root'
+process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_v9' if options.runOnData else '80X_mcRun2_asymptotic_2016_miniAODv2_v1')
+dataFile='/store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/00000/0064B539-803A-E611-BDEA-002590D0B060.root'
 jecFile='sqlite:Spring16_25nsV6_MC.db'
 jecTag='JetCorrectorParametersCollection_Spring16_25nsV6_MC_AK4PFchs'
 if options.runOnData :
 	jecFile='sqlite:Spring16_25nsV6_DATA.db'
 	jecTag='JetCorrectorParametersCollection_Spring16_25nsV6_DATA_AK4PFchs'	
-	dataFile='/store/data/Run2016B/SingleElectron/MINIAOD/PromptReco-v2/000/273/158/00000/0A7BD549-131A-E611-8287-02163E0134FC.root'
+#	dataFile='/store/data/Run2016B/SingleElectron/MINIAOD/PromptReco-v2/000/273/158/00000/0A7BD549-131A-E611-8287-02163E0134FC.root'
+	dataFile='/store/data/Run2016D/SingleMuon/MINIAOD/PromptReco-v2/000/276/315/00000/168C3DE5-F444-E611-A012-02163E014230.root'
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(dataFile)
