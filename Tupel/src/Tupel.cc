@@ -488,9 +488,8 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
   vertexToken_=consumes<reco::VertexCollection>(edm::InputTag("goodOfflinePrimaryVertices"));//hardcode
   convToken_=consumes<reco::ConversionCollection>(edm::InputTag("reducedEgamma","reducedConversions"));//hardcode
   genInfoToken_=consumes<GenEventInfoProduct>(edm::InputTag ("generator"));//hardcode
-  HLTToken_=consumes<edm::TriggerResults>(edm::InputTag ("TriggerResults","","HLT"));//hardcode
-//  HLTTokenFilters_=consumes<edm::TriggerResults>(edm::InputTag ("TriggerResults","","PAT"));//hardcode
-  HLTTokenFilters_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerfilters"));//hardcode
+  HLTToken_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag > ("TrigResults"));
+  HLTTokenFilters_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerfilters"));
   lheEventSrc_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
   PupSrc_=consumes<std::vector< PileupSummaryInfo> >(edm::InputTag ("slimmedAddPileupInfo"));//hardcode
 
@@ -1574,7 +1573,6 @@ int ngjets=0;
       for (int i = 0; i < ntrigs; i++) {
 
         if(HLTResFiltersHandle->accept(i)){
-
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseFilter")!=std::string::npos)Flag_HBHENoiseFilter=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseIsoFilter")!=std::string::npos)Flag_HBHENoiseIsoFilter=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_CSCTightHalo2015Filter")!=std::string::npos)Flag_CSCTightHalo2015Filter=1.;
