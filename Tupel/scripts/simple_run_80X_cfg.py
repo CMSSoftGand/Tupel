@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('python')
-options.register('runOnData', True,
+options.register('runOnData', False,
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.bool,
                  "Run this on real data"
@@ -32,7 +32,7 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(dataFile)
 
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
@@ -101,9 +101,12 @@ process.TFileService = cms.Service("TFileService",
 )
 
 jetsrcc="updatedPatJetsUpdatedJEC"
-
+trigFiltPath="PAT"
+if options.runOnData :
+	trigFiltPath="RECO"
 process.tupel = cms.EDAnalyzer("Tupel",
-  triggerfilters      = cms.InputTag("TriggerResults","","PAT"),
+#  triggerfilters      = cms.InputTag("TriggerResults","","PAT"),
+  triggerfilters      = cms.InputTag("TriggerResults","",trigFiltPath),
   triggerEvent = cms.InputTag( "patTriggerEvent" ),
   #triggerSummaryLabel = cms.InputTag("hltTriggerSummaryAOD","","HLT"), 
   photonSrc   = cms.InputTag("slimmedPhotons"),
