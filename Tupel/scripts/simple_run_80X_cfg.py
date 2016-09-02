@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('python')
-options.register('runOnData', False,
+options.register('runOnData', True,
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.bool,
                  "Run this on real data"
@@ -25,14 +25,14 @@ jecTag='JetCorrectorParametersCollection_Spring16_25nsV6_MC_AK4PFchs'
 if options.runOnData :
 	jecFile='sqlite:Spring16_25nsV6_DATA.db'
 	jecTag='JetCorrectorParametersCollection_Spring16_25nsV6_DATA_AK4PFchs'	
-#	dataFile='/store/data/Run2016B/SingleElectron/MINIAOD/PromptReco-v2/000/273/158/00000/0A7BD549-131A-E611-8287-02163E0134FC.root'
+#	dataFile='/store/data/Run2016D/SingleElectron/MINIAOD/PromptReco-v2/000/276/315/00000/10BB1858-0045-E611-83A5-02163E01456D.root'
 	dataFile='/store/data/Run2016D/SingleMuon/MINIAOD/PromptReco-v2/000/276/315/00000/168C3DE5-F444-E611-A012-02163E014230.root'
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(dataFile)
 
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 
 
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
@@ -101,25 +101,25 @@ process.TFileService = cms.Service("TFileService",
 )
 
 jetsrcc="updatedPatJetsUpdatedJEC"
+trigPath="HLT2"
 trigFiltPath="PAT"
 if options.runOnData :
 	trigFiltPath="RECO"
+	trigPath="HLT"
 process.tupel = cms.EDAnalyzer("Tupel",
-#  triggerfilters      = cms.InputTag("TriggerResults","","PAT"),
-  triggerfilters      = cms.InputTag("TriggerResults","",trigFiltPath),
-  triggerEvent = cms.InputTag( "patTriggerEvent" ),
-  #triggerSummaryLabel = cms.InputTag("hltTriggerSummaryAOD","","HLT"), 
-  photonSrc   = cms.InputTag("slimmedPhotons"),
-  electronSrc = cms.InputTag("slimmedElectrons"),
-  muonSrc     = cms.InputTag("slimmedMuons"),
-  #tauSrc      = cms.untracked.InputTag("slimmedPatTaus"),
-#  jetSrc      = cms.untracked.InputTag("slimmedJets"),
-    pfcandSrc	   = cms.InputTag("packedPFCandidates"),
-    jetSrc      = cms.InputTag(jetsrcc),
-  metSrc      = cms.InputTag("patMETsPF"),
-  genSrc      = cms.InputTag("prunedGenParticles"),
- pgenSrc       =cms.InputTag("packedGenParticles"),
-  gjetSrc       = cms.InputTag('slimmedGenJets'),
+  triggerfilters = cms.InputTag("TriggerResults","",trigFiltPath),
+  triggerEvent   = cms.InputTag("patTriggerEvent" ),
+  HLTSrc         = cms.InputTag("TriggerResults","",trigPath), 
+  photonSrc      = cms.InputTag("slimmedPhotons"),
+  electronSrc    = cms.InputTag("slimmedElectrons"),
+  muonSrc        = cms.InputTag("slimmedMuons"),
+  #tauSrc        = cms.untracked.InputTag("slimmedPatTaus"),
+  pfcandSrc	 = cms.InputTag("packedPFCandidates"),
+  jetSrc         = cms.InputTag(jetsrcc),
+  metSrc         = cms.InputTag("patMETsPF"),
+  genSrc         = cms.InputTag("prunedGenParticles"),
+  pgenSrc        =cms.InputTag("packedGenParticles"),
+  gjetSrc        = cms.InputTag('slimmedGenJets'),
   muonMatch    = cms.string( 'muonTriggerMatchHLTMuons' ),
   muonMatch2    = cms.string( 'muonTriggerMatchHLTMuons2' ),
   elecMatch    = cms.string( 'elecTriggerMatchHLTElecs' ),

@@ -488,7 +488,7 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
   vertexToken_=consumes<reco::VertexCollection>(edm::InputTag("goodOfflinePrimaryVertices"));//hardcode
   convToken_=consumes<reco::ConversionCollection>(edm::InputTag("reducedEgamma","reducedConversions"));//hardcode
   genInfoToken_=consumes<GenEventInfoProduct>(edm::InputTag ("generator"));//hardcode
-  HLTToken_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag > ("TrigResults"));
+  HLTToken_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag > ("HLTSrc"));
   HLTTokenFilters_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerfilters"));
   lheEventSrc_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
   PupSrc_=consumes<std::vector< PileupSummaryInfo> >(edm::InputTag ("slimmedAddPileupInfo"));//hardcode
@@ -1503,7 +1503,7 @@ int ngjets=0;
       for (int i = 0; i < ntrigs; i++) {
 	trigname.push_back(trigNames->triggerName(i));
 	trigaccept.push_back(HLTResHandle->accept(i));
-	if (trigaccept[i]){
+//	if (trigaccept[i]){
 	  if(std::string(trigname[i]).find("HLT_IsoMu24_eta2p1")!=std::string::npos) IsoMu24_eta2p1=1;
 	  if(std::string(trigname[i]).find("HLT_Mu17_Mu8")!=std::string::npos) Mu17_Mu8=1;
 	  if(std::string(trigname[i]).find("HLT_Mu17_TkMu8")!=std::string::npos) Mu17_TkMu8=1;
@@ -1527,7 +1527,7 @@ int ngjets=0;
 
 
 
-	}
+//	}
       }
     }
 

@@ -1,7 +1,7 @@
 Instructions for ntuple Producer
 ssh -Y <uname>@lxplus.cern.ch
-cmsrel CMSSW_8_0_11
-cd CMSSW_8_0_11/src
+cmsrel CMSSW_8_0_12
+cd CMSSW_8_0_12/src
 cmsenv
 git-cms-merge-topic 13960
 // met corrections
