@@ -1,4 +1,4 @@
-#include "Tupel/Tupel/interface/NeutrinoSolver.h"
+#include "../interface/NeutrinoSolver.h"
 
 
 TMatrixD NeutrinoSolver::RotationX(double a)
