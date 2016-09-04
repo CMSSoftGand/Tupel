@@ -420,9 +420,9 @@ std::vector<double> patPfCandVertexRef;
   //HLT
   double HLT_Mu17_Mu8,HLT_Mu17_TkMu8,HLT_IsoMu24_eta2p1;
     double HLT_IsoMu17_eta2p1;
-    double HLT_IsoMu20;
+    double HLT_IsoMu24;
     double HLT_IsoMu20_eta2p1;
-    double HLT_IsoTkMu20;
+    double HLT_IsoTkMu24;
     double HLT_IsoTkMu20_eta2p1;
     double HLT_Mu20;
     double HLT_TkMu20;
@@ -436,7 +436,7 @@ std::vector<double> patPfCandVertexRef;
     double HLT_TkMu18;
 
   double HLT_Elec17_Elec8; //TO BE USED
-  double HLT_Ele23_WPLoose_Gsf_v; //TO BE USED
+  double HLT_Ele32_eta2p1_WPTight_Gsf; //TO BE USED
   double Flag_HBHENoiseFilter; //TO BE USED
   double Flag_HBHENoiseIsoFilter; //TO BE USED
   double Flag_CSCTightHalo2015Filter; //TO BE USED
@@ -890,12 +890,12 @@ pseudoTop_charge.clear();
     HLT_Mu17_Mu8=0;
     HLT_Mu17_TkMu8=0;
     HLT_Elec17_Elec8=0;
-    HLT_Ele23_WPLoose_Gsf_v=0;
+    HLT_Ele32_eta2p1_WPTight_Gsf=0;
     HLT_IsoMu24_eta2p1=0;
       HLT_IsoMu17_eta2p1=0;
-      HLT_IsoMu20=0;
+      HLT_IsoMu24=0;
       HLT_IsoMu20_eta2p1=0;
-      HLT_IsoTkMu20=0;
+      HLT_IsoTkMu24=0;
       HLT_IsoTkMu20_eta2p1=0;
       HLT_Mu20=0;
       HLT_TkMu20=0;
@@ -1470,12 +1470,12 @@ int ngjets=0;
     int Mu17_Mu8=0;
     int Mu17_TkMu8=0;
     int Elec17_Elec8=0;
-    int Ele23_WPLoose_Gsf_v=0;
+    int Ele32_eta2p1_WPTight_Gsf=0;
     int IsoMu24_eta2p1=0;
     int IsoMu17_eta2p1=0;
-    int IsoMu20=0;
+    int IsoMu24=0;
     int IsoMu20_eta2p1=0;
-    int IsoTkMu20=0;
+    int IsoTkMu24=0;
     int IsoTkMu20_eta2p1=0;
     int Mu20=0;
     int TkMu20=0;
@@ -1503,17 +1503,17 @@ int ngjets=0;
       for (int i = 0; i < ntrigs; i++) {
 	trigname.push_back(trigNames->triggerName(i));
 	trigaccept.push_back(HLTResHandle->accept(i));
-//	if (trigaccept[i]){
+	if (trigaccept[i]){
 	  if(std::string(trigname[i]).find("HLT_IsoMu24_eta2p1")!=std::string::npos) IsoMu24_eta2p1=1;
 	  if(std::string(trigname[i]).find("HLT_Mu17_Mu8")!=std::string::npos) Mu17_Mu8=1;
 	  if(std::string(trigname[i]).find("HLT_Mu17_TkMu8")!=std::string::npos) Mu17_TkMu8=1;
 	  if(std::string(trigname[i]).find("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL")!=std::string::npos) Elec17_Elec8=1;
-	  if(std::string(trigname[i]).find("HLT_Ele23_WPLoose_Gsf_v")!=std::string::npos) Ele23_WPLoose_Gsf_v=1;
+	  if(std::string(trigname[i]).find("HLT_Ele32_eta2p1_WPTight_Gsf")!=std::string::npos) Ele32_eta2p1_WPTight_Gsf=1;
 
 	  if(std::string(trigname[i]).find("HLT_IsoMu17_eta2p1_v")!=std::string::npos)IsoMu17_eta2p1=1;
-	  if(std::string(trigname[i]).find("HLT_IsoMu20_v")!=std::string::npos)IsoMu20=1;
+	  if(std::string(trigname[i]).find("HLT_IsoMu24")!=std::string::npos)IsoMu24=1;
 	  if(std::string(trigname[i]).find("HLT_IsoMu20_eta2p1_v")!=std::string::npos)IsoMu20_eta2p1=1;
-	  if(std::string(trigname[i]).find("HLT_IsoTkMu20_v")!=std::string::npos)IsoTkMu20=1;
+	  if(std::string(trigname[i]).find("HLT_IsoTkMu24")!=std::string::npos)IsoTkMu24=1;
 	  if(std::string(trigname[i]).find("HLT_IsoTkMu20_eta2p1_v")!=std::string::npos)IsoTkMu20_eta2p1=1;
 	  if(std::string(trigname[i]).find("HLT_Mu20_v")!=std::string::npos)Mu20=1;
 	  if(std::string(trigname[i]).find("HLT_TkMu20_v")!=std::string::npos)TkMu20=1;
@@ -1524,10 +1524,7 @@ int ngjets=0;
 	  if(std::string(trigname[i]).find("HLT_IsoTkMu18_eta2p1_v")!=std::string::npos)IsoTkMu18_eta2p1=1;
 	  if(std::string(trigname[i]).find("HLT_Mu18_v")!=std::string::npos)Mu18=1;
 	  if(std::string(trigname[i]).find("HLT_TkMu18_v")!=std::string::npos)TkMu18=1;
-
-
-
-//	}
+	}
       }
     }
 
@@ -1536,17 +1533,15 @@ int ngjets=0;
 
     HLT_Mu17_TkMu8=Mu17_TkMu8;
     HLT_Elec17_Elec8=Elec17_Elec8;
-    HLT_Ele23_WPLoose_Gsf_v=Ele23_WPLoose_Gsf_v;
+    HLT_Ele32_eta2p1_WPTight_Gsf=Ele32_eta2p1_WPTight_Gsf;
     
-
       HLT_IsoMu17_eta2p1=IsoMu17_eta2p1;
-      HLT_IsoMu20=IsoMu20;
+      HLT_IsoMu24=IsoMu24;
       HLT_IsoMu20_eta2p1=IsoMu20_eta2p1;
-      HLT_IsoTkMu20=IsoTkMu20;
+      HLT_IsoTkMu24=IsoTkMu24;
       HLT_IsoTkMu20_eta2p1=IsoTkMu20_eta2p1;
       HLT_Mu20=Mu20;
       HLT_TkMu20=TkMu20;
-
 
       HLT_IsoMu18=IsoMu18;
       HLT_IsoMu18_eta2p1=IsoMu18_eta2p1;
@@ -2184,9 +2179,9 @@ Tupel::beginJob()
     myTree->Branch("MGjE",&MGjE); 
     
     //HLT
-     myTree->Branch("HLT_Ele23_WPLoose_Gsf_v",&HLT_Ele23_WPLoose_Gsf_v);
-     myTree->Branch("HLT_IsoMu20",&HLT_IsoMu20); 
-     myTree->Branch("HLT_IsoTkMu20",&HLT_IsoTkMu20); 
+     myTree->Branch("HLT_Ele32_eta2p1_WPTight_Gsf",&HLT_Ele32_eta2p1_WPTight_Gsf);
+     myTree->Branch("HLT_IsoMu24",&HLT_IsoMu24); 
+     myTree->Branch("HLT_IsoTkMu24",&HLT_IsoTkMu24); 
 /*    myTree->Branch("HLT_Mu17_Mu8",&HLT_Mu17_Mu8);
      myTree->Branch("HLT_Mu17_TkMu8",&HLT_Mu17_TkMu8);
      myTree->Branch("HLT_Elec17_Elec8",&HLT_Elec17_Elec8);
