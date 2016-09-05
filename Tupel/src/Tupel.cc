@@ -117,6 +117,7 @@ private:
   std::vector<edm::EDGetTokenT<pat::METCollection> > metSources;
   edm::EDGetTokenT<double> mSrcRho_;
   edm::EDGetTokenT<LHEEventProduct> lheSource_;
+  edm::EDGetTokenT<LHEEventProduct> lheEventToken;
   edm::EDGetTokenT<reco::GenParticleCollection> genParticleSrc_;
   edm::EDGetTokenT<pat::PackedGenParticleCollection> packedgenParticleSrc_;
 
@@ -145,7 +146,7 @@ edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   double MyWeight;
   unsigned int event,run,lumi;
   int realdata,bxnumber;
-  double EvtInfo_NumVtx,PU_npT,PU_npIT,nup;
+  double EvtInfo_NumVtx,PU_npT,PU_npIT,nup,lheSigEvn;
     double wtot_write=0;
     bool accept=false;
   //particles
@@ -476,6 +477,7 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
 //  metSrc_=consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metSrc"));
   mSrcRho_=consumes<double>(edm::InputTag("fixedGridRhoFastjetAll" ));//hardcode
   lheSource_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
+  lheEventToken=consumes<LHEEventProduct>(edm::InputTag ("LHEEventProduct","source"));
 
 
  // metSources(consumes<std::vector< pat::MET > >(iConfig.getParameter<std::vector<edm::InputTag> >("metSource"));
@@ -646,6 +648,7 @@ patPfCandVertexRef.clear();
     PU_npIT=0;
     MyWeight=0;
     nup=0;
+    lheSigEvn=0;
     rhoPrime=0;
     AEff=0; 
     Uncorec_METPt.clear();
@@ -1453,16 +1456,21 @@ int ngjets=0;
 	  scalePDF_pdfInfo_.push_back(pdfInfoHandle->pdf()->scalePDF);
 	}   
       } 
+      edm::Handle<LHEEventProduct>   lheEventProdH;
+      if (iEvent.getByToken(lheEventToken, lheEventProdH)){
+cout<<"HI I am here inside:  "<<endl;
+              lheSigEvn=lheEventProdH->hepeup().IDPRUP;
+	cout<<"ddddddddddddddddddddd:  "<<lheEventProdH->hepeup().IDPRUP<<endl; 
+	}
+	
 
       edm::Handle<LHEEventProduct>   lheEventInfoProd;
-
       if (iEvent.getByToken(lheEventSrc_,lheEventInfoProd)) {
         //mcWeights_ = genEventInfoProd->weights();
-//        cout<<lheEventInfoProd->weights().size()<<endl;
               if(lheEventInfoProd->weights().size()>0)w=lheEventInfoProd->weights()[0].wgt;
         for(unsigned int size=0;size<lheEventInfoProd->weights().size();size++){
           mcWeights_.push_back(lheEventInfoProd->weights()[size].wgt);
-        }
+	}
       }  
     }
 
@@ -2362,6 +2370,7 @@ Tupel::beginJob()
     myTree->Branch("mcWeight_",&mcWeight_);
     myTree->Branch("mcWeights_",&mcWeights_);
     myTree->Branch("nup",&nup);   
+    myTree->Branch("lheSigEvn",&lheSigEvn);   
 }
 /*
 double Tupel::getJER(double jetEta, int sysType){
