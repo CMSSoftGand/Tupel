@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('python')
-options.register('runOnData', False,
+options.register('runOnData', True,
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.bool,
                  "Run this on real data"
@@ -21,9 +21,11 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_ICHEP16JEC_v0' if options.runOnData else '80X_mcRun2_asymptotic_2016_miniAODv2_v1')
 dataFile='/store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/00000/0064B539-803A-E611-BDEA-002590D0B060.root'
 #dataFile='file:AToTT_MiniAOD_100.root'
+jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
 jecFile='sqlite:Spring16_25nsV6_MC.db'
 jecTag='JetCorrectorParametersCollection_Spring16_25nsV6_MC_AK4PFchs'
 if options.runOnData :
+	jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']
 	jecFile='sqlite:Spring16_25nsV6_DATA.db'
 	jecTag='JetCorrectorParametersCollection_Spring16_25nsV6_DATA_AK4PFchs'	
 #	dataFile='/store/data/Run2016D/SingleElectron/MINIAOD/PromptReco-v2/000/276/315/00000/10BB1858-0045-E611-83A5-02163E01456D.root'
@@ -33,13 +35,13 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(dataFile)
 
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
 updateJetCollection(
    process,
    jetSource = cms.InputTag('slimmedJets'),
    labelName = 'UpdatedJEC',
-   jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None')  # Do not forget 'L2L3Residual' on data!
+   jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None')  # Do not forget 'L2L3Residual' on data!
 )
 
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
@@ -95,7 +97,7 @@ if not options.runOnData :
 	)
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('ntuple.root' )
+                                   fileName = cms.string('test_mu_ntuple.root' )
 )
 
 jetsrcc="updatedPatJetsUpdatedJEC"
@@ -154,7 +156,7 @@ process.p = cms.Path(
 )
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.MessageLogger.suppressWarning = cms.untracked.vstring('ecalLaserCorrFilter','manystripclus53X','toomanystripclus53X')
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
