@@ -39,6 +39,7 @@ export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH
 brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json -i data/era2016/Data13TeV_SingleMuon_lumis.json
 
 // To add output files and reduce the numbers of files use the following [1] command for iihe batch. It creates a tmp_combine directory which consists of all the .sh files for datasets.
+  First create proxy: voms-proxy-init --voms cms --valid=168:00
 [1]: python scripts/submitCheckProductionIntegrity.py -i /store/user/mgul/tuple_8011_new1/1c09f31/ -o /store/user/mgul/Htottbar/1c09f31 
 
 // Pileup weighting. To update the pileup distributions run the script below. It will store the data pileup distributions for different min.bias cross section in data/pileupWgts.root
@@ -50,6 +51,9 @@ python scripts/runPileupEstimation.py --json data/era2016/Data13TeV_SingleMuon_l
 // to run the analyzer locally [1] and submit the for the whole sample is [2]:
 [1] ./job.sh 
 [2] python scripts/bash_ttbar.py -i /store/user/mgul/Tupel_8_0_11/1c09f31
+
+// The output will be saved in root_files directory. To merge the output use the command:
+ find root_files/ -type d -maxdepth 1 | awk '{printf("python scripts/mergeOutputs.py %s\n",$NF);}' >merge_output.sh && chmod 777 merge_output.sh && sh merge_output.sh
 
 // SF values can be calculated using script calc_SF.cpp
 
