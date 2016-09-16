@@ -146,7 +146,7 @@ edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   double MyWeight;
   unsigned int event,run,lumi;
   int realdata,bxnumber;
-  double EvtInfo_NumVtx,PU_npT,PU_npIT,nup,lheSigEvn;
+  double EvtInfo_NumVtx,PU_npT,PU_npIT,nup,lheSigEvn,first_PV;
     double wtot_write=0;
     bool accept=false;
   //particles
@@ -419,28 +419,15 @@ std::vector<double> patPfCandVertexRef;
   std::vector<double> mcWeights_;
   double rhoPrime,AEff;
   //HLT
-  double HLT_Mu17_Mu8,HLT_Mu17_TkMu8,HLT_IsoMu24_eta2p1;
-    double HLT_IsoMu17_eta2p1;
+    double HLT_IsoMu22_v;
     double HLT_IsoMu24;
-    double HLT_IsoMu20_eta2p1;
+    double HLT_IsoTkMu22_v;
     double HLT_IsoTkMu24;
-    double HLT_IsoTkMu20_eta2p1;
-    double HLT_Mu20;
-    double HLT_TkMu20;
 
-
-    double HLT_IsoMu18;
-    double HLT_IsoMu18_eta2p1;
-    double HLT_IsoTkMu18;
-    double HLT_IsoTkMu18_eta2p1;
-    double HLT_Mu18;
-    double HLT_TkMu18;
-
-  double HLT_Elec17_Elec8; //TO BE USED
   double HLT_Ele32_eta2p1_WPTight_Gsf; //TO BE USED
   double Flag_HBHENoiseFilter; //TO BE USED
   double Flag_HBHENoiseIsoFilter; //TO BE USED
-  double Flag_CSCTightHalo2015Filter; //TO BE USED
+  double Flag_globalTightHalo2016Filter; //TO BE USED
   double Flag_EcalDeadCellTriggerPrimitiveFilter; //TO BE USED
   double Flag_goodVertices; //TO BE USED
   double Flag_eeBadScFilter; //TO BE USED
@@ -477,7 +464,7 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
 //  metSrc_=consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metSrc"));
   mSrcRho_=consumes<double>(edm::InputTag("fixedGridRhoFastjetAll" ));//hardcode
   lheSource_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
-  lheEventToken=consumes<LHEEventProduct>(edm::InputTag ("LHEEventProduct","source"));
+  lheEventToken=consumes<LHEEventProduct>(edm::InputTag ("source"));
 
 
  // metSources(consumes<std::vector< pat::MET > >(iConfig.getParameter<std::vector<edm::InputTag> >("metSource"));
@@ -487,7 +474,8 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
 
 
   beamSpotToken_=consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));//hardcode
-  vertexToken_=consumes<reco::VertexCollection>(edm::InputTag("goodOfflinePrimaryVertices"));//hardcode
+//  vertexToken_=consumes<reco::VertexCollection>(edm::InputTag("goodOfflinePrimaryVertices"));//hardcode
+  vertexToken_=consumes<reco::VertexCollection>(edm::InputTag("offlineSlimmedPrimaryVertices"));//hardcode
   convToken_=consumes<reco::ConversionCollection>(edm::InputTag("reducedEgamma","reducedConversions"));//hardcode
   genInfoToken_=consumes<GenEventInfoProduct>(edm::InputTag ("generator"));//hardcode
   HLTToken_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag > ("HLTSrc"));
@@ -890,26 +878,11 @@ pseudoTop_charge.clear();
     patElec_mva_presel_.clear();
     //HLT 
     
-    HLT_Mu17_Mu8=0;
-    HLT_Mu17_TkMu8=0;
-    HLT_Elec17_Elec8=0;
     HLT_Ele32_eta2p1_WPTight_Gsf=0;
-    HLT_IsoMu24_eta2p1=0;
-      HLT_IsoMu17_eta2p1=0;
+      HLT_IsoMu22_v=0;
       HLT_IsoMu24=0;
-      HLT_IsoMu20_eta2p1=0;
+      HLT_IsoTkMu22_v=0;
       HLT_IsoTkMu24=0;
-      HLT_IsoTkMu20_eta2p1=0;
-      HLT_Mu20=0;
-      HLT_TkMu20=0;
-
-
-      HLT_IsoMu18=0;
-      HLT_IsoMu18_eta2p1=0;
-      HLT_IsoTkMu18=0;
-      HLT_IsoTkMu18_eta2p1=0;
-      HLT_Mu18=0;
-      HLT_TkMu18=0;
 
     ////Add 08/23/13/////
     id1_pdfInfo_.clear();
@@ -1010,12 +983,20 @@ pseudoTop_charge.clear();
     }
 
 
-    EvtInfo_NumVtx = 0;
+//    EvtInfo_NumVtx = 0;
+    first_PV=0;
+    std::vector<bool>isfake;std::vector<double>z_value;std::vector<double>rho_vlaue;std::vector<double>ndof_value;
     if(pvHandle.isValid()){
     for (reco::VertexCollection::const_iterator vtx = vtxx.begin(); vtx !=vtxx.end(); ++vtx){
-      if (vtx->isValid() && !vtx->isFake()) ++EvtInfo_NumVtx ;
+      if (vtx->isValid() ){
+//if (run==1 && lumi==39870 && event==7941180)cout<<"run:lumi:event, "<<run<<":"<<lumi<<":"<<event<< ",  isFake = "<<vtx->isFake()<<", z =  "<<vtx->z()<<", rho= "<<vtx->position().Rho()<<", ndof= "<<vtx->ndof()<<endl;
+      isfake.push_back(vtx->isFake());z_value.push_back(vtx->z());
+      rho_vlaue.push_back(vtx->position().Rho());ndof_value.push_back(vtx->ndof());
+      ++EvtInfo_NumVtx ;
+     }
     }
-    }
+   }
+if (isfake.at(0)=1 && fabs(z_value.at(0))< 24.0 && rho_vlaue.at(0) < 2. && ndof_value.at(0)>= 4.) first_PV=1;
     if(!realdata){
       Handle<std::vector< PileupSummaryInfo > >  PupInfo;
       iEvent.getByToken(PupSrc_, PupInfo);
@@ -1175,7 +1156,6 @@ int ngjets=0;
       Handle<LHEEventProduct> lheH;
       iEvent.getByToken(lheSource_,lheH);//to be modularized!!!
       if(lheH.isValid()) nup=lheH->hepeup().NUP;
-
       if (! pseudoTopHandle->empty() ){
 
         std::vector<const reco::GenJet*> genjets;
@@ -1475,30 +1455,11 @@ cout<<"HI I am here inside:  "<<endl;
     }
 
         //cout<<"ccccccccccccccc"<<endl;
-    int Mu17_Mu8=0;
-    int Mu17_TkMu8=0;
-    int Elec17_Elec8=0;
     int Ele32_eta2p1_WPTight_Gsf=0;
-    int IsoMu24_eta2p1=0;
-    int IsoMu17_eta2p1=0;
+    int IsoMu22_v=0;
     int IsoMu24=0;
-    int IsoMu20_eta2p1=0;
+    int IsoTkMu22_v=0;
     int IsoTkMu24=0;
-    int IsoTkMu20_eta2p1=0;
-    int Mu20=0;
-    int TkMu20=0;
-
-
-    int IsoMu18=0;
-    int IsoMu18_eta2p1=0;
-    int IsoTkMu18=0;
-    int IsoTkMu18_eta2p1=0;
-    int Mu18=0;
-    int TkMu18=0;
-
-    HLT_Mu17_Mu8=0;
-    HLT_Mu17_TkMu8=0;
-   HLT_IsoMu24_eta2p1=0; 
     int ntrigs;
     vector<string> trigname;
     vector<bool> trigaccept;
@@ -1512,58 +1473,28 @@ cout<<"HI I am here inside:  "<<endl;
 	trigname.push_back(trigNames->triggerName(i));
 	trigaccept.push_back(HLTResHandle->accept(i));
 	if (trigaccept[i]){
-	  if(std::string(trigname[i]).find("HLT_IsoMu24_eta2p1")!=std::string::npos) IsoMu24_eta2p1=1;
-	  if(std::string(trigname[i]).find("HLT_Mu17_Mu8")!=std::string::npos) Mu17_Mu8=1;
-	  if(std::string(trigname[i]).find("HLT_Mu17_TkMu8")!=std::string::npos) Mu17_TkMu8=1;
-	  if(std::string(trigname[i]).find("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL")!=std::string::npos) Elec17_Elec8=1;
 	  if(std::string(trigname[i]).find("HLT_Ele32_eta2p1_WPTight_Gsf")!=std::string::npos) Ele32_eta2p1_WPTight_Gsf=1;
 
-	  if(std::string(trigname[i]).find("HLT_IsoMu17_eta2p1_v")!=std::string::npos)IsoMu17_eta2p1=1;
+	  if(std::string(trigname[i]).find("HLT_IsoMu22_v")!=std::string::npos)IsoMu22_v=1;
 	  if(std::string(trigname[i]).find("HLT_IsoMu24")!=std::string::npos)IsoMu24=1;
-	  if(std::string(trigname[i]).find("HLT_IsoMu20_eta2p1_v")!=std::string::npos)IsoMu20_eta2p1=1;
+	  if(std::string(trigname[i]).find("HLT_IsoTkMu22_v")!=std::string::npos)IsoTkMu22_v=1;
 	  if(std::string(trigname[i]).find("HLT_IsoTkMu24")!=std::string::npos)IsoTkMu24=1;
-	  if(std::string(trigname[i]).find("HLT_IsoTkMu20_eta2p1_v")!=std::string::npos)IsoTkMu20_eta2p1=1;
-	  if(std::string(trigname[i]).find("HLT_Mu20_v")!=std::string::npos)Mu20=1;
-	  if(std::string(trigname[i]).find("HLT_TkMu20_v")!=std::string::npos)TkMu20=1;
-
-	  if(std::string(trigname[i]).find("HLT_IsoMu18_v")!=std::string::npos)IsoMu18=1;
-	  if(std::string(trigname[i]).find("HLT_IsoMu18_eta2p1_v")!=std::string::npos)IsoMu18_eta2p1=1;
-	  if(std::string(trigname[i]).find("HLT_IsoTkMu18_v")!=std::string::npos)IsoTkMu18=1;
-	  if(std::string(trigname[i]).find("HLT_IsoTkMu18_eta2p1_v")!=std::string::npos)IsoTkMu18_eta2p1=1;
-	  if(std::string(trigname[i]).find("HLT_Mu18_v")!=std::string::npos)Mu18=1;
-	  if(std::string(trigname[i]).find("HLT_TkMu18_v")!=std::string::npos)TkMu18=1;
 	}
       }
     }
 
-    HLT_Mu17_Mu8=Mu17_Mu8;
-    HLT_IsoMu24_eta2p1=IsoMu24_eta2p1;
-
-    HLT_Mu17_TkMu8=Mu17_TkMu8;
-    HLT_Elec17_Elec8=Elec17_Elec8;
-    HLT_Ele32_eta2p1_WPTight_Gsf=Ele32_eta2p1_WPTight_Gsf;
-    
-      HLT_IsoMu17_eta2p1=IsoMu17_eta2p1;
+      HLT_Ele32_eta2p1_WPTight_Gsf=Ele32_eta2p1_WPTight_Gsf;
+      HLT_IsoMu22_v=IsoMu22_v;
       HLT_IsoMu24=IsoMu24;
-      HLT_IsoMu20_eta2p1=IsoMu20_eta2p1;
+      HLT_IsoTkMu22_v=IsoTkMu22_v;
       HLT_IsoTkMu24=IsoTkMu24;
-      HLT_IsoTkMu20_eta2p1=IsoTkMu20_eta2p1;
-      HLT_Mu20=Mu20;
-      HLT_TkMu20=TkMu20;
-
-      HLT_IsoMu18=IsoMu18;
-      HLT_IsoMu18_eta2p1=IsoMu18_eta2p1;
-      HLT_IsoTkMu18=IsoTkMu18;
-      HLT_IsoTkMu18_eta2p1=IsoTkMu18_eta2p1;
-      HLT_Mu18=Mu18;
-      HLT_TkMu18=TkMu18;
 
     edm::Handle< edm::TriggerResults > HLTResFiltersHandle;
     //edm::InputTag HLTTag = edm::InputTag( "TriggerResults", "", "HLT");
     iEvent.getByToken(HLTTokenFilters_, HLTResFiltersHandle);
     Flag_HBHENoiseFilter=0;
     Flag_HBHENoiseIsoFilter=0;
-    Flag_CSCTightHalo2015Filter=0;
+    Flag_globalTightHalo2016Filter=0;
     Flag_EcalDeadCellTriggerPrimitiveFilter=0;
     Flag_goodVertices=0;
     Flag_eeBadScFilter=0;
@@ -1578,7 +1509,7 @@ cout<<"HI I am here inside:  "<<endl;
         if(HLTResFiltersHandle->accept(i)){
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseFilter")!=std::string::npos)Flag_HBHENoiseFilter=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseIsoFilter")!=std::string::npos)Flag_HBHENoiseIsoFilter=1.;
-          if(std::string(trigNames->triggerName(i)).find("Flag_CSCTightHalo2015Filter")!=std::string::npos)Flag_CSCTightHalo2015Filter=1.;
+          if(std::string(trigNames->triggerName(i)).find("Flag_globalTightHalo2016Filter")!=std::string::npos)Flag_globalTightHalo2016Filter=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_EcalDeadCellTriggerPrimitiveFilter")!=std::string::npos)Flag_EcalDeadCellTriggerPrimitiveFilter=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_goodVertices")!=std::string::npos)Flag_goodVertices=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_eeBadScFilter")!=std::string::npos)Flag_eeBadScFilter=1.;
@@ -2139,6 +2070,7 @@ Tupel::beginJob()
     myTree->Branch("lumi",&lumi);
     myTree->Branch("bxnumber",&bxnumber);
     myTree->Branch("EvtInfo_NumVtx",&EvtInfo_NumVtx);
+    myTree->Branch("first_PV",&first_PV);
     myTree->Branch("PU_npT",&PU_npT);
     myTree->Branch("PU_npIT",&PU_npIT);
     myTree->Branch("MyWeight",&MyWeight);
@@ -2190,26 +2122,11 @@ Tupel::beginJob()
      myTree->Branch("HLT_Ele32_eta2p1_WPTight_Gsf",&HLT_Ele32_eta2p1_WPTight_Gsf);
      myTree->Branch("HLT_IsoMu24",&HLT_IsoMu24); 
      myTree->Branch("HLT_IsoTkMu24",&HLT_IsoTkMu24); 
-/*    myTree->Branch("HLT_Mu17_Mu8",&HLT_Mu17_Mu8);
-     myTree->Branch("HLT_Mu17_TkMu8",&HLT_Mu17_TkMu8);
-     myTree->Branch("HLT_Elec17_Elec8",&HLT_Elec17_Elec8);
-     myTree->Branch("HLT_IsoMu24_eta2p1",&HLT_IsoMu24_eta2p1);
-     myTree->Branch("HLT_IsoMu17_eta2p1",&HLT_IsoMu17_eta2p1); 
-     myTree->Branch("HLT_IsoMu20_eta2p1",&HLT_IsoMu20_eta2p1); 
-     myTree->Branch("HLT_IsoTkMu20_eta2p1",&HLT_IsoTkMu20_eta2p1);
-     myTree->Branch("HLT_Mu20",&HLT_Mu20); 
-     myTree->Branch("HLT_TkMu20",&HLT_TkMu20); 
+     myTree->Branch("HLT_IsoMu22_v",&HLT_IsoMu22_v); 
+     myTree->Branch("HLT_IsoTkMu22_v",&HLT_IsoTkMu22_v); 
 
-
-     myTree->Branch("HLT_IsoMu18",&HLT_IsoMu18); 
-     myTree->Branch("HLT_IsoMu18_eta2p1",&HLT_IsoMu18_eta2p1); 
-     myTree->Branch("HLT_IsoTkMu18",&HLT_IsoTkMu18);
-     myTree->Branch("HLT_IsoTkMu18_eta2p1",&HLT_IsoTkMu18_eta2p1); 
-     myTree->Branch("HLT_Mu18",&HLT_Mu18); 
-     myTree->Branch("HLT_TkMu18",&HLT_TkMu18); 
-*/     myTree->Branch("Flag_HBHENoiseFilter",&Flag_HBHENoiseFilter); 
      myTree->Branch("Flag_HBHENoiseIsoFilter",&Flag_HBHENoiseIsoFilter); 
-     myTree->Branch("Flag_CSCTightHalo2015Filter",&Flag_CSCTightHalo2015Filter); 
+     myTree->Branch("Flag_globalTightHalo2016Filter",&Flag_globalTightHalo2016Filter); 
      myTree->Branch("Flag_EcalDeadCellTriggerPrimitiveFilter",&Flag_EcalDeadCellTriggerPrimitiveFilter); 
      myTree->Branch("Flag_goodVertices",&Flag_goodVertices); 
      myTree->Branch("Flag_eeBadScFilter",&Flag_eeBadScFilter); 

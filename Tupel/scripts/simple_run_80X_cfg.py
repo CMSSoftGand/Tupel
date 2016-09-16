@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('python')
-options.register('runOnData', True,
+options.register('runOnData', False,
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.bool,
                  "Run this on real data"
@@ -19,7 +19,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 from Configuration.AlCa.GlobalTag import GlobalTag
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_ICHEP16JEC_v0' if options.runOnData else '80X_mcRun2_asymptotic_2016_miniAODv2_v1')
-dataFile='/store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/00000/0064B539-803A-E611-BDEA-002590D0B060.root'
+#dataFile='/store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/00000/0064B539-803A-E611-BDEA-002590D0B060.root'
+dataFile='file:pickevents.root'
 #dataFile='file:AToTT_MiniAOD_100.root'
 jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
 jecFile='sqlite:Spring16_25nsV6_MC.db'
@@ -28,8 +29,8 @@ if options.runOnData :
 	jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']
 	jecFile='sqlite:Spring16_25nsV6_DATA.db'
 	jecTag='JetCorrectorParametersCollection_Spring16_25nsV6_DATA_AK4PFchs'	
-#	dataFile='/store/data/Run2016D/SingleElectron/MINIAOD/PromptReco-v2/000/276/315/00000/10BB1858-0045-E611-83A5-02163E01456D.root'
-	dataFile='/store/data/Run2016D/SingleMuon/MINIAOD/PromptReco-v2/000/276/315/00000/168C3DE5-F444-E611-A012-02163E014230.root'
+	dataFile='/store/data/Run2016D/SingleElectron/MINIAOD/PromptReco-v2/000/276/315/00000/10BB1858-0045-E611-83A5-02163E01456D.root'
+#	dataFile='/store/data/Run2016D/SingleMuon/MINIAOD/PromptReco-v2/000/276/315/00000/168C3DE5-F444-E611-A012-02163E014230.root'
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(dataFile)
@@ -97,7 +98,7 @@ if not options.runOnData :
 	)
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('test_mu_ntuple.root' )
+                                   fileName = cms.string('ntuple.root' )
 )
 
 jetsrcc="updatedPatJetsUpdatedJEC"
@@ -131,15 +132,20 @@ process.tupel = cms.EDAnalyzer("Tupel",
   #metSource = cms.VInputTag("slimmedMETs","slimmedMETs","slimmedMETs","slimmedMETs"), #no MET corr yet
   metSource = cms.VInputTag("slimmedMETs","slimmedMETs"),
   lheSource=cms.InputTag("source")
-
 )
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
-process.goodOfflinePrimaryVertices = cms.EDFilter(
-    "PrimaryVertexObjectFilter",
-    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0),maxd0 = cms.double(2.0) ),
-    src=cms.InputTag('offlineSlimmedPrimaryVertices')
-    )
+#process.goodOfflinePrimaryVertices = cms.EDFilter(
+#    "PrimaryVertexObjectFilter",
+#    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0),maxd0 = cms.double(2.0) ),
+#    src=cms.InputTag('offlineSlimmedPrimaryVertices')
+#    )
+
+#process.goodOfflinePrimaryVertices = cms.EDFilter(
+#    "PrimaryVertexObjectFilter",
+#    filterParams = pvSelector.clone( NPV     = cms.int32(1),minNdof = cms.double(4.0), maxZ = cms.double(24.0),maxRho = cms.double(2.0) ),
+#    src=cms.InputTag('offlineSlimmedPrimaryVertices')
+#    )
 
 process.p = cms.Path(
 #    process.patJets
