@@ -266,8 +266,12 @@ private:
   edm::EDGetTokenT<edm::TriggerResults> HLTTagToken_;
 
   edm::EDGetTokenT<edm::TriggerResults> metFilTagToken_;
+  edm::EDGetTokenT<edm::TriggerResults> metFilTagRECOToken_;
+	
+  //edm::EDGetTokenT<edm::View<pat::MET> > newMetToken_;
+  //edm::EDGetTokenT<edm::View<pat::MET> > new2MetToken_;
 
-  edm::EDGetTokenT<std::vector<reco::GenParticle> > genParticleToken_;  
+  edm::EDGetTokenT<std::vector<reco::GenParticle> > genParticleToken_;
 
   edm::EDGetTokenT<std::vector<reco::GenJet> > gjetToken_;
 
@@ -826,7 +830,16 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   mSrcRhoToken_(consumes<double>(iConfig.getUntrackedParameter<edm::InputTag>("mSrcRho" ))),
   beamSpotToken_(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
   HLTTagToken_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "HLT"))),
+
   metFilTagToken_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "PAT"))),
+  metFilTagRECOToken_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "RECO"))),
+
+  //newMetToken_(consumes<edm::View<pat::MET> >(edm::InputTag("slimmedMETs"))),
+  // MET before re-correction MC
+  //new2MetToken_(consumes<edm::View<pat::MET> >(edm::InputTag("slimmedMETs", "", "PAT"))),
+  // MET before re-correction DATA
+  //new2MetToken_(consumes<edm::View<pat::MET> >(edm::InputTag("slimmedMETs", "", "RECO"))),
+
   genParticleToken_(consumes<std::vector<reco::GenParticle> >(iConfig.getUntrackedParameter<edm::InputTag>("genSrc"))),
   gjetToken_(consumes<std::vector<reco::GenJet> >(iConfig.getUntrackedParameter<edm::InputTag>("gjetSrc"))),
   puToken_(consumes<std::vector<PileupSummaryInfo> >(iConfig.getUntrackedParameter<edm::InputTag>("puSrc"))),
@@ -1230,11 +1243,28 @@ void Tupel::processMET(const edm::Event& iEvent){
   for(unsigned int imet=0;imet<metSrcsToken.size();imet++){
     Handle<edm::View<pat::MET> > metH;  
     iEvent.getByToken(metSrcsToken[imet], metH);
+//      if (imet == 1) {
+//          iEvent.getByToken(newMetToken_, metH);
+//      }
+//      else if (imet == 2){
+//          iEvent.getByToken(new2MetToken_, metH);
+//      }
+//      else{
+//          iEvent.getByToken(metSrcsToken[imet], metH);
+//      }
 
     if(!metH.isValid()) continue;
     
-    //cout<<"MET"<<imet<<"  "<<metSrcs[imet]<<"  "<<metH->ptrAt(0)->pt()<<endl;
-    //cout << " GMETPx_ " << metH->ptrAt(0)->genMET()->px() << " GMETE_ " << metH->ptrAt(0)->genMET()->energy() << " GMETPt_ " << metH->ptrAt(0)->genMET()->pt() << " met.pt() " << metH->ptrAt(0)->pt() << " met.px() " << metH->ptrAt(0)->px() << " corr Px " << metH->ptrAt(0)->px() - metH->ptrAt(0)->uncorPx() << " met.uncorPt() " << metH->ptrAt(0)->uncorPt() << " met.uncorPhi() " << metH->ptrAt(0)->uncorPhi() << " met.uncorPx() " << metH->ptrAt(0)->uncorPx() << endl;
+	//std::cout<<"MET"<<imet<<"  " /*<<*metSrcsToken[imet]<< "  " <<metH->ptrAt(0)->pt() */ <<std::endl;
+	//std::cout
+	/*<< " GMETE_ " << metH->ptrAt(0)->genMET()->energy()*/
+	/*<< " GMETPt_ " << metH->ptrAt(0)->genMET()->pt() << " GMETPx_ " << metH->ptrAt(0)->genMET()->px()*/
+	//<< " met.pt() " << metH->ptrAt(0)->pt() /*<< " met.px() " << metH->ptrAt(0)->px()*/
+	//<< " met.uncorPt() " << metH->ptrAt(0)->uncorPt()
+	//<< " corr Pt " << metH->ptrAt(0)->pt() - metH->ptrAt(0)->uncorPt()
+	/*<< " met.uncorPhi() " << metH->ptrAt(0)->uncorPhi()*/
+	/*<< " met.uncorPx() " << metH->ptrAt(0)->uncorPx()*/
+	//<< std::endl;
 
     METPt_->push_back(metH->ptrAt(0)->pt());
     METPx_->push_back(metH->ptrAt(0)->px());
@@ -1573,35 +1603,73 @@ void Tupel::processPdfInfo(const edm::Event& iEvent){
   }
 }
 
+//https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
 void Tupel::processMETFilter(const edm::Event& iEvent){
     edm::Handle< edm::TriggerResults > metFilHandle;
     iEvent.getByToken(metFilTagToken_, metFilHandle);
-    
+	edm::Handle< edm::TriggerResults >     metFilHandleRECO;
+	iEvent.getByToken(metFilTagRECOToken_, metFilHandleRECO);
+
     if ( metFilHandle.isValid() && !metFilHandle.failedToGet() ) {
         edm::RefProd<edm::TriggerNames> metFilNames( &(iEvent.triggerNames( *metFilHandle )) );
         int nMetFil = (int)metFilNames->size();
-        
-        // 0    Flag_HBHENoiseFilter    TO BE USED
-        // 1    Flag_HBHENoiseIsoFilter TO BE USED
-        // 2    Flag_CSCTightHaloFilter TO BE USED
-        // 3    Flag_hcalLaserEventFilter
-        // 4    Flag_EcalDeadCellTriggerPrimitiveFilter
-        // 5    Flag_EcalDeadCellBoundaryEnergyFilter
-        // 6    Flag_goodVertices       TO BE USED
-        // 7    Flag_eeBadScFilter      TO BE USED
-        // 8    Flag_ecalLaserCorrFilter
-        // 9    Flag_trkPOGFilters
-        // 10   Flag_trkPOG_manystripclus53X
-        // 11   Flag_trkPOG_toomanystripclus53X
-        // 12   Flag_trkPOG_logErrorTooManyClusters
-        // 13   Flag_METFilters
-        
+		//-- for MC
+		// 0	Flag_HBHENoiseFilter                    # TO BE USED
+		// 1	Flag_HBHENoiseIsoFilter                 # TO BE USED
+		// 2	Flag_CSCTightHaloFilter
+		// 3	Flag_CSCTightHaloTrkMuUnvetoFilter
+		// 4	Flag_CSCTightHalo2015Filter             # TO BE USED
+		// 5	Flag_HcalStripHaloFilter
+		// 6	Flag_hcalLaserEventFilter
+		// 7	Flag_EcalDeadCellTriggerPrimitiveFilter # TO BE USED
+		// 8	Flag_EcalDeadCellBoundaryEnergyFilter
+		// 9	Flag_goodVertices                       # TO BE USED
+		// 10	Flag_eeBadScFilter                      # TO BE USED
+		// 11	Flag_ecalLaserCorrFilter
+		// 12	Flag_trkPOGFilters
+		// 13	Flag_chargedHadronTrackResolutionFilter
+		// 14	Flag_muonBadTrackFilter
+		// 15	Flag_trkPOG_manystripclus53X
+		// 16	Flag_trkPOG_toomanystripclus53X
+		// 17	Flag_trkPOG_logErrorTooManyClusters
+		// 18	Flag_METFilters
+		
         for (int i = 0; i < nMetFil; i++) {
-            //cout << metFilNames->triggerName(i) << "  " <<  metFilHandle->accept(i) << " " << metFilHandle.product()->accept(i) <<  "  ";
+			//std::cout << i << " " << metFilNames->triggerName(i) << "  " <<  metFilHandle->accept(i) << " " << metFilHandle.product()->accept(i) <<  "  ";
             if (metFilHandle->accept(i)) *TrigMET_ |= 1LL <<i;
-            //cout << *TrigMET_ << endl;
+			//std::cout << *TrigMET_ << std::endl;
         }
     }
+	else if ( metFilHandleRECO.isValid() && !metFilHandleRECO.failedToGet() ){
+		edm::RefProd<edm::TriggerNames> metFilNames( &(iEvent.triggerNames( *metFilHandleRECO )) );
+		//int nMetFil = (int)metFilNames->size();
+		//-- for DATA
+		// 10	Flag_HBHENoiseFilter                    # TO BE USED
+		// 11	Flag_HBHENoiseIsoFilter                 # TO BE USED
+		// 12	Flag_CSCTightHaloFilter
+		// 13	Flag_CSCTightHaloTrkMuUnvetoFilter
+		// 14	Flag_CSCTightHalo2015Filter             # TO BE USED
+		// 15	Flag_HcalStripHaloFilter
+		// 16	Flag_hcalLaserEventFilter
+		// 17	Flag_EcalDeadCellTriggerPrimitiveFilter # TO BE USED
+		// 18	Flag_EcalDeadCellBoundaryEnergyFilter
+		// 19	Flag_goodVertices                       # TO BE USED
+		// 20	Flag_eeBadScFilter                      # TO BE USED
+		// 21	Flag_ecalLaserCorrFilter
+		// 22	Flag_trkPOGFilters
+		// 23	Flag_chargedHadronTrackResolutionFilter
+		// 24	Flag_muonBadTrackFilter
+		// 25	Flag_trkPOG_manystripclus53X
+		// 26	Flag_trkPOG_toomanystripclus53X
+		// 27	Flag_trkPOG_logErrorTooManyClusters
+		// 28	Flag_METFilters
+		
+		for (int i = 10; i < 29; i++) {
+			//std::cout << i << " " << metFilNames->triggerName(i) << "  " <<  metFilHandleRECO->accept(i) << " " << metFilHandleRECO.product()->accept(i) <<  "  ";
+			if (metFilHandleRECO->accept(i)) *TrigMET_ |= 1LL << (i-10);
+			//std::cout << *TrigMET_ << std::endl;
+		}
+	}
 }
 
 
@@ -2396,7 +2464,7 @@ void Tupel::processPhotons(const edm::Event& iEvent, const edm::EventSetup& iSet
 void Tupel::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   ++analyzedEventCnt_;
 
-  //cout << " ------ New Event ----- "  << endl;
+  //std::cout << " ------ New Event ----- "  << std::endl;
   readEvent(iEvent);
 
   // PAT trigger EvtNum
