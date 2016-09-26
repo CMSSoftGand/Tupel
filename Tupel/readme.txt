@@ -46,7 +46,7 @@ brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_
 python scripts/runPileupEstimation.py --json data/era2016/Data13TeV_SingleMuon_lumis.json --out data/era2016/pileupWgts.root
 
 // B-tagging. To apply corrections to the simulation one needs the expected efficiencies stored somwewhere. The script below will project the jet pT spectrum from the TTbar sample before and after applying b-tagging, to compute the expecte efficiencies (this is done only for one file but could to done by many files giving the directory path). The result will be stored in data/era2016/expTageff.root
->> python scripts/saveExpectedBtagEff.py -i /store/user/mgul/ntuple.root -o data/era2016/expTageff.root 
+>> python scripts/saveExpectedBtagEff.py -i /store/user/mgul/Htottbar/b2c6591/MC13TeV_WJets -o data/era2016/expTageff.root 
 
 // to run the analyzer locally [1] and submit the for the whole sample is [2]:
 [1] ./job.sh 

@@ -12,9 +12,10 @@ def saveExpectedBtagEff(opt):
     inputDir=opt.input
     
     #open a file
-    input_list=getEOSlslist(directory=inputDir)
-#    prefix="/pnfs/iihe/cms"
-#    input_list=[prefix+ x for x in my_list]
+#    input_list=getEOSlslist(directory=inputDir)
+    my_list=getEOSlslist(directory=inputDir)
+    prefix="/pnfs/iihe/cms"
+    input_list=[prefix+ x for x in my_list]
 #    print 'this is input llist: %s'%input_list
     data=ROOT.TChain('ak4PFJetAnalyzer/t') if opt.HiForest else ROOT.TChain('tupel/MuonTree') 
     for i in xrange(0,min(5,len(input_list))):
