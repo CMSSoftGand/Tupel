@@ -2125,6 +2125,7 @@ Tupel::beginJob()
      myTree->Branch("HLT_IsoMu22_v",&HLT_IsoMu22_v); 
      myTree->Branch("HLT_IsoTkMu22_v",&HLT_IsoTkMu22_v); 
 
+     myTree->Branch("Flag_HBHENoiseFilter",&Flag_HBHENoiseFilter); 
      myTree->Branch("Flag_HBHENoiseIsoFilter",&Flag_HBHENoiseIsoFilter); 
      myTree->Branch("Flag_globalTightHalo2016Filter",&Flag_globalTightHalo2016Filter); 
      myTree->Branch("Flag_EcalDeadCellTriggerPrimitiveFilter",&Flag_EcalDeadCellTriggerPrimitiveFilter); 
