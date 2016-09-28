@@ -55,6 +55,9 @@ python scripts/runPileupEstimation.py --json data/era2016/Data13TeV_SingleMuon_l
 // The output will be saved in root_files directory. To merge the output use the command:
  find root_files/ -type d -maxdepth 1 | awk '{printf("python scripts/mergeOutputs.py %s\n",$NF);}' >merge_output.sh && chmod 777 merge_output.sh && sh merge_output.sh
 
+// copy the output files to a single directory ~/work/root_files
+ find root_files/ -type f -maxdepth 2 | awk '{printf(" cp %s ~/work/root_files/\n",$NF);}' >merge_output.sh && printf '0a\nif [ ! -d ~/work/root_files ] \n   then mkdir ~/work/root_files \n   else echo "File exists" \n   fi \n.\nw\n' | ed merge_output.sh && chmod 777 merge_output.sh && sh merge_output.sh
+
 // SF values can be calculated using script calc_SF.cpp
 
 extra info:
