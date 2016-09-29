@@ -1437,13 +1437,10 @@ int ngjets=0;
 	}   
       } 
       edm::Handle<LHEEventProduct>   lheEventProdH;
+      iEvent.getByToken(lheEventToken, lheEventProdH);
       if (iEvent.getByToken(lheEventToken, lheEventProdH)){
-cout<<"HI I am here inside:  "<<endl;
-              lheSigEvn=lheEventProdH->hepeup().IDPRUP;
-	cout<<"ddddddddddddddddddddd:  "<<lheEventProdH->hepeup().IDPRUP<<endl; 
+      lheSigEvn=lheEventProdH->hepeup().IDPRUP;
 	}
-	
-
       edm::Handle<LHEEventProduct>   lheEventInfoProd;
       if (iEvent.getByToken(lheEventSrc_,lheEventInfoProd)) {
         //mcWeights_ = genEventInfoProd->weights();
@@ -1505,7 +1502,6 @@ cout<<"HI I am here inside:  "<<endl;
       edm::RefProd<edm::TriggerNames> trigNames( &(iEvent.triggerNames( *HLTResFiltersHandle )) );
       ntrigs = (int)trigNames->size();
       for (int i = 0; i < ntrigs; i++) {
-
         if(HLTResFiltersHandle->accept(i)){
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseFilter")!=std::string::npos)Flag_HBHENoiseFilter=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseIsoFilter")!=std::string::npos)Flag_HBHENoiseIsoFilter=1.;
