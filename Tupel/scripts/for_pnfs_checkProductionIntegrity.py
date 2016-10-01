@@ -70,19 +70,14 @@ def main():
             choice = raw_input('Will move to %s current output directory. [y/n] ?' % newDir ).lower()
             if not 'y' in choice : continue
             
-        cmd = '-p'
 #           Popen([eos_cmd, 'mkdir', '/eos/cms/'+newDir],stdout=PIPE).communicate()
-#        Popen(['srmmkdir', 'srm://maite.iihe.ac.be:8443/pnfs/iihe/cms'+newDir],stdout=PIPE).communicate()
-        if not os.path.exists('/scratch/mgul'+newDir):
-          os.makedirs('/scratch/mgul%s')%newDir
-#        Popen(['mkdir',cmd, '/scratch/mgul'+newDir],stdout=PIPE).communicate()
-        print 'I am new direc: %s'%newDir
+        Popen(['srmmkdir', 'srm://maite.iihe.ac.be:8443/pnfs/iihe/cms'+newDir],stdout=PIPE).communicate()
+    
         moveIndividualFiles=True
         if len(file_list)>0:
                #subgroupMerge = int( raw_input('This set has %d files. Merge into groups? (enter 0 if no merging)' % len(file_list)) )
             subgroupMerge=100 if 'Data' in dsetname else 10 
             if 'TTJets' or 'WJets' or 'DYJets' in pub : subgroupMerge=50
-            if 'GluGlu' in pub : subgroupMerge=5
 #                if '/store/cmst3/group/hintt' in opt.inDir: 
 #                    subgroupMerge=10 if '/data' in dsetname else 3
 
@@ -103,11 +98,11 @@ def main():
                     for f in split_file_lists[ilist]:                            
                         toAdd += '/pnfs/iihe/cms%s '%f 
 
-                    finalOutput='/scratch/mgul%s/%s'%(newDir,mergedFileName.replace('temp_merged_files/',''))
+                    finalOutput='/pnfs/iihe/cms%s/%s'%(newDir,mergedFileName.replace('temp_merged_files/',''))
                     fIn=ROOT.TFile.Open(finalOutput)
                     try:
                         if fIn or not fIn.IsZombie():
-                            print '%s already in scratch, skipping'%finalOutput
+                            print '%s already in pnfs, skipping'%finalOutput
                             fIn.Close()
                             continue
                     except:
@@ -115,8 +110,7 @@ def main():
                         
                     os.system('hadd -f -k %s'%toAdd)
 #                        os.system('cp %s /pnfs/iihe/cms%s/'%(mergedFileName,newDir))
-                    os.system('cp %s /scratch/mgul%s/%s'%(mergedFileName,newDir,mergedFileNameonly))
-#                    os.system('srmcp file:///%s srm://maite.iihe.ac.be:8443/pnfs/iihe/cms%s/%s'%(mergedFileName,newDir,mergedFileNameonly))
+                    os.system('srmcp file:///%s srm://maite.iihe.ac.be:8443/pnfs/iihe/cms%s/%s'%(mergedFileName,newDir,mergedFileNameonly))
                     os.system('rm %s'%mergedFileName)
                         #os.system('xrdcp  -f %s root://eoscms//eos/cms/%s/MergedMiniEvents_%d.root' %(mergedFileName,newDir,ilist))
 
@@ -129,13 +123,13 @@ def main():
                         newF=f.replace('.root','_%s.root'%pubExt)
 
 #                        os.system('cp %s /pnfs/iihe/cms%s/%s' % (f, newDir,newF) )
-                    os.system('cp %s /scratch/mgul%s/%s' % (f, newDir,newF) )
+                    os.system('srmcp %s file:///%s srm://maite.iihe.ac.be:8443/pnfs/iihe/cms%s/%s' % (f, newDir,newF) )
                     print 'this is file: %s %s %s'% (f,newDir,newF)
 
         if not opt.nocheck and opt.cleanup : 
             choice = raw_input('Will remove output directory. [y/n] ?').lower()
             if 'y' in choice: 
-                Popen(['rm', '-r /scratch/mgul'+pubDir],stdout=PIPE).communicate()
+                Popen(['rm', '-r /pnfs/iihe/cms'+pubDir],stdout=PIPE).communicate()
 
         print 'Crab outputs may now be found in %s' % newDir
 
