@@ -38,7 +38,7 @@ mergeJSON.py grid/crab_Data13TeV_SingleMuon_2016B/results/processedLumis.json gr
 export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH
 brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_DATACERT.json -i data/era2016/Data13TeV_SingleMuon_lumis.json
 
-// To add output files and reduce the numbers of files use the following [1],[2] command for iihe batch.Use for_pnfs_checkProductionIntegrity.py for /pnfs/.. otherwise the default one is checkProductionIntegrity.py in used. It creates a tmp_combine directory which consists of all the .sh files for datasets.
+// To add output files and reduce the numbers of files use the following [1],[2] command for iihe batch.Use checkProductionIntegrity.py for /pnfs/... It creates a tmp_combine directory which consists of all the .sh files for datasets. For scratch area a seperate file is available name for_scratchArea_checkProductionIntegrity.py.
   First create proxy: voms-proxy-init --voms cms --valid=168:00
 [1]: python scripts/submitCheckProductionIntegrity.py -i /store/user/mgul/tuple_8011_new1/1c09f31/ -o /store/user/mgul/Htottbar/1c09f31 
 if you want to use /scratch -->[2]: python scripts/submitCheckProductionIntegrity.py -i /store/user/mgul/tuple_8011_new1/1c09f31/ -o /scratch/mgul/Htottbar/1c09f31 
