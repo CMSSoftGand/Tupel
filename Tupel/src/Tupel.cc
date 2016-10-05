@@ -792,6 +792,12 @@ private:
 
   //  int singleMuOnly_;
 
+  //keep track if the input file contained LHE weights:
+  bool weightsFromLhe_;
+
+  //keep track if GenRunInfoProduct weights which were found:
+  enum {UNKNOWN, YES, NO, MIXTURE} weightFromGenEventInfo_ = UNKNOWN;
+
   struct TrigSorter{
     TrigSorter(Tupel* t): tupel_(t){}
     bool operator()(int i, int j) const{
@@ -857,7 +863,8 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   photonIdsListed_(false),
   elecIdsListed_(false),
   hltListed_(false),
-  trigStatValid_(true)
+  trigStatValid_(true),
+  weightsFromLhe_(false)
 {
   std::vector<edm::InputTag> metConfig = iConfig.getParameter<std::vector<edm::InputTag> >("metSrcs");
   for (auto& conf : metConfig) {
@@ -1585,11 +1592,29 @@ void Tupel::processPdfInfo(const edm::Event& iEvent){
     if (genEventInfoProd->hasBinningValues()){
       *GBinningValue_ = genEventInfoProd->binningValues()[0];
     }
-    *EvtWeights_ = genEventInfoProd->weights();
+    EvtWeights_->push_back(genEventInfoProd->weight());
   }
+
+  if(EvtWeights_->size() == 0){
+    EvtWeights_->push_back(1.);
+    if(weightFromGenEventInfo_== NO) weightFromGenEventInfo_ = MIXTURE;
+    else if (weightFromGenEventInfo_==UNKNOWN) weightFromGenEventInfo_ = YES;
+  } else{
+    if(weightFromGenEventInfo_== YES) weightFromGenEventInfo_ = MIXTURE;
+    else if (weightFromGenEventInfo_==UNKNOWN) weightFromGenEventInfo_ = NO;
+  }
+
+  edm::Handle<LHEEventProduct>   lheEvent;
+  if (iEvent.getByToken(lheEventToken_, lheEvent)) {
+    for(unsigned iw = 0; iw < lheEvent->weights().size(); ++iw){
+      EvtWeights_->push_back(lheEvent->weights()[iw].wgt);
+    }
+  }
+  if(EvtWeights_->size() > 0) weightsFromLhe_ = true;
+
   /// now get the PDF information
   edm::Handle<GenEventInfoProduct> pdfInfoHandle;
-  if (iEvent.getByToken(generatorToken_, pdfInfoHandle)) {
+  if(iEvent.getByToken(generatorToken_, pdfInfoHandle)) {
 
     if (pdfInfoHandle->pdf()) {
       GPdfId1_->push_back(pdfInfoHandle->pdf()->id.first);
@@ -3040,7 +3065,19 @@ Tupel::writeTriggerStat(){
 void
 Tupel::endRun(edm::Run const& iRun, edm::EventSetup const&){
 
-  std::string desc = "List of MC event weights. The first weight is the default weight to use when filling histograms.";
+  std::string desc = "List of MC event weights. Use the first one by default.";
+  if(weightFromGenEventInfo_ == YES){
+    desc += " The first element contains the GenInfoProduct weight.";
+  } else if(weightFromGenEventInfo_ == NO){
+    desc += " GenInfoProduct weight was not found and the first element was set to 1.";
+  } else if(weightFromGenEventInfo_ == MIXTURE){
+    desc += " GenInfoProduct weight was missing from some event(s). The first element was set to this weight when found and to 1 otherwise.";
+  }
+
+  if(weightsFromLhe_){
+    desc += "Elements starting from index 1 contains the weights from LHEEventProduct.";
+  }
+
   edm::Handle<LHERunInfoProduct> lheRun;
   iRun.getByToken(lheRunToken_, lheRun );
 
@@ -3049,6 +3086,9 @@ Tupel::endRun(edm::Run const& iRun, edm::EventSetup const&){
     for (std::vector<LHERunInfoProduct::Header>::const_iterator iter = myLHERunInfoProduct.headers_begin();
 	 iter != myLHERunInfoProduct.headers_end();
 	 iter++){
+      if(iter == myLHERunInfoProduct.headers_begin()){
+	desc += "A description of the LHE weights in the order they appears in the vector is given below.\n";
+      }
       if(iter->tag() == "initrwgt" && iter->size() > 0){
 	desc += "\n";
 	for(std::vector<std::string>::const_iterator it = iter->begin();
@@ -3059,6 +3099,7 @@ Tupel::endRun(edm::Run const& iRun, edm::EventSetup const&){
       }
     }
   }
+
   //Suppresses spurious last line with "<" produced with CMSSW_7_4_1:
   if(desc.size() > 2 && desc[desc.size()-1] == '<'){
     std::string::size_type p = desc.find_last_not_of(" \n", desc.size()-2);

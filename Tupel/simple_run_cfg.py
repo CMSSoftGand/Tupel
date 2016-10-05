@@ -3,8 +3,10 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("BAOBAB")
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root")
-)
+    fileNames = cms.untracked.vstring(
+"/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root"
+#'/store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/06532BBC-05C8-E511-A60A-F46D043B3CE5.root'
+))
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
@@ -43,7 +45,7 @@ process.tupel = cms.EDAnalyzer("Tupel",
   mSrcRho      = cms.untracked.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now
   CalojetLabel = cms.untracked.InputTag('slimmedJets'), #same collection now BB 
   metSrcs      = cms.VInputTag("slimmedMETs","slimmedMETsNoHF","slimmedMETsPuppi"),
-  lheSrc       = cms.untracked.InputTag('source'),
+  lheSrc       = cms.untracked.InputTag('externalLHEProducer'),
   puSrc        = cms.untracked.InputTag('slimmedAddPileupInfo'),
   puMvaName    = cms.untracked.string('pileupJetId:fullDiscriminan'),
   puJetIdSrc   = cms.untracked.InputTag("pileupJetId"),
