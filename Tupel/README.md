@@ -3,13 +3,13 @@ Instructions to install ntuple producer code of Tupel_MiniAOD branch
 
 * Set up a CMSSW environment. Current code is for CMSSW_7_6_X miniaod format. The code has been tested with CMSSW_7_6_3_patch
 ```
-cmsrel CMSSW_7_6_3_patch2
-cd CMSSW_7_6_3_patch2/src
+cmsrel CMSSW_7_6_4
+cd CMSSW_7_6_4/src
 cmsenv
 ```
 * Clone the github repository to download the code
 `git clone -b Tupel_MiniAOD git@github.com:UGent/Tupel`
-* Apply the CMSSW patch you wil find in https://gitlab.cern.ch/shears/shears/blob/master/ntuple_production/cmssw-patches/CMSSW_7_6_3_patch2-mod.tgz
+* Apply the CMSSW patch you wil find in https://gitlab.cern.ch/shears/shears/blob/master/ntuple_production/cmssw-patches/CMSSW_7_6_3_patch2-mod.tgz (works also for the version 7.6.4)
 ```
 tar xzf CMSSW_7_6_3_patch2-mod.tgz
 ```
