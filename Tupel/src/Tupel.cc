@@ -165,6 +165,13 @@ private:
     else return -10e10;
   }
 
+  //help function to compute DR between two TLorentz vectors without
+  //ROOT exception in case of infinite pseudo rapidity
+  double deltar(TLorentzVector v1, TLorentzVector v2){
+    return sqrt(pow(v1.DeltaPhi(v2), 2) + pow(eta(v1)-eta(v2), 2));
+  }
+
+  
   //Write Job information tree in the output. The tree
   //contains one event, with general information
   void writeHeader();
@@ -1431,7 +1438,7 @@ void Tupel::processGenParticles(const edm::Event& iEvent){
 
 	    if(dR<0.2){
 	      GLepClosePhotPt_->push_back(thisPho1.Pt());
-	      GLepClosePhotEta_->push_back(thisPho1.Eta());
+	      GLepClosePhotEta_->push_back(eta(thisPho1));
 	      GLepClosePhotPhi_->push_back(thisPho1.Phi());
 	      GLepClosePhotE_->push_back(thisPho1.Energy());
 	      GLepClosePhotId_->push_back(gen2[j].pdgId());
@@ -1448,7 +1455,7 @@ void Tupel::processGenParticles(const edm::Event& iEvent){
 	
       genR1DressLep1 = genLep1+genR1Pho1;
       GLepDr01Pt_->push_back(genR1DressLep1.Pt());
-      GLepDr01Eta_->push_back(genR1DressLep1.Eta());
+      GLepDr01Eta_->push_back(eta(genR1DressLep1));
       GLepDr01Phi_->push_back(genR1DressLep1.Phi());
       GLepDr01E_->push_back(genR1DressLep1.Energy());
       GLepDr01Id_->push_back(id);
@@ -1458,7 +1465,7 @@ void Tupel::processGenParticles(const edm::Event& iEvent){
       GLepDr01TauProd_->push_back(tauProd);
 
       GLepBarePt_->push_back(genLep1.Pt());
-      GLepBareEta_->push_back(genLep1.Eta());
+      GLepBareEta_->push_back(eta(genLep1));
       GLepBarePhi_->push_back(genLep1.Phi());
       GLepBareE_->push_back(genLep1.Energy());
       GLepBareId_->push_back(id);
@@ -1512,7 +1519,7 @@ void Tupel::processGenJets(const edm::Event& iEvent){
 
 	TLorentzVector genobj(0,0,0,0);
 	genobj.SetPtEtaPhiE(gen[i].pt(),gen[i].eta(),gen[i].phi(),gen[i].energy());
-	float dr = genjetlv.DeltaR( genobj );
+	float dr = deltar(genjetlv, genobj);
 
 	if( dr < mindr ) {
 	  mindr = dr;
@@ -2131,7 +2138,7 @@ void Tupel::processJets(){
     JetAk04HadFlav_->push_back(jet.hadronFlavour());
 
     //cout << " JetAk04HadFlav_ " << jet.hadronFlavour() << " " << jet.partonFlavour() << endl;
-    //cout << " jet.pt() " << jet.pt() << " corr " << jet.pt()/jet.correctedJet(0).pt() << " jet.correctedJet(0).pt() " << jet.correctedJet(0).pt() << " " << jet.eta() << endl;
+    //cout << " jet.pt() " << jet.pt() << " corr " << jet.pt()/jet.correctedJet(0).pt() << " jet.correctedJet(0).pt() " << jet.correctedJet(0).pt() << " " << eta(jet) << endl;
       
     JetAk04E_->push_back(jet.energy());
     JetAk04Pt_->push_back(jet.pt());
@@ -2192,7 +2199,7 @@ void Tupel::processJets(){
 	//	  double dphi = fabs(jet.phi()-(*genjetColl_)[genJetIdx].phi());
 	//	  if(dphi > pi ) dphi = 2*pi - dphi;
 	//	  std::cout << "Jet matching check: R = "
-	//		    << sqrt(std::pow(jet.eta()-(*genjetColl_)[genJetIdx].eta(),2)
+	//		    << sqrt(std::pow(eta(jet)-(*genjetColl_)[genJetIdx].eta(),2)
 	//			    + std::pow(dphi,2))
 	//		    << "\tPt ratio = "
 	//		    << jet.pt() / (*genjetColl_)[genJetIdx].pt()
@@ -2256,7 +2263,7 @@ void Tupel::processFatJets(){
     JetAk08HadFlav_->push_back(fatjet.hadronFlavour());
 
     //cout << " JetAk04HadFlav_ " << jet.hadronFlavour() << " " << jet.partonFlavour() << endl;
-    //cout << " jet.pt() " << jet.pt() << " corr " << jet.pt()/jet.correctedJet(0).pt() << " jet.correctedJet(0).pt() " << jet.correctedJet(0).pt() << " " << jet.eta() << endl;
+    //cout << " jet.pt() " << jet.pt() << " corr " << jet.pt()/jet.correctedJet(0).pt() << " jet.correctedJet(0).pt() " << jet.correctedJet(0).pt() << " " << eta(jet) << endl;
       
     JetAk08E_->push_back(fatjet.energy());
     JetAk08Pt_->push_back(fatjet.pt());
