@@ -2,5 +2,5 @@
 "HToTT-semilep_pseudoscalar-M400" :               [0.5,    0, "/HToTT-semilep_pseudoscalar-M400-portmanteau_13TeV-madgraph-pythia8/aapopov-MiniAOD-b773ac922eef67f3b5600ed596c9ce54/USER", "HToTT-semilep_pseudoscalar-M400", 920, true,false,1],
 "HToTT-semilep_pseudoscalar-M500" :               [0.5,    0, "/HToTT-semilep_pseudoscalar-M500-portmanteau_13TeV-madgraph-pythia8/aapopov-MiniAOD-b773ac922eef67f3b5600ed596c9ce54/USER", "HToTT-semilep_pseudoscalar-M500", 920, true,false,1],
 "HToTT-semilep_pseudoscalar-M600" :               [0.5,    0, "/HToTT-semilep_pseudoscalar-M600-portmanteau_13TeV-madgraph-pythia8/aapopov-MiniAOD-b773ac922eef67f3b5600ed596c9ce54/USER", "HToTT-semilep_pseudoscalar-M600", 920, true,false,1],
-"HToTT-semilep_pseudoscalar-M750" :               [0.5,    0, "/HToTT-semilep_pseudoscalar-M750-portmanteau_13TeV-madgraph-pythia8/aapopov-MiniAOD-b773ac922eef67f3b5600ed596c9ce54/USER", "HToTT-semilep_pseudoscalar-M750", 920, true,false,1]
+"HToTT-semilep_pseudoscalar-M750" :               [0.5,    0, "/HToTT-semilep_pseudoscalar-M750-RelW50-portmanteau_13TeV-madgraph-pythia8/aapopov-MiniAOD-b773ac922eef67f3b5600ed596c9ce54/USER", "HToTT-semilep_pseudoscalar-M750", 920, true,false,1]
 }

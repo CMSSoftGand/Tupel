@@ -4,15 +4,65 @@
 // from TChain tupel/MuonTree/
 //////////////////////////////////////////////////////////
 
-#include "TMath.h"
+#include <TH2.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <stdio.h>
+#include <iostream>
+#include <math.h>
+#include <TLorentzVector.h>
 #include <TROOT.h>
 #include <TChain.h>
-#include <TFile.h>
-using namespace std;
-// Header file for the classes stored in the TTree if any.
+#include <iomanip>
+#include "TFile.h"
+#include "TTree.h"
+#include "TBrowser.h"
+#include "TH2.h"
+#include "TH3.h"
+#include "TRandom.h"
+#include "TProfile.h"
+#include "TProfile2D.h"
+#include "math.h"
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <TStyle.h>
+#include "TCanvas.h"
+#include "TGraph.h"
+#include "TGraphErrors.h"
+#include "TF2.h"
+#include "TLegend.h"
+#include "TH1F.h"
+#include "TPostScript.h"
+#include "TLine.h"
+#include "TEllipse.h"
+#include "TMath.h"
+#include "TLatex.h"
+#include <vector>
+#include <TSystem.h>
+#include <TGraph.h>
+#include <TLorentzVector.h>
+#include <TGraphAsymmErrors.h>
+#include <algorithm>
+#include "plugins/NeutrinoSolver.cc"
+#include "interface/NeutrinoSolver.h"
+#include "interface/BtagUncertaintyComputer.h"
+#include "plugins/BtagUncertaintyComputer.cc"
+#include "plugins/TTBarSolver.cc"
+#include "interface/BTagCalibration.h"
+#include "interface/TTBarSolver.h"
+#include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
+#include "interface/standalone_LumiReWeighting.h"
+#include "interface/Permutation.h"
+#include "plugins/Permutation.cc"
 #include "vector"
+using namespace std;
+//TTBarSolver ttsolver;
 
+   // 
    // Declaration of leaf types
+   vector<double>  *Uncorec_METPt;
+   vector<double>  *Uncorec_METPhi;
    vector<double>  *METRawPt=0;
    vector<double>  *METPt=0;
    vector<double>  *METPx=0;
@@ -29,6 +79,7 @@ using namespace std;
    UInt_t          lumi_=0;
    Int_t           bxnumber=0;
    Double_t        EvtInfo_NumVtx=0;
+   Double_t        first_PV=0;
    Double_t        PU_npT=0;
    Double_t        PU_npIT=0;
    Double_t        MyWeight=0;
@@ -83,16 +134,18 @@ using namespace std;
    vector<double>  *MGjeta=0;
    vector<double>  *MGjphi=0;
    vector<double>  *MGjE=0;
-   Double_t        HLT_IsoMu20=0;
-   Double_t        HLT_IsoTkMu20=0;
+   Double_t        HLT_IsoMu24=0;
+   Double_t        HLT_IsoMu22=0;
+   Double_t        HLT_IsoTkMu24=0;
+   Double_t        HLT_IsoTkMu22=0;
    Double_t        HLT_Mu17_Mu8=0;
    Double_t        HLT_Mu17_TkMu8=0;
    Double_t        HLT_Elec17_Elec8=0;
    Double_t        HLT_IsoMu24_eta2p1=0;
-   Double_t        HLT_Ele23_WPLoose_Gsf_v=0;
+   Double_t        HLT_Ele32_eta2p1_WPTight_Gsf=0;
    Double_t        Flag_HBHENoiseFilter=0;
    Double_t        Flag_HBHENoiseIsoFilter=0;
-   Double_t        Flag_CSCTightHalo2015Filter=0;
+   Double_t        Flag_globalTightHalo2016Filter=0;
    Double_t        Flag_EcalDeadCellTriggerPrimitiveFilter=0;
    Double_t        Flag_goodVertices=0;
    Double_t        Flag_eeBadScFilter=0;
@@ -255,6 +308,8 @@ using namespace std;
    Double_t        nup=0;
 
    // List of branches
+   TBranch        *b_Uncorec_METPt;   //!
+   TBranch        *b_Uncorec_METPhi;   //!
    TBranch        *b_METRawPt;   //!
    TBranch        *b_METPt;   //!
    TBranch        *b_METPx;   //!
@@ -268,9 +323,10 @@ using namespace std;
    TBranch        *b_event;   //!
    TBranch        *b_realdata;   //!
    TBranch        *b_run;   //!
-   TBranch        *b_lumi_;   //!
+   TBranch        *b_lumi;   //!
    TBranch        *b_bxnumber;   //!
    TBranch        *b_EvtInfo_NumVtx;   //!
+   TBranch        *b_first_PV;   //!
    TBranch        *b_PU_npT;   //!
    TBranch        *b_PU_npIT;   //!
    TBranch        *b_MyWeight;   //!
@@ -321,16 +377,18 @@ using namespace std;
    TBranch        *b_MGjeta;   //!
    TBranch        *b_MGjphi;   //!
    TBranch        *b_MGjE;   //!
-   TBranch        *b_HLT_IsoMu20;   //!
-   TBranch        *b_HLT_IsoTkMu20;   //!
+   TBranch        *b_HLT_IsoMu24;   //!
+   TBranch        *b_HLT_IsoMu22;   //!
+   TBranch        *b_HLT_IsoTkMu24;   //!
+   TBranch        *b_HLT_IsoTkMu22;   //!
    TBranch        *b_HLT_Mu17_Mu8;   //!
    TBranch        *b_HLT_Mu17_TkMu8;   //!
    TBranch        *b_HLT_Elec17_Elec8;   //!
    TBranch        *b_HLT_IsoMu24_eta2p1;
-   TBranch        *b_HLT_Ele23_WPLoose_Gsf_v;
+   TBranch        *b_HLT_Ele32_eta2p1_WPTight_Gsf;
    TBranch        *b_Flag_HBHENoiseFilter;
    TBranch        *b_Flag_HBHENoiseIsoFilter;
-   TBranch        *b_Flag_CSCTightHalo2015Filter;
+   TBranch        *b_Flag_globalTightHalo2016Filter;
    TBranch        *b_Flag_EcalDeadCellTriggerPrimitiveFilter;
    TBranch        *b_Flag_goodVertices;
    TBranch        *b_Flag_eeBadScFilter;
@@ -492,6 +550,8 @@ using namespace std;
    TBranch        *b_nup;   //!
 
   void branchAdd(TTree *tree){
+   tree->SetBranchAddress("Uncorec_METPt", &Uncorec_METPt, &b_Uncorec_METPt);
+   tree->SetBranchAddress("Uncorec_METPhi", &Uncorec_METPhi, &b_Uncorec_METPhi);
    tree->SetBranchAddress("METPt", &METPt, &b_METPt);
    tree->SetBranchAddress("METPx", &METPx, &b_METPx);
    tree->SetBranchAddress("METPy", &METPy, &b_METPy);
@@ -504,9 +564,10 @@ using namespace std;
    tree->SetBranchAddress("event", &event, &b_event);
    tree->SetBranchAddress("realdata", &realdata, &b_realdata);
    tree->SetBranchAddress("run", &run, &b_run);
-   tree->SetBranchAddress("lumi_", &lumi_, &b_lumi_);
+   tree->SetBranchAddress("lumi", &lumi_, &b_lumi);
    tree->SetBranchAddress("bxnumber", &bxnumber, &b_bxnumber);
    tree->SetBranchAddress("EvtInfo_NumVtx", &EvtInfo_NumVtx, &b_EvtInfo_NumVtx);
+   tree->SetBranchAddress("first_PV", &first_PV, &b_first_PV);
    tree->SetBranchAddress("PU_npT", &PU_npT, &b_PU_npT);
    tree->SetBranchAddress("PU_npIT", &PU_npIT, &b_PU_npIT);
    tree->SetBranchAddress("MyWeight", &MyWeight, &b_MyWeight);
@@ -557,17 +618,19 @@ using namespace std;
    tree->SetBranchAddress("MGjeta", &MGjeta, &b_MGjeta);
    tree->SetBranchAddress("MGjphi", &MGjphi, &b_MGjphi);
    tree->SetBranchAddress("MGjE", &MGjE, &b_MGjE);
-   tree->SetBranchAddress("HLT_IsoMu20", &HLT_IsoMu20, &b_HLT_IsoMu20);
-   tree->SetBranchAddress("HLT_IsoTkMu20", &HLT_IsoTkMu20, &b_HLT_IsoTkMu20);
+   tree->SetBranchAddress("HLT_IsoMu24", &HLT_IsoMu24, &b_HLT_IsoMu24);
+   tree->SetBranchAddress("HLT_IsoMu22_v", &HLT_IsoMu22, &b_HLT_IsoMu22);
+   tree->SetBranchAddress("HLT_IsoTkMu24", &HLT_IsoTkMu24, &b_HLT_IsoTkMu24);
+   tree->SetBranchAddress("HLT_IsoTkMu22_v", &HLT_IsoTkMu22, &b_HLT_IsoTkMu22);
 /*   tree->SetBranchAddress("HLT_Mu17_Mu8", &HLT_Mu17_Mu8, &b_HLT_Mu17_Mu8);
    tree->SetBranchAddress("HLT_Mu17_TkMu8", &HLT_Mu17_TkMu8, &b_HLT_Mu17_TkMu8);
    tree->SetBranchAddress("HLT_Elec17_Elec8", &HLT_Elec17_Elec8, &b_HLT_Elec17_Elec8);
    tree->SetBranchAddress("HLT_IsoMu24_eta2p1", &HLT_IsoMu24_eta2p1, &b_HLT_IsoMu24_eta2p1);
-*/   tree->SetBranchAddress("HLT_Ele23_WPLoose_Gsf_v", &HLT_Ele23_WPLoose_Gsf_v, &b_HLT_Ele23_WPLoose_Gsf_v);
+*/   tree->SetBranchAddress("HLT_Ele32_eta2p1_WPTight_Gsf", &HLT_Ele32_eta2p1_WPTight_Gsf, &b_HLT_Ele32_eta2p1_WPTight_Gsf);
 
    tree->SetBranchAddress("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter, &b_Flag_HBHENoiseFilter);
    tree->SetBranchAddress("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter, &b_Flag_HBHENoiseIsoFilter);
-   tree->SetBranchAddress("Flag_CSCTightHalo2015Filter", &Flag_CSCTightHalo2015Filter, &b_Flag_CSCTightHalo2015Filter);
+   tree->SetBranchAddress("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter, &b_Flag_globalTightHalo2016Filter);
    tree->SetBranchAddress("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter, &b_Flag_EcalDeadCellTriggerPrimitiveFilter);
    tree->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
    tree->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
@@ -611,6 +674,8 @@ using namespace std;
    tree->SetBranchAddress("patMuon_Mu17_TkMu8_Matched_", &patMuon_Mu17_TkMu8_Matched_, &b_patMuon_Mu17_TkMu8_Matched_);
    tree->SetBranchAddress("patElecdEtaIn_", &patElecdEtaIn_, &b_patElecdEtaIn_);
    tree->SetBranchAddress("patElecIdveto_", &patElecIdveto_, &b_patElecIdveto_);
+   tree->SetBranchAddress("patElecIdloose_", &patElecIdloose_, &b_patElecIdloose_);
+   tree->SetBranchAddress("patElecIdmedium_", &patElecIdmedium_, &b_patElecIdmedium_);
    tree->SetBranchAddress("patElecIdtight_", &patElecIdtight_, &b_patElecIdtight_);
    tree->SetBranchAddress("patElecdPhiIn_", &patElecdPhiIn_, &b_patElecdPhiIn_);
    tree->SetBranchAddress("patElechOverE_", &patElechOverE_, &b_patElechOverE_);
@@ -678,6 +743,7 @@ using namespace std;
    tree->SetBranchAddress("patJetPfAk04jetpukMedium_", &patJetPfAk04jetpukMedium_, &b_patJetPfAk04jetpukMedium_);
    tree->SetBranchAddress("patJetPfAk04jetpukTight_", &patJetPfAk04jetpukTight_, &b_patJetPfAk04jetpukTight_);
    tree->SetBranchAddress("patJetPfAk04BDiscCSVv2_", &patJetPfAk04BDiscCSVv2_, &b_patJetPfAk04BDiscCSVv2_);
+   tree->SetBranchAddress("patJetPfAk04BDiscpfCMVA_", &patJetPfAk04BDiscpfCMVA_, &b_patJetPfAk04BDiscpfCMVA_);
 //   tree->SetBranchAddress("patJetPfAk04BDiscCSVV1_", &patJetPfAk04BDiscCSVV1_, &b_patJetPfAk04BDiscCSVV1_);
 //   tree->SetBranchAddress("patJetPfAk04BDiscCSVSLV1_", &patJetPfAk04BDiscCSVSLV1_, &b_patJetPfAk04BDiscCSVSLV1_);
    tree->SetBranchAddress("unc_", &unc_, &b_unc_);
