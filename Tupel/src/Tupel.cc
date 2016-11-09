@@ -262,6 +262,8 @@ private:
   std::string candidateSw_;
   edm::EDGetTokenT<std::vector<pat::PackedCandidate> > candidateToken_; 
 
+  std::string recoSw_;
+
   edm::EDGetTokenT<std::vector<reco::Vertex> > vertexToken_;
 
   edm::EDGetTokenT<double> mSrcRhoToken_;
@@ -305,6 +307,10 @@ private:
   edm::EDGetTokenT<EcalRecHitCollection> ecalHitESToken_;
 
 
+  /** Selection of list of trigger to copy
+   * in the ntuple
+   */
+  std::string triggerMenu_;
 
   /** Total number of events analyzed so far
    */
@@ -839,33 +845,11 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
 
   photonSw_(iConfig.getUntrackedParameter<std::string>("photonSw")),
   candidateSw_(iConfig.getUntrackedParameter<std::string>("candidateSw")),
-  vertexToken_(consumes<std::vector<reco::Vertex> >(iConfig.getUntrackedParameter<edm::InputTag>("pvSrc"))),
-  mSrcRhoToken_(consumes<double>(iConfig.getUntrackedParameter<edm::InputTag>("mSrcRho" ))),
-  beamSpotToken_(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
-  HLTTagToken_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "HLT"))),
-
-  metFilTagToken_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "PAT"))),
-  metFilTagRECOToken_(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "RECO"))),
-
-  //newMetToken_(consumes<edm::View<pat::MET> >(edm::InputTag("slimmedMETs"))),
-  // MET before re-correction MC
-  //new2MetToken_(consumes<edm::View<pat::MET> >(edm::InputTag("slimmedMETs", "", "PAT"))),
-  // MET before re-correction DATA
-  //new2MetToken_(consumes<edm::View<pat::MET> >(edm::InputTag("slimmedMETs", "", "RECO"))),
-
-  genParticleToken_(consumes<std::vector<reco::GenParticle> >(iConfig.getUntrackedParameter<edm::InputTag>("genSrc"))),
-  gjetToken_(consumes<std::vector<reco::GenJet> >(iConfig.getUntrackedParameter<edm::InputTag>("gjetSrc"))),
-  puToken_(consumes<std::vector<PileupSummaryInfo> >(iConfig.getUntrackedParameter<edm::InputTag>("puSrc"))),
-  generatorToken_(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
-  lheEventToken_(consumes<LHEEventProduct>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"))),
-  lheRunToken_(consumes<LHERunInfoProduct, edm::InRun>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"))),
-  puJetIdsToken_(consumes<edm::ValueMap<StoredPileupJetIdentifier> >(iConfig.getUntrackedParameter<edm::InputTag>("puJetIdSrc"))),
+  recoSw_(iConfig.getUntrackedParameter<std::string>("recoSw", "on")),
   puJetIds_(0),
   puMvaName_(iConfig.getUntrackedParameter<std::string>("puMvaName")),
   triggerStat_(iConfig.getUntrackedParameter<bool>("triggerStat", false)),
-  ecalHitEBToken_( consumes<EcalRecHitCollection>( iConfig.getParameter<edm::InputTag>( "reducedBarrelRecHitCollection" ) ) ),
-  ecalHitEEToken_( consumes<EcalRecHitCollection>( iConfig.getParameter<edm::InputTag>( "reducedEndcapRecHitCollection" ) ) ),
-  ecalHitESToken_( consumes<EcalRecHitCollection>( iConfig.getParameter<edm::InputTag>( "reducedPreshowerRecHitCollection" ) ) ),
+  triggerMenu_(iConfig.getUntrackedParameter<std::string>("triggerMenu", "2015")),
   analyzedEventCnt_(0),
   photonIdsListed_(false),
   elecIdsListed_(false),
@@ -873,30 +857,52 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   trigStatValid_(true),
   weightsFromLhe_(false)
 {
-  std::vector<edm::InputTag> metConfig = iConfig.getParameter<std::vector<edm::InputTag> >("metSrcs");
-  for (auto& conf : metConfig) {
-    metSrcsToken.push_back(consumes<edm::View<pat::MET> >(conf));   
-  }
-  if(photonSw_ == std::string("on")){
-    photonMode_ = photonsOn;
-    photonToken_ = consumes<std::vector<pat::Photon> >(iConfig.getUntrackedParameter<edm::InputTag>("photonSrc"));
-  } else if(photonSw_ == std::string("off")){
-    photonMode_ = photonsOff;
-  } else{
-    throw cms::Exception(TString::Format("Invalid value (%s) for photonSw parameter. Valid values are on and off.", photonSw_.c_str()));
-  }
-  if(candidateSw_==std::string("on") || candidateSw_==std::string("withTrack")){
-    candidateToken_ = consumes<std::vector<pat::PackedCandidate> >(iConfig.getUntrackedParameter<edm::InputTag>("candidateSrc"));
-    if(candidateSw_ == std::string("on")) candidateMode_ = candidatesOn;
-  } else if(candidateSw_ == std::string("off")){
-    candidateMode_ = candidatesOff;
-  } else{
-    throw cms::Exception(TString::Format("Invalid value (%s) for candidateSw parameter. Valid values are: all, withTrack, and off.", candidateSw_.c_str()));
-  }
 
+  genParticleToken_ = consumes<std::vector<reco::GenParticle> >(iConfig.getUntrackedParameter<edm::InputTag>("genSrc"));
+  gjetToken_ = consumes<std::vector<reco::GenJet> >(iConfig.getUntrackedParameter<edm::InputTag>("gjetSrc"));
+  generatorToken_ = consumes<GenEventInfoProduct>(edm::InputTag("generator"));
+  lheEventToken_ = consumes<LHEEventProduct>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"));
+  lheRunToken_ = consumes<LHERunInfoProduct, edm::InRun>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"));
+
+  if(recoSw_==std::string("on")){
+    vertexToken_ = consumes<std::vector<reco::Vertex> >(iConfig.getUntrackedParameter<edm::InputTag>("pvSrc"));
+    mSrcRhoToken_ = consumes<double>(iConfig.getUntrackedParameter<edm::InputTag>("mSrcRho" ));
+    beamSpotToken_ = consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
+    HLTTagToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "HLT"));
+    metFilTagToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "PAT"));
+    metFilTagRECOToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "RECO"));
+    puToken_ = consumes<std::vector<PileupSummaryInfo> >(iConfig.getUntrackedParameter<edm::InputTag>("puSrc"));
+    puJetIdsToken_ = consumes<edm::ValueMap<StoredPileupJetIdentifier> >(iConfig.getUntrackedParameter<edm::InputTag>("puJetIdSrc"));
+    ecalHitEBToken_ =  consumes<EcalRecHitCollection>( iConfig.getParameter<edm::InputTag>( "reducedBarrelRecHitCollection" ) ) ;
+    ecalHitEEToken_ =  consumes<EcalRecHitCollection>( iConfig.getParameter<edm::InputTag>( "reducedEndcapRecHitCollection" ) ) ;
+    ecalHitESToken_ =  consumes<EcalRecHitCollection>( iConfig.getParameter<edm::InputTag>( "reducedPreshowerRecHitCollection" ) );
+    std::vector<edm::InputTag> metConfig = iConfig.getParameter<std::vector<edm::InputTag> >("metSrcs");
+    for (auto& conf : metConfig) {
+      metSrcsToken.push_back(consumes<edm::View<pat::MET> >(conf));   
+    }
+    if(photonSw_ == std::string("on")){
+      photonMode_ = photonsOn;
+      photonToken_ = consumes<std::vector<pat::Photon> >(iConfig.getUntrackedParameter<edm::InputTag>("photonSrc"));
+    } else if(photonSw_ == std::string("off")){
+      photonMode_ = photonsOff;
+    } else{
+      throw cms::Exception(TString::Format("Invalid value (%s) for photonSw parameter. Valid values are on and off.", photonSw_.c_str()));
+    }
+    if(candidateSw_==std::string("on") || candidateSw_==std::string("withTrack")){
+      candidateToken_ = consumes<std::vector<pat::PackedCandidate> >(iConfig.getUntrackedParameter<edm::InputTag>("candidateSrc"));
+      if(candidateSw_ == std::string("on")) candidateMode_ = candidatesOn;
+    } else if(candidateSw_ == std::string("off")){
+      candidateMode_ = candidatesOff;
+    } else{
+      throw cms::Exception(TString::Format("Invalid value (%s) for candidateSw parameter. Valid values are: all, withTrack, and off.", candidateSw_.c_str()));
+    }
+  } else if(recoSw_!=std::string("off")){
+    throw cms::Exception(TString::Format("Invalid value (%s) for recoSw parameter. Valid values are: on and off.", fatJetSw_.c_str()));
+  }
+  
   //Modified by Clement Leloup
   if(fatJetSw_==std::string("on")){
-    fatJetToken_ = consumes<edm::View<pat::Jet> >(iConfig.getUntrackedParameter<edm::InputTag>("fatJetSrc"));
+    if(recoSw_==std::string("on")) fatJetToken_ = consumes<edm::View<pat::Jet> >(iConfig.getUntrackedParameter<edm::InputTag>("fatJetSrc"));
     gfatJetToken_ = consumes<std::vector<reco::GenJet> >(iConfig.getUntrackedParameter<edm::InputTag>("gfatJetSrc"));
     fatJetMode_ = fatJetOn;
   } else if(fatJetSw_ == std::string("off")){
@@ -919,6 +925,14 @@ void Tupel::defineBitFields(){
   trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMap_,   TrigHltEl_.get()));
   trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiElMap_, TrigHltDiEl_.get()));
   trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMuMap_, TrigHltElMu_.get()));
+
+  if(triggerMenu_ == "2015"){
+    #include "trigger2015.h"
+  } else if(triggerMenu_ == "2016"){
+    #include "trigger2016.h"
+  } else{
+    throw cms::Exception("Value of triggerMenu parameter is not valid.");
+  }
 
   DEF_BIT(TrigHlt, 0, Elec17_Elec8);
   DEF_BIT(TrigHlt, 1, Mu17_Mu8);
@@ -1178,78 +1192,81 @@ void Tupel::readEvent(const edm::Event& iEvent){
   iEvent.getByToken(genParticleToken_, genParticles_h);
   genParticles  = genParticles_h.failedToGet () ? 0 : &*genParticles_h;
 
-  // get muon collection
-  iEvent.getByToken(muonToken_, muons);
-  muon = muons.failedToGet () ? 0 : &*muons;
+  if(recoSw_==std::string("on")){
+    
+    // get muon collection
+    iEvent.getByToken(muonToken_, muons);
+    muon = muons.failedToGet () ? 0 : &*muons;
+    
+    // get electron collection
+    iEvent.getByToken(elecToken_,electrons);
+    electron = electrons.failedToGet () ? 0 :  &*electrons;
+    
+    //Modified by Clement Leloup
+    iEvent.getByToken(tauToken_, taus);
+    tau = taus.failedToGet () ? 0 : &*taus;
+    
+    //get photon conversion collection
+    iEvent.getByToken(conversionsToken_, conversions_h);
 
-  // get electron collection
-  iEvent.getByToken(elecToken_,electrons);
-  electron = electrons.failedToGet () ? 0 :  &*electrons;
+    // get jet collection
+    iEvent.getByToken(jetToken_, jets);  
+    jettt = jets.failedToGet () ? 0 : &*jets ;
+    
+    //Modified by Clement Leloup
+    // get fat jet collection
+    if(fatJetMode_){
+      iEvent.getByToken(fatJetToken_, hFatJets);  
+      fatjettt = hFatJets.failedToGet () ? 0 : &*hFatJets ;
+    } else{
+      fatjettt = 0;
+    }
 
-  //Modified by Clement Leloup
-  iEvent.getByToken(tauToken_, taus);
-  tau = taus.failedToGet () ? 0 : &*taus;
-
-  //get photon conversion collection
-  iEvent.getByToken(conversionsToken_, conversions_h);
-
-  // get jet collection
-  iEvent.getByToken(jetToken_, jets);  
-  jettt = jets.failedToGet () ? 0 : &*jets ;
-
-  //Modified by Clement Leloup
-  // get fat jet collection
-  if(fatJetMode_){
-    iEvent.getByToken(fatJetToken_, hFatJets);  
-    fatjettt = hFatJets.failedToGet () ? 0 : &*hFatJets ;
-  } else{
-    fatjettt = 0;
+    edm::Handle<edm::ValueMap<StoredPileupJetIdentifier> > puJetIdHandle;
+    iEvent.getByToken(puJetIdsToken_, puJetIdHandle);
+    puJetIds_ = puJetIdHandle.failedToGet() ? 0 : &* puJetIdHandle;
+    
+    // get photon collection
+    if(photonMode_){
+      edm::Handle<std::vector<pat::Photon> > hPhotons;  
+      iEvent.getByToken(photonToken_, hPhotons);
+      photons = hPhotons.failedToGet () ? 0 :  &*hPhotons;
+    } else{
+      photons = 0;
+    }
+    
+    // get PF candidate collection
+    if(candidateMode_){
+      edm::Handle<std::vector<pat::PackedCandidate> > hCandidates;  
+      iEvent.getByToken(candidateToken_, hCandidates);  
+      candidates = hCandidates.failedToGet() ? 0 : &*hCandidates;
+    } else{
+      candidates = 0;
+    }
+    //get primary vertex collection
+    iEvent.getByToken(vertexToken_, pvHandle);
+    vtxx = pvHandle.failedToGet () ? 0 : &*pvHandle ;
+    
+    //get rho information
+    iEvent.getByToken(mSrcRhoToken_, rho);
+    
+    rhoIso=99;
+    if(!rho.failedToGet()) rhoIso = *rho;
+    
+    //get beam spot information
+    iEvent.getByToken(beamSpotToken_, beamSpotHandle);
+    beamSpot = beamSpotHandle.failedToGet() ? reco::BeamSpot() : *beamSpotHandle;
+    
   }
-
-  edm::Handle<edm::ValueMap<StoredPileupJetIdentifier> > puJetIdHandle;
-  iEvent.getByToken(puJetIdsToken_, puJetIdHandle);
-  puJetIds_ = puJetIdHandle.failedToGet() ? 0 : &* puJetIdHandle;
-
-  // get photon collection
-  if(photonMode_){
-    edm::Handle<std::vector<pat::Photon> > hPhotons;  
-    iEvent.getByToken(photonToken_, hPhotons);
-    photons = hPhotons.failedToGet () ? 0 :  &*hPhotons;
-  } else{
-    photons = 0;
-  }
-
-  // get PF candidate collection
-  if(candidateMode_){
-    edm::Handle<std::vector<pat::PackedCandidate> > hCandidates;  
-    iEvent.getByToken(candidateToken_, hCandidates);  
-    candidates = hCandidates.failedToGet() ? 0 : &*hCandidates;
-  } else{
-    candidates = 0;
-  }
-
+  
   //get Gen jets
   iEvent.getByToken(gjetToken_, genjetColl_);
-
+  
   //Modified by Clement Leloup
   //get Gen fat jets
   if(fatJetMode_){
     iEvent.getByToken(gfatJetToken_, genfatJetColl_);
   }
-
-  //get primary vertex collection
-  iEvent.getByToken(vertexToken_, pvHandle);
-  vtxx = pvHandle.failedToGet () ? 0 : &*pvHandle ;
-
-  //get rho information
-  iEvent.getByToken(mSrcRhoToken_, rho);
-
-  rhoIso=99;
-  if(!rho.failedToGet()) rhoIso = *rho;
-  
-  //get beam spot information
-  iEvent.getByToken(beamSpotToken_, beamSpotHandle);
-  beamSpot = beamSpotHandle.failedToGet() ? reco::BeamSpot() : *beamSpotHandle;
 }
 
 void Tupel::processMET(const edm::Event& iEvent){
@@ -2342,9 +2359,9 @@ void Tupel::processFatJets(){
     }
 
     JetAk08PrunedMass_->push_back(fatjet.userFloat("ak8PFJetsCHSPrunedMass"));
-    JetAk08FilteredMass_->push_back(fatjet.userFloat("ak8PFJetsCHSFilteredMass"));
+    //JetAk08FilteredMass_->push_back(fatjet.userFloat("ak8PFJetsCHSFilteredMass"));
     JetAk08SoftDropMass_->push_back(fatjet.userFloat("ak8PFJetsCHSSoftDropMass"));
-    JetAk08TrimmedMass_->push_back(fatjet.userFloat("ak8PFJetsCHSTrimmedMass"));
+    //JetAk08TrimmedMass_->push_back(fatjet.userFloat("ak8PFJetsCHSTrimmedMass"));
     JetAk08Tau1_->push_back(fatjet.userFloat("NjettinessAK8:tau1"));
     JetAk08Tau2_->push_back(fatjet.userFloat("NjettinessAK8:tau2"));
     JetAk08Tau3_->push_back(fatjet.userFloat("NjettinessAK8:tau3"));
@@ -2503,48 +2520,51 @@ void Tupel::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   //edm::Handle<pat::TriggerEvent>  triggerEvent;
   //iEvent.getByLabel( triggerEvent_, triggerEvent );
 
-  processMET(iEvent);
-
-  processVtx();
-
-  if (!*EvtIsRealData_){
-    processPu(iEvent);
-    if (genParticles) processGenParticles(iEvent);
+  if(!*EvtIsRealData_){
     processGenJets(iEvent);
-
-    //Modified by Clement Leloup
-    if(fatJetMode_ == fatJetOn){
-      processGenFatJets(iEvent);
-    }
-
-    processPdfInfo(iEvent);
+      if (genParticles) processGenParticles(iEvent);
+      processPdfInfo(iEvent);
+      //Modified by Clement Leloup
+      if(fatJetMode_ == fatJetOn){
+	processGenFatJets(iEvent);
+      }
   }
 
-  processTrigger(iEvent);
+  if(recoSw_==std::string("on")){
+    processMET(iEvent);
     
-  processMETFilter(iEvent);
+    processVtx();
+    
+    if (!*EvtIsRealData_){
+      processPu(iEvent);       
+    }
+    
+    processTrigger(iEvent);
+    
+    processMETFilter(iEvent);
+    
+    if(muon) processMuons();
+    
+    //electrons B.B.
+    if(electron) processElectrons();
+    
+    //Modified by Clement Leloup
+    if(tau) processTaus();
+    
+    //jets
+    if(jettt) processJets();
+    
+    //Modified by Clement Leloup
+    //fat jets
+    if(fatjettt) processFatJets();
 
-  if(muon) processMuons();
-
-  //electrons B.B.
-  if(electron) processElectrons();
-
-  //Modified by Clement Leloup
-  if(tau) processTaus();
-
-  //jets
-  if(jettt) processJets();
-
-  //Modified by Clement Leloup
-  //fat jets
-  if(fatjettt) processFatJets();
-
-  //photons. Ph. G.
-  //if(photons) processPhotons(); 
-  if(photons) processPhotons(iEvent, iSetup);
-
-  //tracks G.N.
-  if(candidates) processPfCands();
+    //photons. Ph. G.
+    //if(photons) processPhotons(); 
+    if(photons) processPhotons(iEvent, iSetup);
+    
+    //tracks G.N.
+    if(candidates) processPfCands();
+  }
 
   //Stores the EvtNum in the output tree
   treeHelper_->fill();
