@@ -52,7 +52,8 @@ process.tupel = cms.EDAnalyzer("Tupel",
   pvSrc        = cms.untracked.InputTag('goodOfflinePrimaryVertices'),
   reducedBarrelRecHitCollection = cms.InputTag("reducedEgamma","reducedEBRecHits"),
   reducedEndcapRecHitCollection = cms.InputTag("reducedEgamma","reducedEERecHits"),
-  reducedPreshowerRecHitCollection = cms.InputTag("reducedEgamma","reducedESRecHits")
+  reducedPreshowerRecHitCollection = cms.InputTag("reducedEgamma","reducedESRecHits"),
+  triggerMenu = cms.untracked.string("2015")
 )
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
