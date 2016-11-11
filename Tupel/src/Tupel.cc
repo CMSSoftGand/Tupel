@@ -305,6 +305,10 @@ private:
   edm::EDGetTokenT<EcalRecHitCollection> ecalHitESToken_;
 
 
+  /** Selection of list of trigger to copy
+   * in the ntuple
+   */
+  std::string triggerMenu_;
 
   /** Total number of events analyzed so far
    */
@@ -866,6 +870,7 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   ecalHitEBToken_( consumes<EcalRecHitCollection>( iConfig.getParameter<edm::InputTag>( "reducedBarrelRecHitCollection" ) ) ),
   ecalHitEEToken_( consumes<EcalRecHitCollection>( iConfig.getParameter<edm::InputTag>( "reducedEndcapRecHitCollection" ) ) ),
   ecalHitESToken_( consumes<EcalRecHitCollection>( iConfig.getParameter<edm::InputTag>( "reducedPreshowerRecHitCollection" ) ) ),
+  triggerMenu_(iConfig.getUntrackedParameter<std::string>("triggerMenu", "2015")),
   analyzedEventCnt_(0),
   photonIdsListed_(false),
   elecIdsListed_(false),
@@ -919,6 +924,14 @@ void Tupel::defineBitFields(){
   trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMap_,   TrigHltEl_.get()));
   trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiElMap_, TrigHltDiEl_.get()));
   trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMuMap_, TrigHltElMu_.get()));
+
+  if(triggerMenu_ == "2015"){
+    #include "trigger2015.h"
+  } else if(triggerMenu_ == "2016"){
+    #include "trigger2016.h"
+  } else{
+    throw cms::Exception("Value of triggerMenu parameter is not valid.");
+  }
 
   DEF_BIT(TrigHlt, 0, Elec17_Elec8);
   DEF_BIT(TrigHlt, 1, Mu17_Mu8);
@@ -2342,9 +2355,9 @@ void Tupel::processFatJets(){
     }
 
     JetAk08PrunedMass_->push_back(fatjet.userFloat("ak8PFJetsCHSPrunedMass"));
-    JetAk08FilteredMass_->push_back(fatjet.userFloat("ak8PFJetsCHSFilteredMass"));
+    //JetAk08FilteredMass_->push_back(fatjet.userFloat("ak8PFJetsCHSFilteredMass"));
     JetAk08SoftDropMass_->push_back(fatjet.userFloat("ak8PFJetsCHSSoftDropMass"));
-    JetAk08TrimmedMass_->push_back(fatjet.userFloat("ak8PFJetsCHSTrimmedMass"));
+    //JetAk08TrimmedMass_->push_back(fatjet.userFloat("ak8PFJetsCHSTrimmedMass"));
     JetAk08Tau1_->push_back(fatjet.userFloat("NjettinessAK8:tau1"));
     JetAk08Tau2_->push_back(fatjet.userFloat("NjettinessAK8:tau2"));
     JetAk08Tau3_->push_back(fatjet.userFloat("NjettinessAK8:tau3"));
