@@ -1388,7 +1388,7 @@ void Tupel::processGenParticles(const edm::Event& iEvent){
 	  if (gen[j].status() == 1 && abs(gen[j].pdgId()) !=12 && abs(gen[j].pdgId()) !=14 && abs(gen[j].pdgId()) !=16){
 	    TLorentzVector partP4GEN(0, 0, 0, 0);
 	    partP4GEN.SetPtEtaPhiE(gen[j].pt(),gen[j].eta(),gen[j].phi(),gen[j].energy());
-	    float DR = partP4GEN.DeltaR(genPho);
+	    float DR = deltar(partP4GEN,genPho);
 	    if (DR<0.5) {
 	      isoEDR05 += gen[j].energy();
 	      isoSumPtDR05 += gen[j].pt();
@@ -1448,7 +1448,7 @@ void Tupel::processGenParticles(const edm::Event& iEvent){
 	    if( gen2[j].status()!=1|| gen2[j].pdgId()!=22 || gen2[j].energy()<0.000001 /*|| fabs(MomId2)!=fabs(id)*/) continue;
 	    TLorentzVector thisPho1(0,0,0,0);
 	    thisPho1.SetPtEtaPhiE(gen2[j].pt(),gen2[j].eta(),gen2[j].phi(),gen2[j].energy());
-	    double dR = genLep1.DeltaR(thisPho1);
+	    double dR = deltar(genLep1,thisPho1);
 	    if(dR<0.1){
 	      genR1Pho1+=thisPho1;
 	    }
@@ -1591,11 +1591,11 @@ void Tupel::processGenFatJets(const edm::Event& iEvent){
 	int id = gen[i].pdgId();
 	if( !( id == 21 || abs(id) < 6 )  ) continue; // only consider quarks or gluons
 
-	if( gen[i].pt() < 0.0000001 ) continue; // prevent from using 0 pT  particles (DeltaR fails)
+	//	if( gen[i].pt() < 0.0000001 ) continue; // prevent from using 0 pT  particles (DeltaR fails)
 
 	TLorentzVector genobj(0,0,0,0);
 	genobj.SetPtEtaPhiE(gen[i].pt(),gen[i].eta(),gen[i].phi(),gen[i].energy());
-	float dr = genfatjetlv.DeltaR( genobj );
+	float dr = deltar(genfatjetlv, genobj );
 
 	if( dr < mindr ) {
 	  mindr = dr;
