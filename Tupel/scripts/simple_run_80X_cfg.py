@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('python')
-options.register('runOnData', False,
+options.register('runOnData', True,
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.bool,
                  "Run this on real data"
@@ -12,18 +12,21 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.GeometryDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+process.load('RecoEgamma.ElectronIdentification.Identification.cutBasedElectronHLTPreselecition_Summer16_V1_cff')
 from JetMETCorrections.Configuration.DefaultJEC_cff import *
 from JetMETCorrections.Configuration.JetCorrectionServices_cff import *
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_Prompt_ICHEP16JEC_v0' if options.runOnData else '80X_mcRun2_asymptotic_2016_miniAODv2_v1')
-#dataFile='/store/mc/RunIISpring16MiniAODv2/ST_t-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/MINIAODSIM/premix_withHLT_80X_mcRun2_asymptotic_v14_ext1-v1/80000/02236588-E871-E611-BDA6-D8D385AE85C0.root'
-dataFile='/store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext3-v1/00000/0064B539-803A-E611-BDEA-002590D0B060.root'
-#dataFile='file:pickevents.root'
-#dataFile='file:AToTT_MiniAOD_100.root'
-#dataFile='root://lyogrid06.in2p3.fr//dpm/in2p3.fr/home/cms/data/store/user/aapopov/Production/HToTT-semilep_pseudoscalar-M400-portmanteau_13TeV-madgraph-pythia8/MiniAOD/160904_121450/0000/AToTT_MiniAOD_1.root'
+process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v6' if options.runOnData else '80X_mcRun2_asymptotic_2016_TrancheIV_v7')
+dataFile='/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
+#dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-15to20_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/00524E06-5BBB-E611-829C-0025905B8590.root'
+#dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/001C9AD4-0AB9-E611-9F03-0242AC130002.root'
+#dataFile='/store/mc/RunIISummer16MiniAODv2/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/60000/18B56A8D-D0BD-E611-9448-002590DE3AC0.root'
+#dataFile='/store/mc/RunIISummer16MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/002F2CE1-38BB-E611-AF9F-0242AC130005.root'
+#dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/029FD095-D6BB-E611-A642-848F69FD471E.root'
+#dataFile='root://lyogrid06.in2p3.fr//dpm/in2p3.fr/home/cms/data/store/user/aapopov/Production/HToTT-semilep_pseudoscalar-M750-portmanteau_13TeV-madgraph-pythia8/MiniAOD/160829_105936/0000/AToTT_MiniAOD_10.root'
 jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
 jecFile='sqlite:Spring16_25nsV6_MC.db'
 jecTag='JetCorrectorParametersCollection_Spring16_25nsV6_MC_AK4PFchs'
@@ -31,8 +34,8 @@ if options.runOnData :
 	jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']
 	jecFile='sqlite:Spring16_25nsV6_DATA.db'
 	jecTag='JetCorrectorParametersCollection_Spring16_25nsV6_DATA_AK4PFchs'	
-#	dataFile='/store/data/Run2016D/SingleElectron/MINIAOD/PromptReco-v2/000/276/315/00000/10BB1858-0045-E611-83A5-02163E01456D.root'
-	dataFile='/store/data/Run2016D/SingleMuon/MINIAOD/PromptReco-v2/000/276/315/00000/168C3DE5-F444-E611-A012-02163E014230.root'
+	dataFile='/store/data/Run2016B/SingleElectron/MINIAOD/23Sep2016-v3/00000/00099863-E799-E611-A876-141877343E6D.root'
+#	dataFile='/store/data/Run2016D/SingleMuon/MINIAOD/PromptReco-v2/000/276/315/00000/168C3DE5-F444-E611-A012-02163E014230.root'
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(dataFile)
@@ -40,13 +43,22 @@ process.source = cms.Source("PoolSource",
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+#updateJetCollection(
 updateJetCollection(
    process,
    jetSource = cms.InputTag('slimmedJets'),
    labelName = 'UpdatedJEC',
-   jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None')  # Do not forget 'L2L3Residual' on data!
-)
+   jetCorrections = ('AK4PFchs', cms.vstring(jecLevels), 'None'),  # Do not forget 'L2L3Residual' on data!
+   btagDiscriminators = [
+    'pfJetBProbabilityBJetTags',
+    'deepFlavourJetTags:probudsg'        ,
+    'deepFlavourJetTags:probb'           ,
+    'deepFlavourJetTags:probc'           ,
+    'deepFlavourJetTags:probbb'          ,
+    'deepFlavourJetTags:probcc'          ,
+        ]
 
+)
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 runMetCorAndUncFromMiniAOD(process,
                            isData=options.runOnData,
@@ -75,30 +87,14 @@ process.jer = cms.ESSource("PoolDBESSource",
         )
 
 process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
-
-if not options.runOnData :
-	process.pseudoTop = cms.EDProducer("PseudoTopProducer",
-    	finalStates = cms.InputTag("packedGenParticles"),
-    	genParticles = cms.InputTag("prunedGenParticles"),
-    	jetConeSize = cms.double(0.4),
-    	maxJetEta = cms.double(2.4),
-    	minJetPt = cms.double(20),
-    	leptonConeSize = cms.double(0.1),
-	minLeptonPt = cms.double(20),#new?
-     	maxLeptonEta= cms.double(2.4),#new?
-     	minLeptonPtDilepton = cms.double(20),#new?
-     	maxLeptonEtaDilepton= cms.double(2.4),#new?
-	minDileptonMassDilepton= cms.double(0.),#new?
-     	minLeptonPtSemilepton = cms.double(20),#new?
-     	maxLeptonEtaSemilepton= cms.double(2.4),#new?
-     	minVetoLeptonPtSemilepton= cms.double(15.),#new?
-     	maxVetoLeptonEtaSemilepton= cms.double(2.4),#new?
-     	minMETSemiLepton=cms.double(0.),#new?
-     	minMtWSemiLepton=cms.double(0.),#new?
-    	tMass = cms.double(172.5),
-    	wMass = cms.double(80.4)
-	)
-
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+my_id_modules = [
+    'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronHLTPreselecition_Summer16_V1_cff',
+    'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Summer16_80X_V1_cff'
+    ]
+for idmod in my_id_modules:
+    setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('ntuple.root' )
 )
@@ -119,6 +115,7 @@ process.tupel = cms.EDAnalyzer("Tupel",
   #tauSrc        = cms.untracked.InputTag("slimmedPatTaus"),
   pfcandSrc	 = cms.InputTag("packedPFCandidates"),
   jetSrc         = cms.InputTag(jetsrcc),
+#  deepFlavourJetTags_probudsg = cms.InputTag('deepFlavourJetTags:probudsg'),
   metSrc         = cms.InputTag("patMETsPF"),
   genSrc         = cms.InputTag("prunedGenParticles"),
   pgenSrc        =cms.InputTag("packedGenParticles"),
@@ -126,6 +123,10 @@ process.tupel = cms.EDAnalyzer("Tupel",
   muonMatch    = cms.string( 'muonTriggerMatchHLTMuons' ),
   muonMatch2    = cms.string( 'muonTriggerMatchHLTMuons2' ),
   elecMatch    = cms.string( 'elecTriggerMatchHLTElecs' ),
+  cutBasedElectronID_Summer16_80X_V1_veto = cms.InputTag('egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-veto'),
+  cutBasedElectronID_Summer16_80X_V1_loose = cms.InputTag('egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-loose'),
+  cutBasedElectronID_Summer16_80X_V1_medium = cms.InputTag('egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-medium'),
+  cutBasedElectronID_Summer16_80X_V1_tight = cms.InputTag('egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-tight'),
   channel    = cms.string( 'noselection' ),
   keepparticlecoll    = cms.bool(False),
   mSrcRho      = cms.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now

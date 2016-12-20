@@ -36,6 +36,9 @@ Code by: Bugra Bilin, Kittikul Kovitanggoon, Tomislav Seva, Efe Yazgan, ...
 #include "EgammaAnalysis/ElectronTools/interface/ElectronEffectiveArea.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "PhysicsTools/SelectorUtils/interface/CutApplicatorBase.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -83,36 +86,24 @@ private:
 //   double getJER(double jetEta, int sysType);
   virtual void endJob() ;
 
-  // input tags
-  //edm::InputTag trigger_;
-  //edm::InputTag triggerEvent_;
-  //edm::InputTag triggerSummaryLabel_;
   std::string channel_;
   bool keepparticlecoll_;
   std::string elecMatch_;
   std::string muonMatch_;
   std::string muonMatch2_;
- // std::string jecunctable_;
-/*  edm::InputTag photonSrc_;
-  edm::InputTag elecSrc_;
-  edm::InputTag muonSrc_;
-//  edm::InputTag tauSrc_;
-  edm::InputTag pfcandSrc_;
-  edm::InputTag jetSrc_;
-  edm::InputTag gjetSrc_;
-  edm::InputTag metSrc_;
-  edm::InputTag mSrcRho_;
-//  edm::InputTag CaloJet_;
-  edm::InputTag lheSource_;
-  edm::InputTag genParticleSrc_;
-  edm::InputTag packedgenParticleSrc_;*/
 
   edm::EDGetTokenT<pat::Photon> photonSrc_;
-  edm::EDGetTokenT<pat::ElectronCollection> elecSrc_;
+//  edm::EDGetTokenT<pat::ElectronCollection> elecSrc_;
+  edm::EDGetTokenT<edm::View<pat::Electron> > electronToken_;
+  edm::EDGetTokenT<edm::ValueMap<bool> > eleIdvetoToken_;
+  edm::EDGetTokenT<edm::ValueMap<bool> > eleIdlooseToken_;
+  edm::EDGetTokenT<edm::ValueMap<bool> > eleIdmediumToken_;
+  edm::EDGetTokenT<edm::ValueMap<bool> > eleIdtightToken_;
   edm::EDGetTokenT<pat::MuonCollection> muonSrc_;
   edm::EDGetTokenT<pat::PackedCandidateCollection> pfcandSrc_;
-  edm::EDGetTokenT<pat::JetCollection> jetSrc_;
-  edm::EDGetTokenT<reco::GenJetCollection> gjetSrc_;
+  edm::EDGetTokenT<edm::View<pat::Jet> >jetToken_;
+//  edm::EDGetTokenT<edm::ValueMap<double> > deepFJetTags_probudsgToken_;
+  edm::EDGetTokenT<reco::GenJetCollection> gjetToken_;
 //  edm::EDGetTokenT<pat::METCollection> metSrc_;
   std::vector<edm::EDGetTokenT<pat::METCollection> > metSources;
   edm::EDGetTokenT<double> mSrcRho_;
@@ -130,14 +121,9 @@ private:
   edm::EDGetTokenT<edm::TriggerResults> HLTToken_;
   edm::EDGetTokenT<edm::TriggerResults> HLTTokenFilters_;
 
-edm::EDGetTokenT<LHEEventProduct> lheEventSrc_;
-edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
-
-
-   edm::EDGetTokenT<reco::GenParticleCollection > pseudoTopToken_;
-   edm::EDGetTokenT<reco::GenJetCollection >pseudoTopjetToken_;
-   edm::EDGetTokenT<reco::GenJetCollection >pseudoToplepToken_;
-
+  edm::EDGetTokenT<LHEEventProduct> lheEventSrc_;
+  edm::EDGetTokenT<LHERunInfoProduct> lheRunInfoToken_;
+  edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   bool elecIdsListed_=false;
   //edm::EDGetTokenT<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMapToken_;
 
@@ -161,7 +147,10 @@ edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   std::vector<double> METsigxy;
   std::vector<double> METsigy2;   
   std::vector<double> METsig;
-  std::vector<double> METUncPt;
+  std::vector<double> METUncPtUp;
+  std::vector<double> METUncPtDn;
+  std::vector<double> METUncPhiUp;
+  std::vector<double> METUncPhiDn;
   std::vector<double> Dr01LepPt;
   std::vector<double> Dr01LepEta;
   std::vector<double> Dr01LepPhi;
@@ -228,21 +217,6 @@ std::vector<double> GjConstPhi;
 std::vector<double> GjConstE;
 
 
-std::vector<double> pseudoTop_const_pt;
-std::vector<double> pseudoTop_const_eta;
-std::vector<double> pseudoTop_const_phi;
-std::vector<double> pseudoTop_const_energy;
-std::vector<double> pseudoTop_const_pdgId;
-std::vector<double> pseudoTop_const_charge;
-std::vector<double> pseudoTop_pt;
-std::vector<double> pseudoTop_eta;
-std::vector<double> pseudoTop_phi;
-std::vector<double> pseudoTop_energy;
-std::vector<double> pseudoTop_pdgId;
-std::vector<double> pseudoTop_charge;
-
-
-
   std::vector<bool> matchGjet;
   std::vector<double> MGjPt;
   std::vector<double> MGjeta;
@@ -289,6 +263,7 @@ std::vector<double> pseudoTop_charge;
   std::vector<double> patJetPfAk04nhf_;
   std::vector<double> patJetPfAk04cemf_;
   std::vector<double> patJetPfAk04nemf_;
+  std::vector<double> patJetPfAk04muf_;
   std::vector<double> patJetPfAk04cmult_;
   std::vector<double> patJetPfAk04nconst_;
   std::vector<bool> patJetPfAk04jetpukLoose_;
@@ -348,12 +323,8 @@ std::vector<double> patJetPfAk04ConstE;
   std::vector<unsigned>  patElecIdloose_;
   std::vector<unsigned>  patElecIdmedium_;
   std::vector<unsigned>  patElecIdtight_;
-  std::vector<unsigned>  patElecIdnonTrig80_;
-  std::vector<unsigned>  patElecIdnonTrig90_;
-  std::vector<unsigned>  patElecIdTrig80_;
-  std::vector<unsigned>  patElecIdTrig90_;
 
-    std::vector<double> patElecdEtaIn_;
+    std::vector<double> patElecdEtaInSeed_;
     std::vector<double> patElecdPhiIn_;
     std::vector<double> patElechOverE_;
     std::vector<double> patElecsigmaIetaIeta_;
@@ -456,11 +427,17 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
 //jecunctable_=iConfig.getParameter<std::string >("jecunctable");
 
   photonSrc_=consumes<pat::Photon>(iConfig.getParameter<edm::InputTag>("photonSrc"));
-  elecSrc_=consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electronSrc"));
+//  elecSrc_=consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electronSrc"));
+  electronToken_ =consumes<edm::View<pat::Electron> >(iConfig.getParameter<edm::InputTag>("electronSrc"));
+  eleIdvetoToken_=consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("cutBasedElectronID_Summer16_80X_V1_veto"));
+  eleIdlooseToken_=consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("cutBasedElectronID_Summer16_80X_V1_loose"));
+  eleIdmediumToken_=consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("cutBasedElectronID_Summer16_80X_V1_medium"));
+  eleIdtightToken_=consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("cutBasedElectronID_Summer16_80X_V1_tight"));
   muonSrc_=consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonSrc"));
   pfcandSrc_=consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("pfcandSrc"));
-  jetSrc_=consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetSrc" ));
-  gjetSrc_=consumes<reco::GenJetCollection>(iConfig.getParameter<edm::InputTag>("gjetSrc" ));
+  jetToken_=consumes<edm::View<pat::Jet> >(iConfig.getParameter<edm::InputTag>("jetSrc" ));
+//  deepFJetTags_probudsgToken_=consumes<edm::ValueMap<double> >(iConfig.getParameter<edm::InputTag>("deepFlavourJetTags_probudsg"));
+  gjetToken_=consumes<reco::GenJetCollection>(iConfig.getParameter<edm::InputTag>("gjetSrc" ));
 //  metSrc_=consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metSrc"));
   mSrcRho_=consumes<double>(edm::InputTag("fixedGridRhoFastjetAll" ));//hardcode
   lheSource_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
@@ -481,11 +458,8 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
   HLTToken_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag > ("HLTSrc"));
   HLTTokenFilters_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerfilters"));
   lheEventSrc_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
+  lheRunInfoToken_=consumes<LHERunInfoProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
   PupSrc_=consumes<std::vector< PileupSummaryInfo> >(edm::InputTag ("slimmedAddPileupInfo"));//hardcode
-
-  pseudoTopToken_=consumes<reco::GenParticleCollection>(edm::InputTag("pseudoTop"));//hardcode
-  pseudoTopjetToken_=consumes<reco::GenJetCollection>(edm::InputTag("pseudoTop","jets"));//hardcode
-  pseudoToplepToken_=consumes<reco::GenJetCollection>(edm::InputTag("pseudoTop","leptons"));//hardcode
  for (edm::InputTag const & tag : iConfig.getParameter< std::vector<edm::InputTag> > ("metSource"))metSources.push_back(consumes<pat::METCollection>(tag));
 }
 
@@ -524,20 +498,12 @@ JME::JetResolutionScaleFactor resolution_sf;
   iEvent.getByToken(genParticleSrc_, genParticles_h);
   const GenParticleCollection* genParticles  = genParticles_h.failedToGet () ? 0 : &*genParticles_h;
 
-   edm::Handle<reco::GenParticleCollection> pseudoTopHandle;
-    iEvent.getByToken(pseudoTopToken_, pseudoTopHandle);
-
-   edm::Handle<reco::GenJetCollection> pseudoTopjetHandle;
-    iEvent.getByToken(pseudoTopjetToken_, pseudoTopjetHandle);
-
-   edm::Handle<reco::GenJetCollection> pseudoToplepHandle;
-    iEvent.getByToken(pseudoToplepToken_, pseudoToplepHandle);
   edm::Handle<pat::PackedGenParticleCollection > packedgenParticles_h;
   iEvent.getByToken(packedgenParticleSrc_, packedgenParticles_h);
   const vector<pat::PackedGenParticle>* packedgenParticles  = packedgenParticles_h.failedToGet () ? 0 : &*packedgenParticles_h;
 
 /*  edm::Handle<std::vector <reco::GenJet> >genjetColl;
-  iEvent.getByToken(gjetSrc_, genjetColl);
+  iEvent.getByToken(gjetToken_, genjetColl);
   std::vector<const reco::GenJet*> genjets_v;
   for ( auto& x : *genjetColl ) {
        genjets_v.push_back(&x);
@@ -550,11 +516,6 @@ JME::JetResolutionScaleFactor resolution_sf;
   const std::vector<pat::Muon> * muon = muons.failedToGet () ? 0 : &*muons;
 
   
-  // get electron collection
-  edm::Handle<pat::ElectronCollection > electrons;
-  iEvent.getByToken(elecSrc_,electrons);
-
-  const vector<pat::Electron>  *electron = electrons.failedToGet () ? 0 :  &*electrons;
 			      
  // edm::Handle<reco::GsfElectronCollection> els_h;
  // iEvent.getByToken("gsfElectrons", els_h);			       
@@ -571,10 +532,6 @@ JME::JetResolutionScaleFactor resolution_sf;
   edm::Handle<pat::PackedCandidateCollection > pfcand;
   iEvent.getByToken(pfcandSrc_,pfcand);
   const vector<pat::PackedCandidate> * pfcands = pfcand.failedToGet () ? 0 : &*pfcand ;
-  // get jet collection
-  edm::Handle<pat::JetCollection> jets;
-  iEvent.getByToken(jetSrc_,jets);
-
   
   // get met collection  
  // edm::Handle<edm::View<pat::MET> > mets;
@@ -650,7 +607,10 @@ patPfCandVertexRef.clear();
     METsigxy.clear();
     METsigy2.clear();
     METsig.clear();   
-    METUncPt.clear();   
+    METUncPtUp.clear();   
+    METUncPtDn.clear();   
+    METUncPhiUp.clear();   
+    METUncPhiDn.clear();   
     Dr01LepPt.clear();
     Dr01LepEta.clear();
     Dr01LepPhi.clear();
@@ -716,22 +676,6 @@ GjConstCharge.clear();
       GjConstPhi.clear();
       GjConstE.clear();
 
-pseudoTop_const_pt.clear();
-pseudoTop_const_eta.clear();
-pseudoTop_const_phi.clear();
-pseudoTop_const_energy.clear();
-pseudoTop_const_pdgId.clear();
-pseudoTop_const_charge.clear();
-pseudoTop_pt.clear();
-pseudoTop_eta.clear();
-pseudoTop_phi.clear();
-pseudoTop_energy.clear();
-pseudoTop_pdgId.clear();
-pseudoTop_charge.clear();
-
-
-
-
     matchGjet.clear();
     MGjPt.clear();
     MGjeta.clear();
@@ -776,6 +720,7 @@ pseudoTop_charge.clear();
     patJetPfAk04nhf_.clear();
     patJetPfAk04cemf_.clear();
     patJetPfAk04nemf_.clear();
+    patJetPfAk04muf_.clear();
     patJetPfAk04cmult_.clear();
     patJetPfAk04nconst_.clear();
     patJetPfAk04jetpukLoose_.clear();
@@ -835,11 +780,7 @@ pseudoTop_charge.clear();
     patElecIdloose_.clear();
     patElecIdmedium_.clear();
     patElecIdtight_.clear();
-    patElecIdnonTrig80_.clear();
-    patElecIdnonTrig90_.clear();
-    patElecIdTrig80_.clear();
-    patElecIdTrig90_.clear();
-    patElecdEtaIn_.clear();
+    patElecdEtaInSeed_.clear();
     patElecdPhiIn_.clear();
     patElechOverE_.clear();
     patElecsigmaIetaIeta_.clear();
@@ -905,7 +846,11 @@ pseudoTop_charge.clear();
         Handle<pat::METCollection> metH;
         iEvent.getByToken(metSources[imet], metH);
         if(!metH.isValid())continue;
-        //cout<<"MET"<<imet<<"  "<<metSources[imet]<<"  "<<metH->ptrAt(0)->pt()<<endl;
+	using metUnc = pat::MET::METUncertainty;
+        METUncPtUp.push_back(metH->at(0).shiftedPt(metUnc::UnclusteredEnUp, pat::MET::Type1));
+        METUncPtDn.push_back(metH->at(0).shiftedPt(metUnc::UnclusteredEnDown, pat::MET::Type1));
+        METUncPhiUp.push_back(metH->at(0).shiftedPhi(metUnc::UnclusteredEnUp, pat::MET::Type1));
+        METUncPhiDn.push_back(metH->at(0).shiftedPhi(metUnc::UnclusteredEnDown, pat::MET::Type1));
 
         Uncorec_METPt.push_back(metH->at(0).uncorPt()); 
         Uncorec_METPhi.push_back(metH->at(0).uncorPhi()); 
@@ -919,7 +864,7 @@ pseudoTop_charge.clear();
         METsigy2.push_back(metH->at(0).getSignificanceMatrix()(1,1)); 
         METsig.push_back(metH->at(0).significance()); 
 //https://github.com/BristolTopGroup/NTupleProduction/blob/master/src/BristolNTuple_MET.cc
-        METUncPt.push_back(metH->at(0).shiftedPt(pat::MET::METUncertainty(1) )); 
+//        METUncPt.push_back(metH->at(0).shiftedPt(pat::MET::METUncertainty(1) )); 
 //	std::cout<<"this is met pt unc: "<<METUncPt.at(0)<<endl;
         //Output object in EDM format
         //std::auto_ptr<llvvMet> metOut(new llvvMet());
@@ -1156,259 +1101,6 @@ int ngjets=0;
       Handle<LHEEventProduct> lheH;
       iEvent.getByToken(lheSource_,lheH);//to be modularized!!!
       if(lheH.isValid()) nup=lheH->hepeup().NUP;
-      if (! pseudoTopHandle->empty() ){
-
-        std::vector<const reco::GenJet*> genjets;
-        for ( auto& x : *pseudoTopjetHandle ) {
-          genjets.push_back(&x);
-        }
-
-        std::vector<const reco::GenJet*> genleps;
-        for ( auto& x : *pseudoToplepHandle ) {
-          genleps.push_back(&x);
-        }
-        std::vector<const reco::GenParticle*> topquarks;
-        for ( auto& x : *pseudoTopHandle ) {
-          if ( std::abs(x.pdgId()) == 6 ) topquarks.push_back(&x);
-        }
-        if ( topquarks.size() >= 2 ) {
-//      std::nth_element(topquarks.begin(), topquarks.begin()+2, topquarks.end(), gtByPtPtr);
-
-          const auto t1 = topquarks.at(0);
-          const auto t2 = topquarks.at(1);
-          if ( t1->numberOfDaughters() >= 2 && t2->numberOfDaughters() >= 2 ) {
-
-            const auto w1 = t1->daughter(0);
-            const auto w2 = t2->daughter(0);
-
-//      if ( !w1 or !w2 ) break;
-
-            const auto b1 = t1->daughter(1);
-            const auto b2 = t2->daughter(1);
-//      if ( !b1 or !b2 ) break;
-
-            const auto l1 = w1->daughter(0);
-            const auto l2 = w2->daughter(0);
-
-           const auto nu1 = w1->daughter(1);
-            const auto nu2 = w2->daughter(1);
-
-//      if ( !l1 or !l2 ) break;
-            if ( w1 && w2&& b1 && b2 && l1 && l2 && nu1 && nu2){
-            vector<TLorentzVector> gj_vector_vector;
-
-         
-              if(((fabs(l1->pdgId())==11 ||fabs(l1->pdgId())==13) || (fabs(l2->pdgId())==11 ||fabs(l2->pdgId())==13)) /*&& !((fabs(l1->pdgId())==11 ||fabs(l1->pdgId())==13) && (fabs(l2->pdgId())==11 ||fabs(l2->pdgId())==13))*/
-             //||((fabs(nu1->pdgId())==11 ||fabs(nu1->pdgId())==13) || (fabs(nu2->pdgId())==11 ||fabs(nu2->pdgId())==13)) && !((fabs(nu1->pdgId())==11 ||fabs(nu1->pdgId())==13) && (fabs(nu2->pdgId())==11 ||fabs(nu2->pdgId())==13))
-                  ){
-       //         cout<<l1->pt()<<" "<<l1->eta()<<"  "<<l1->pdgId()<<"     "<<l2->pt()<<"  "<<l2->eta()<<" "<<l2->pdgId()<<"  "<<nu1->pt()<<" "<<nu1->eta()<<"  "<<nu1->pdgId()<<"     "<<nu2->pt()<<"  "<<nu2->eta()<<" "<<nu2->pdgId()<<"        "<<w1->pt()<<"  "<<w1->pdgId()<<"    "<<w2->pt()<<"  "<<w2->pdgId()<<"        "<<b1->pt()<<"  "<<b1->eta()<<"  "<<b1->pdgId()<<"     "<<b2->pt()<<"  "<<b2->eta()<<"  "<<b2->pdgId()<<"        "<<t1->pt()<<"  "<<t1->pdgId()<<"     "<<t2->pt()<<"  "<<t2->pdgId()<<endl;
-
-                if( fabs(l1->pdgId())==11 &&fabs(l2->pdgId())==11 )gendielec=true;
-                if( (fabs(l1->pdgId())==11 &&fabs(l2->pdgId())==13) || (fabs(l1->pdgId())==13 &&fabs(l2->pdgId())==11) )genemu=true;
-                if( fabs(l1->pdgId())==13 &&fabs(l2->pdgId())==13 )gendimu=true;
-                if( (fabs(l1->pdgId())==11 ||fabs(l2->pdgId())==11) && !(fabs(l1->pdgId())==11 &&fabs(l2->pdgId())==11))gensingleelec=true;
-                if( (fabs(l1->pdgId())==13 ||fabs(l2->pdgId())==13) && !(fabs(l1->pdgId())==13 &&fabs(l2->pdgId())==13))gensinglemu=true;
-                if( fabs(l1->pdgId())<6 ){
-//                  cout<<"a "<<l1->pdgId()<<"  "<<l1->pt()<<endl;
-                  TLorentzVector tmp;
-                  tmp.SetPtEtaPhiE(l1->pt(),l1->eta(),l1->phi(),l1->energy());
-                  gj_vector_vector.push_back(tmp);
-                }
-
-                if(fabs(l2->pdgId())<6){
-//                  cout<<"b "<<l2->pdgId()<<"  "<<l2->pt()<<endl;
-                  TLorentzVector tmp;
-                  tmp.SetPtEtaPhiE(l2->pt(),l2->eta(),l2->phi(),l2->energy());
-                  gj_vector_vector.push_back(tmp);
-                }
-
-                if(fabs(nu1->pdgId())<6){
- //                 cout<<"c "<<nu1->pdgId()<<"  "<<nu1->pt()<<endl;
-                  TLorentzVector tmp;
-                  tmp.SetPtEtaPhiE(nu1->pt(),nu1->eta(),nu1->phi(),nu1->energy());
-                  gj_vector_vector.push_back(tmp);
-                }
-
-                if(fabs(nu2->pdgId())<6){
-//                  cout<<"d "<<nu2->pdgId()<<"  "<<nu2->pt()<<endl;
-                  TLorentzVector tmp;
-                  tmp.SetPtEtaPhiE(nu2->pt(),nu2->eta(),nu2->phi(),nu2->energy());
-                  gj_vector_vector.push_back(tmp);
-                }
-                TLorentzVector tmpb1;
-                tmpb1.SetPtEtaPhiE(b1->pt(),b1->eta(),b1->phi(),b1->energy());
-                TLorentzVector tmpb2;
-                tmpb2.SetPtEtaPhiE(b2->pt(),b2->eta(),b2->phi(),b2->energy());
-
-                gj_vector_vector.push_back(tmpb1);
-                gj_vector_vector.push_back(tmpb2);
-  //              cout<<"ee "<<tmpb1.Pt()<<endl;
-    //            cout<<"ee "<<tmpb2.Pt()<<endl;
-                
-                pseudoTop_pt.push_back(t1->pt());
-                pseudoTop_pt.push_back(t2->pt());
-                pseudoTop_pt.push_back(w1->pt());
-                pseudoTop_pt.push_back(w2->pt());
-                pseudoTop_pt.push_back(b1->pt());
-                pseudoTop_pt.push_back(b2->pt());
-                pseudoTop_pt.push_back(l1->pt());
-                pseudoTop_pt.push_back(nu1->pt());
-                pseudoTop_pt.push_back(l2->pt());
-                pseudoTop_pt.push_back(nu2->pt());
-
-                pseudoTop_eta.push_back(t1->eta());
-                pseudoTop_eta.push_back(t2->eta());
-                pseudoTop_eta.push_back(w1->eta());
-                pseudoTop_eta.push_back(w2->eta());
-                pseudoTop_eta.push_back(b1->eta());
-                pseudoTop_eta.push_back(b2->eta());
-                pseudoTop_eta.push_back(l1->eta());
-                pseudoTop_eta.push_back(nu1->eta());
-                pseudoTop_eta.push_back(l2->eta());
-                pseudoTop_eta.push_back(nu2->eta());
-
-                pseudoTop_phi.push_back(t1->phi());
-                pseudoTop_phi.push_back(t2->phi());
-                pseudoTop_phi.push_back(w1->phi());
-                pseudoTop_phi.push_back(w2->phi());
-                pseudoTop_phi.push_back(b1->phi());
-                pseudoTop_phi.push_back(b2->phi());
-                pseudoTop_phi.push_back(l1->phi());
-                pseudoTop_phi.push_back(nu1->phi());
-                pseudoTop_phi.push_back(l2->phi());
-                pseudoTop_phi.push_back(nu2->phi());
-
-                pseudoTop_energy.push_back(t1->energy());
-                pseudoTop_energy.push_back(t2->energy());
-                pseudoTop_energy.push_back(w1->energy());
-                pseudoTop_energy.push_back(w2->energy());
-                pseudoTop_energy.push_back(b1->energy());
-                pseudoTop_energy.push_back(b2->energy());
-                pseudoTop_energy.push_back(l1->energy());
-                pseudoTop_energy.push_back(nu1->energy());
-                pseudoTop_energy.push_back(l2->energy());
-                pseudoTop_energy.push_back(nu2->energy());
-
-                pseudoTop_pdgId.push_back(t1->pdgId());
-                pseudoTop_pdgId.push_back(t2->pdgId());
-                pseudoTop_pdgId.push_back(w1->pdgId());
-                pseudoTop_pdgId.push_back(w2->pdgId());
-                pseudoTop_pdgId.push_back(b1->pdgId());
-                pseudoTop_pdgId.push_back(b2->pdgId());
-                pseudoTop_pdgId.push_back(l1->pdgId());
-                pseudoTop_pdgId.push_back(nu1->pdgId());
-                pseudoTop_pdgId.push_back(l2->pdgId());
-                pseudoTop_pdgId.push_back(nu2->pdgId());
-
-                pseudoTop_charge.push_back(t1->charge());
-                pseudoTop_charge.push_back(t2->charge());
-                pseudoTop_charge.push_back(w1->charge());
-                pseudoTop_charge.push_back(w2->charge());
-                pseudoTop_charge.push_back(b1->charge());
-                pseudoTop_charge.push_back(b2->charge());
-                pseudoTop_charge.push_back(l1->charge());
-                pseudoTop_charge.push_back(nu1->charge());
-                pseudoTop_charge.push_back(l2->charge());
-                pseudoTop_charge.push_back(nu2->charge());
-
-
-
-                int nmatched=0;
-                for(unsigned int iii=0;iii<genjets.size();iii++){
-                  //cout<<genjets.at(iii)->pt()<<"  "<<genjets.at(iii)->eta()<<endl;
-                  for(unsigned int ind_r=0;ind_r<gj_vector_vector.size();ind_r++){
-//                    /*if(genjets.at(iii)->pt()==gj_vector_vector[ind_r].Pt())*/cout<<genjets.at(iii)->pt()<<"  "<<gj_vector_vector[ind_r].Pt()<<"  "<<gj_vector_vector.size()<<endl;
-//                    if(fabs(genjets.at(iii)->pt()-gj_vector_vector[ind_r].Pt())<0.001 &&fabs(genjets.at(iii)->eta()-gj_vector_vector[ind_r].Eta())<0.001 &&fabs(genjets.at(iii)->phi()-gj_vector_vector[ind_r].Phi())<0.001   )cout<<"FOUND!!!!!!! "<<genjets.at(iii)->pt()<<"  "<<gj_vector_vector[ind_r].Pt()<<"  "<<gj_vector_vector.size()<<endl;
-
-                    if(fabs(genjets.at(iii)->pt()-gj_vector_vector[ind_r].Pt())<0.001 &&fabs(genjets.at(iii)->eta()-gj_vector_vector[ind_r].Eta())<0.001 &&fabs(genjets.at(iii)->phi()-gj_vector_vector[ind_r].Phi())<0.001 &&fabs(genjets.at(iii)->eta())<3.0){
-                       nmatched++;
-                       for(unsigned int idx =0; idx<genjets.at(iii)->numberOfDaughters();idx++){
-			 pseudoTop_const_pt.push_back(genjets.at(iii)->daughter(idx)->pt());
-			 pseudoTop_const_eta.push_back(genjets.at(iii)->daughter(idx)->eta());
-			 pseudoTop_const_phi.push_back(genjets.at(iii)->daughter(idx)->phi());
-			 pseudoTop_const_energy.push_back(genjets.at(iii)->daughter(idx)->energy());
-			 pseudoTop_const_pdgId.push_back(genjets.at(iii)->daughter(idx)->pdgId());
-			 pseudoTop_const_charge.push_back(genjets.at(iii)->daughter(idx)->charge());
-                      }
-                    }
-                  }
-                }
-                for(unsigned int iii=0;iii<genleps.size();iii++){
-//                   cout<<iii<<"  "<<genleps.at(iii)->pt()<<"  "<<genleps.at(iii)->numberOfDaughters()<<endl;
-                       for(unsigned int idx =0; idx<genleps.at(iii)->numberOfDaughters();idx++){
-//                         cout<<genleps.at(iii)->daughter(idx)->pt()<<"  "<<genleps.at(iii)->daughter(idx)->pdgId()<<endl;
-			 pseudoTop_const_pt.push_back(genleps.at(iii)->daughter(idx)->pt());
-			 pseudoTop_const_eta.push_back(genleps.at(iii)->daughter(idx)->eta());
-			 pseudoTop_const_phi.push_back(genleps.at(iii)->daughter(idx)->phi());
-			 pseudoTop_const_energy.push_back(genleps.at(iii)->daughter(idx)->energy());
-			 pseudoTop_const_pdgId.push_back(genleps.at(iii)->daughter(idx)->pdgId());
-			 pseudoTop_const_charge.push_back(genleps.at(iii)->daughter(idx)->charge());
-                      }
-                }
-                //if(nmatched!=4)cout<<"SHOOOUUUUUUUT "<<nmatched<<endl;
-              }
-            }
-          }
-        } 
-
-
-
-
-
-
-
-
-
-
-//      edm::Handle<std::vector <reco::GenJet> >genjetColl;
-//      iEvent.getByToken("gjetSrc_", genjetColl);
-//          iEvent.getByToken(gjetSrc_, genjetColl);
-//      if(!genjetColl.failedToGet()){
-//      const reco::GenJetCollection & genjet = *genjetColl;
-      for(unsigned int k=0; k<genjets.size(); ++k){
-
-        if(genjets.at(k)->pt()<15 ||fabs(genjets.at(k)->eta())>2.5)continue;
-	GjPt.push_back(genjets.at(k)->pt());
-	Gjeta.push_back(genjets.at(k)->eta());
-	Gjphi.push_back(genjets.at(k)->phi());
-	GjE.push_back(genjets.at(k)->energy());
-	GjPx.push_back(genjets.at(k)->px());
-	GjPy.push_back(genjets.at(k)->py());
-	GjPz.push_back(genjets.at(k)->pz());
-    //    cout<<k<<"  "<<genjets.at(k)->partonFlavour()<<endl;
-	//double isChargedJet=false;
-	double chargedFraction = 0.;
-//	std::vector<const GenParticle*> mcparticles = genjets.at(k)->getGenConstituents();
-//	for(std::vector <const GenParticle*>::const_iterator thepart =mcparticles.begin();thepart != mcparticles.end(); ++ thepart ) {
-//	  if ( (**thepart).charge()!=0 ){
-	    //isChargedJet=true;
-//	    chargedFraction += (**thepart).pt();
-//	  }
-//	}
-	//if ( chargedFraction == 0 ) cout << " is chargeid: " << isChargedJet << "   " << chargedFraction/genjets.at(k)->pt()<< endl;
-	GjChargedFraction.push_back(chargedFraction/genjets.at(k)->pt());
-        double nconst=0;
-        if(fabs(genjets.at(k)->eta())<3.0){
-          nconst=genjets.at(k)->numberOfDaughters();
-          for(unsigned int idx =0; idx<genjets.at(k)->numberOfDaughters();idx++){
-
-          //cout<<genjets.at(k)->eta()<<endl;
-          //cout<<genjets.at(k)->numberOfDaughters()<< "  "<<idx<<"  "<<genjets.at(k)->daughter(idx)->pdgId()<<"  "<<endl;
-          //cout<<genjets.at(k)->daughter(idx)->pt()<<"  "<<genjets.at(k)->daughter(idx)->eta()<<"  "<<genjets.at(k)->daughter(idx)->phi()<<"  "<<genjets.at(k)->daughter(idx)->energy()<<endl<<endl;
-            GjConstId.push_back(genjets.at(k)->daughter(idx)->pdgId());
-            GjConstPt.push_back(genjets.at(k)->daughter(idx)->pt());
-            GjConstCharge.push_back(genjets.at(k)->daughter(idx)->charge());
-            GjConstEta.push_back(genjets.at(k)->daughter(idx)->eta());
-            GjConstPhi.push_back(genjets.at(k)->daughter(idx)->phi());
-            GjConstE.push_back(genjets.at(k)->daughter(idx)->energy());
-
-          }
-        }
-        GjNConst.push_back(nconst);
-        if(genjets.at(k)->pt()>30)ngjets++;
-      }
-
-      }
     }
     
     //cout<<"bbbbbbbbb"<<endl;
@@ -1448,7 +1140,24 @@ int ngjets=0;
         for(unsigned int size=0;size<lheEventInfoProd->weights().size();size++){
           mcWeights_.push_back(lheEventInfoProd->weights()[size].wgt);
 	}
-      }  
+      }
+/*
+edm::Handle<LHERunInfoProduct> lheRunInfoH_; 
+//if(iEvent.getByToken( lheRunInfoToken_, lheRunInfoH_ )) {
+iEvent.getByLabel("externalLHEProducer", lheRunInfoH_);
+//LHERunInfoProduct myLHERunInfoProduct = *(lheRunInfoH_.product());
+//for(unsigned int iter=0;iter<lheRunInfoH_->size();iter++){
+for (auto iter=lheRunInfoH_->headers_begin(); iter!=lheRunInfoH_->headers_end(); iter++){
+cout<<"I am here:  "<<endl;
+//  std::cout << iter->tag() << std::endl;
+  std::vector<std::string> lines = iter->lines();
+  for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
+   std::cout << lines.at(iLine);
+  }
+}*/
+
+
+  
     }
 
         //cout<<"ccccccccccccccc"<<endl;
@@ -1470,10 +1179,16 @@ int ngjets=0;
 	trigname.push_back(trigNames->triggerName(i));
 	trigaccept.push_back(HLTResHandle->accept(i));
 	if (trigaccept[i]){
-	  if(std::string(trigname[i]).find("HLT_Ele32_eta2p1_WPTight_Gsf")!=std::string::npos) Ele32_eta2p1_WPTight_Gsf=1;
-
-	  if(std::string(trigname[i]).find("HLT_IsoMu22_v")!=std::string::npos)IsoMu22_v=1;
-	  if(std::string(trigname[i]).find("HLT_IsoMu24")!=std::string::npos)IsoMu24=1;
+//cout<<"this is trigger:  "<<trigname[i]<<endl;
+	  if(std::string(trigname[i]).find("HLT_Ele32_eta2p1_WPTight_Gsf")!=std::string::npos){ Ele32_eta2p1_WPTight_Gsf=1;
+//cout<<"this is trigger:  "<<trigname[i]<<endl;
+}
+	  if(std::string(trigname[i]).find("HLT_IsoMu22_v")!=std::string::npos){IsoMu22_v=1;
+//cout<<"this is trigger:  "<<trigname[i]<<endl;
+}
+	  if(std::string(trigname[i]).find("HLT_IsoMu24")!=std::string::npos){IsoMu24=1;
+//cout<<"this is trigger:  "<<trigname[i]<<endl;
+}
 	  if(std::string(trigname[i]).find("HLT_IsoTkMu22_v")!=std::string::npos)IsoTkMu22_v=1;
 	  if(std::string(trigname[i]).find("HLT_IsoTkMu24")!=std::string::npos)IsoTkMu24=1;
 	}
@@ -1630,12 +1345,22 @@ int ngjets=0;
     }
             //cout<<"eeeeeeeeeeeeeeeeeeeeeee"<<endl;
     //electrons B.B.
-    
-    int ElecFill=0;
-    if(electron){
-    auto_ptr<vector<pat::Electron> > electronColl( new vector<pat::Electron> (*electrons) );
-    for (unsigned int j=0; j < electronColl->size();++j){
-      pat::Electron & el = (*electronColl)[j];
+  edm::Handle<edm::View<pat::Electron> > electrons;
+  iEvent.getByToken(electronToken_,electrons);
+  edm::Handle<edm::ValueMap<bool> > ele_vetoid_decisions;
+  iEvent.getByToken(eleIdvetoToken_ ,ele_vetoid_decisions);
+  edm::Handle<edm::ValueMap<bool> > ele_looseid_decisions;
+  iEvent.getByToken(eleIdlooseToken_ ,ele_looseid_decisions);
+  edm::Handle<edm::ValueMap<bool> > ele_mediumid_decisions;
+  iEvent.getByToken(eleIdmediumToken_ ,ele_mediumid_decisions);
+  edm::Handle<edm::ValueMap<bool> > ele_tightid_decisions;
+  iEvent.getByToken(eleIdtightToken_ ,ele_tightid_decisions);
+
+  int ElecFill=0;
+  for (unsigned int j = 0; j < electrons->size(); ++j){
+  const auto el = *electrons->ptrAt(j);
+  const auto e = electrons->ptrAt(j);
+
         if(el.pt()<10 || abs(el.eta())>3.0)continue;
   double dEtaIn_;
   double dPhiIn_;
@@ -1649,8 +1374,9 @@ int ngjets=0;
   int   expectedMissingInnerHits_;
   int   passConversionVeto_;     
 
-
-     dEtaIn_ = el.deltaEtaSuperClusterTrackAtVtx();
+     dEtaIn_ =  el.superCluster().isNonnull() && el.superCluster()->seed().isNonnull() ?
+           el.deltaEtaSuperClusterTrackAtVtx() - el.superCluster()->eta() + el.superCluster()->seed()->eta() :
+           std::numeric_limits<float>::max();
      dPhiIn_ = el.deltaPhiSuperClusterTrackAtVtx();
      hOverE_ = el.hcalOverEcal();
      sigmaIetaIeta_ = el.sigmaIetaIeta();
@@ -1668,9 +1394,8 @@ int ngjets=0;
      d0_ = (-1) * el.gsfTrack()->dxy(vtx_h->at(0).position() );
      dz_ = el.gsfTrack()->dz( vtx_h->at(0).position() );
 
-
-
-//     expectedMissingInnerHits_ = el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits();//MISSING!!
+//    expectedMissingInnerHits_ = el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits();//MISSING!!
+    expectedMissingInnerHits_ = el.gsfTrack()->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS);//MISSING!!
      passConversionVeto_ = false;
      if( beamSpotHandle.isValid() && conversions_h.isValid()) {
        passConversionVeto_ = !ConversionTools::hasMatchedConversion(el,conversions_h,
@@ -1682,7 +1407,7 @@ int ngjets=0;
 
      ////cout<<dEtaIn_<<"  "<<dPhiIn_<<"  "<<hOverE_<<"  "<<sigmaIetaIeta_<<"  "<<full5x5_sigmaIetaIeta_<<"  "<<ooEmooP_<<"  "<< d0_<<"  "<< dz_<<"  "<<expectedMissingInnerHits_<<"  "<<passConversionVeto_<<endl;
 
-     patElecdEtaIn_.push_back(dEtaIn_);
+     patElecdEtaInSeed_.push_back(dEtaIn_);
      patElecdPhiIn_.push_back(dPhiIn_);
      patElechOverE_.push_back(hOverE_);
      patElecsigmaIetaIeta_.push_back(sigmaIetaIeta_);
@@ -1702,27 +1427,14 @@ int ngjets=0;
 	std::cout << std::flush;
 	elecIdsListed_ = true;
       }
-     unsigned int elecid = 0;
-     unsigned int elecid_veto = 0,elecid_loose=0,elecid_medium=0,elecid_tight=0,elecid_nonTrig80=0,elecid_nonTrig90=0,elecid_Trig80=0,elecid_Trig90=0;
-           if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"))) elecid_veto= 1;
-           if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"))) elecid_loose= 1;
-           if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-medium"))) elecid_medium= 1;
-           if(el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"))) elecid_tight= 1;
-           if(el.electronID(std::string("mvaEleID-Spring15-25ns-nonTrig-V1-wp80"))) elecid_nonTrig80= 1;
-           if(el.electronID(std::string("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"))) elecid_nonTrig90= 1;
-           if(el.electronID(std::string("mvaEleID-Spring15-25ns-Trig-V1-wp80"))) elecid_Trig80= 1;
-           if(el.electronID(std::string("mvaEleID-Spring15-25ns-Trig-V1-wp90"))) elecid_Trig90= 1;
-
-           patElecIdveto_.push_back(elecid_veto);
-           patElecIdloose_.push_back(elecid_loose);
-           patElecIdmedium_.push_back(elecid_medium);
-           patElecIdtight_.push_back(elecid_tight);
-           patElecIdnonTrig80_.push_back(elecid_nonTrig80);
-           patElecIdnonTrig90_.push_back(elecid_nonTrig90);
-           patElecIdTrig80_.push_back(elecid_Trig80);
-           patElecIdTrig90_.push_back(elecid_Trig90);         
-//           cout<<"id is:  "<<el.electronID(std::string("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"))<<endl;
-      patElecId_.push_back(elecid);
+           bool isPassEle_vetoId = (*ele_vetoid_decisions)[e];
+           bool isPassEle_looseId = (*ele_looseid_decisions)[e];
+           bool isPassEle_mediumId = (*ele_mediumid_decisions)[e];
+           bool isPassEle_tightId = (*ele_tightid_decisions)[e];
+           patElecIdveto_.push_back(isPassEle_vetoId);
+           patElecIdloose_.push_back(isPassEle_looseId);
+           patElecIdmedium_.push_back(isPassEle_mediumId);
+           patElecIdtight_.push_back(isPassEle_tightId);
       double Elec17_Elec8_Matched=0;
       patElecTrig_.push_back(Elec17_Elec8_Matched);//no matching yet...BB 
       reco::Vertex::Point pos(0,0,0);
@@ -1753,15 +1465,16 @@ int ngjets=0;
       patElecPfIso_.push_back(( chIso03_ + nhIso03_ + phIso03_ ) / el.pt());
       patElecPfIsodb_.push_back(( chIso03_ + max(0.0, nhIso03_ + phIso03_ - 0.5*puChIso03_) )/ el.pt());
       patElecPfIsoRho_.push_back(( chIso03_ + max(0.0, nhIso03_ + phIso03_ - rhoPrime*AEff) )/ el.pt());
-      
+     
       bool myTrigPresel = false;
       if(fabs(el.superCluster()->eta()) < 1.479){
 	if(el.sigmaIetaIeta() < 0.014 &&
 	   el.hadronicOverEm() < 0.15 &&
 	   el.dr03TkSumPt()/el.pt() < 0.2 &&
 	   el.dr03EcalRecHitSumEt()/el.pt() < 0.2 &&
-	   el.dr03HcalTowerSumEt()/el.pt() < 0.2 /*&&
-	   el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits() == 0*/)
+	   el.dr03HcalTowerSumEt()/el.pt() < 0.2 
+//         && el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits() == 0
+         )
 	  myTrigPresel = true;
       }
       else {
@@ -1769,43 +1482,51 @@ int ngjets=0;
 	   el.hadronicOverEm() < 0.10 &&
 	   el.dr03TkSumPt()/el.pt() < 0.2 &&
 	   el.dr03EcalRecHitSumEt()/el.pt() < 0.2 &&
-	   el.dr03HcalTowerSumEt()/el.pt() < 0.2 /*&&
-	   el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits() == 0*/)
+	   el.dr03HcalTowerSumEt()/el.pt() < 0.2 
+//	   && el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits() == 0
+	   )
 	  myTrigPresel = true;
 	  }
       
       patElec_mva_presel_.push_back(myTrigPresel);
       if(el.pt()>20)ElecFill++; 
     }
-    }
-            //cout<<"fffffffffffffffffffff"<<endl;
     double PFjetFill=0;
     double PFjetFill_b=0;
     double chf = 0;
     double nhf = 0;
     double cemf = 0;
     double nemf = 0;
+    double muf = 0;
     double cmult = 0;
-    double nconst = 0;
+    double nconst = 0, nNeutralParticles = 0;
     
     //for(edm::View<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
+  edm::Handle<edm::View<pat::Jet> >jets;
+  iEvent.getByToken(jetToken_,jets);
+//  edm::Handle<edm::ValueMap<double> > deepFJetTags_probudsg;
+//  iEvent.getByToken(deepFJetTags_probudsgToken_ ,deepFJetTags_probudsg);
 
     for ( unsigned int i=0; i<jets->size(); ++i ) {
-      const pat::Jet & jet = jets->at(i);
-        if((channel_!="noselection")&&(jet.pt()<15 || abs(jet.eta())>2.5))continue;
-        if((channel_=="noselection")&&(jet.pt()<15 || abs(jet.eta())>5.0))continue;
+//      const pat::Jet & jet = jets->at(i);
+    const auto jet = *jets->ptrAt(i);
+    const auto j = jets->ptrAt(i);
+      if((channel_!="noselection")&&(jet.pt()<15 || abs(jet.eta())>2.5))continue;
+      if((channel_=="noselection")&&(jet.pt()<15 || abs(jet.eta())>5.0))continue;
+//double deepFJetTags_udsg = (*deepFJetTags_probudsg)[j];
     //  cout<<"I am here"<<endl;                     
       //patJetPfAk04jetpuMVA_.push_back(jet.userFloat("pileupJetId:fullDiscriminant"));//not available!
       chf = jet.chargedHadronEnergyFraction();
       nhf = (jet.neutralHadronEnergy()+jet.HFHadronEnergy())/jet.correctedJet(0).energy();
       cemf = jet.chargedEmEnergyFraction();
       nemf = jet.neutralEmEnergyFraction();
+      muf = jet.muonEnergyFraction();
       cmult = jet.chargedMultiplicity();
-      nconst = jet.numberOfDaughters();
-      
-    //  //cout<<"jet.bDiscriminator(combinedSecondaryVertexBJetTags)=  "<<jet.bDiscriminator("combinedSecondaryVertexBJetTags")<<endl;
-    //  //cout<<"jet.bDiscriminator(combinedSecondaryVertexV1BJetTags)=  "<<jet.bDiscriminator("combinedSecondaryVertexV1BJetTags")<<endl;
-    //  //cout<<"jet.bDiscriminator(combinedSecondaryVertexSoftPFLeptonV1BJetTags)=  "<<jet.bDiscriminator("combinedSecondaryVertexSoftPFLeptonV1BJetTags")<<endl;
+      nconst = jet.chargedMultiplicity()+jet.neutralMultiplicity();
+      nNeutralParticles = jet.neutralMultiplicity(); 
+//  cout<<"this is disc udsg:  "<<deepFJetTags_udsg<<endl; 
+//  cout<<"this is disc b:  "<<jet.bDiscriminator("deepFlavourJetTags:probudsg")<<endl; 
+//  cout<<"this is disc csv:  "<<jet.bDiscriminator("pfCombinedMVAV2BJetTags")<<endl; 
       patJetPfAk04BDiscCSVv2_.push_back(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
       patJetPfAk04BDiscpfCMVA_.push_back(jet.bDiscriminator("pfCombinedMVAV2BJetTags"));
       patJetPfAk04BDiscCSVSLV1_.push_back(jet.bDiscriminator("combinedSecondaryVertexSoftPFLeptonV1BJetTags"));
@@ -1825,6 +1546,7 @@ int ngjets=0;
       patJetPfAk04nhf_.push_back(nhf);
       patJetPfAk04cemf_.push_back(cemf);
       patJetPfAk04nemf_.push_back(nemf);
+      patJetPfAk04muf_.push_back(muf);
       patJetPfAk04cmult_.push_back(cmult);
       patJetPfAk04nconst_.push_back(nconst);
 
@@ -1839,17 +1561,18 @@ int ngjets=0;
       double down = (1-unc)*jet.pt();
       patJetPfAk04PtUp_.push_back(up);
       patJetPfAk04PtDn_.push_back(down);
+//https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVRun2016
       double tempJetID=0;
-      if( abs(jet.eta())<2.4){
-	if(chf>0 && nhf<0.99 && cmult>0.0 && cemf<0.99 && nemf<0.99 && nconst>1) tempJetID=1;
-	if((chf>0)&&(nhf<0.95)&&(cmult>0.0)&&(cemf<0.99)&&(nemf<0.95)&&(nconst>1)) tempJetID=2; 
-	if((chf>0)&&(nhf<0.9)&&(cmult>0.0)&&(cemf<0.99)&&(nemf<0.9)&&(nconst>1)) tempJetID=3;
-      }
-      if( abs(jet.eta())>=2.4){
-	if ((nhf<0.99)&&(nemf<0.99)&&(nconst>1))tempJetID=1;
-	if ((nhf<0.95)&&(nemf<0.95)&&(nconst>1))tempJetID=2; 
-	if ((nhf<0.9)&&(nemf<0.9)&&(nconst>1))tempJetID=3;
-      }
+      double jeta=jet.eta();
+	if((nhf<0.99 && nemf<0.99 && nconst>1) && ((abs(jeta)<=2.4 && chf>0 && cmult>0 && cemf<0.99) || abs(jeta)>2.4) && abs(jeta)<=2.7)tempJetID=1; 
+	if((nhf<0.90 && nemf<0.90 && nconst>1) && ((abs(jeta)<=2.4 && chf>0 && cmult>0 && cemf<0.99) || abs(jeta)>2.4) && abs(jeta)<=2.7)tempJetID=2; 
+	if((nhf<0.90 && nemf<0.90 && nconst>1&& (muf<0.80)) && ((abs(jeta)<=2.4 && chf>0 && cmult>0 && cemf<0.90) || abs(jeta)>2.4) && abs(jeta)<=2.7)tempJetID=3; 
+
+	if(nhf<0.98 && nemf>0.01 && nNeutralParticles>2 && abs(jeta)>2.7 && abs(jeta)<=3.0  )tempJetID=1;
+	if(nhf<0.98 && nemf>0.01 && nNeutralParticles>2 && abs(jeta)>2.7 && abs(jeta)<=3.0  )tempJetID=2;
+
+	if(nemf<0.90 && nNeutralParticles>10 && abs(jeta)>3.0 )tempJetID=1;
+	if(nemf<0.90 && nNeutralParticles>10 && abs(jeta)>3.0)tempJetID=2;
       patJetPfAk04LooseId_.push_back(tempJetID);//ala 
       if(jet.pt()>30 &&tempJetID>0)PFjetFill++;
       if(jet.pt()>30 &&tempJetID>0&& jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags")>=0.8)PFjetFill_b++;
@@ -1870,8 +1593,6 @@ int ngjets=0;
   //    smearUp = getJER(jet.eta(), 1); //JER nominal=0, up=+1, down=-1
   //    smearDn = getJER(jet.eta(), -1); //JER nominal=0, up=+1, down=-1
       if(!realdata){
-//      for (unsigned int j=0; j<genjets_v.size();++j){
-//           const reco::GetJet* & gjet = genjets_v.at(j);
         bool matchGen=false;
         JME::JetParameters parameters_1;
         parameters_1.setJetPt(jet.pt());
@@ -1884,8 +1605,6 @@ int ngjets=0;
         double sf_up = resolution_sf.getScaleFactor({{JME::Binning::JetEta, jet.eta()}}, Variation::UP);
         double sf_dn = resolution_sf.getScaleFactor({{JME::Binning::JetEta, jet.eta()}}, Variation::DOWN);
 
-//        cout<<r<<"  "<<sf<<"  "<<sf_up<<"  "<<sf_dn <<endl;
-
 //        cout<<gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r)<<endl;
         smear=gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r);
         smearUp=gRandom->Gaus(jet.pt(),sqrt(sf_up*sf_up-1)*r);
@@ -1897,7 +1616,7 @@ int ngjets=0;
     gjet_vv.SetPtEtaPhiE(jet.genJet()->pt(),jet.genJet()->eta(),jet.genJet()->phi(),jet.genJet()->energy());
     double DR_gj_j=jet_vv.DeltaR(gjet_vv);
 //    double DPt_gj_j=fabs(jet.pt()-jet.genJet()->pt());
-//    if( DR_gj_j<0.2 &&DPt_gj_j<3*r ){
+//    if( DR_gj_j<0.2 &&DPt_gj_j<3*r )
     if( DR_gj_j<0.2 ){
 	  matchGen=true;
           //cout<<"Burdayım ulan "<<endl;
@@ -1923,7 +1642,6 @@ int ngjets=0;
       patJetPfAk04EnJERSmear.push_back(smearE);
       patJetPfAk04EnJERSmearUp.push_back(smearUpE);
       patJetPfAk04EnJERSmearDn.push_back(smearDnE);
-//    }
     }
     
     //end jets
@@ -1950,6 +1668,8 @@ if(
 
 void
 Tupel::beginRun(edm::Run const& iRun, edm::EventSetup const&){
+
+
 /*
 edm::Handle<LHERunInfoProduct> run;
  
@@ -1965,7 +1685,8 @@ for (headers_const_iterator iter=myLHERunInfoProduct.headers_begin(); iter!=myLH
   for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
    std::cout << lines.at(iLine);
   }
-}*/
+}
+*/
 }
 void 
 Tupel::beginJob()
@@ -1994,12 +1715,6 @@ Tupel::beginJob()
       myTree->Branch("Packed01Charge",&Packed01Charge);
       myTree->Branch("Packed01IsPrompt",&Packed01IsPrompt);
       myTree->Branch("Packed01IsTauProd",&Packed01IsTauProd);
-      myTree->Branch("pseudoTop_const_pt",&pseudoTop_const_pt);
-      myTree->Branch("pseudoTop_const_eta",&pseudoTop_const_eta);
-    myTree->Branch("pseudoTop_const_phi",&pseudoTop_const_phi);
-    myTree->Branch("pseudoTop_const_energy",&pseudoTop_const_energy);
-    myTree->Branch("pseudoTop_const_pdgId",&pseudoTop_const_pdgId);
-    myTree->Branch("pseudoTop_const_charge",&pseudoTop_const_charge);
     myTree->Branch("patPfCandPt",&patPfCandPt);
     myTree->Branch("patPfCandEta",&patPfCandEta);
     myTree->Branch("patPfCandPhi",&patPfCandPhi);
@@ -2040,12 +1755,6 @@ Tupel::beginJob()
     myTree->Branch("Bare01LepStatus",&Bare01LepStatus);
     myTree->Branch("Bare01LepMomId",&Bare01LepMomId);      
 
-    myTree->Branch("pseudoTop_pt",&pseudoTop_pt);
-    myTree->Branch("pseudoTop_eta",&pseudoTop_eta);
-    myTree->Branch("pseudoTop_phi",&pseudoTop_phi);
-    myTree->Branch("pseudoTop_energy",&pseudoTop_energy);
-    myTree->Branch("pseudoTop_pdgId",&pseudoTop_pdgId);
-    myTree->Branch("pseudoTop_charge",&pseudoTop_charge);
     }
 
     myTree->Branch("Uncorec_METPt",&Uncorec_METPt);
@@ -2059,7 +1768,10 @@ Tupel::beginJob()
     myTree->Branch("METsigxy",&METsigxy);
     myTree->Branch("METsigy2",&METsigy2);
     myTree->Branch("METsig",&METsig);
-    myTree->Branch("METUncPt",&METUncPt);
+    myTree->Branch("METUncPtUp",&METUncPtUp);
+    myTree->Branch("METUncPtDn",&METUncPtDn);
+    myTree->Branch("METUncPhiUp",&METUncPhiUp);
+    myTree->Branch("METUncPhiDn",&METUncPhiDn);
     myTree->Branch("event",&event);
     myTree->Branch("realdata",&realdata);
     myTree->Branch("run",&run);
@@ -2169,16 +1881,11 @@ Tupel::beginJob()
     myTree->Branch("patMuon_Mu17_Mu8_Matched_",&patMuon_Mu17_Mu8_Matched_);
     myTree->Branch("patMuon_Mu17_TkMu8_Matched_",&patMuon_Mu17_TkMu8_Matched_);
 
-    myTree->Branch("patElecId_",&patElecId_);
     myTree->Branch("patElecIdveto_",&patElecIdveto_);
     myTree->Branch("patElecIdloose_",&patElecIdloose_);
     myTree->Branch("patElecIdmedium_",&patElecIdmedium_);
     myTree->Branch("patElecIdtight_",&patElecIdtight_);
-    myTree->Branch("patElecIdnonTrig80_",&patElecIdnonTrig80_);
-    myTree->Branch("patElecIdnonTrig90_",&patElecIdnonTrig90_);
-    myTree->Branch("patElecIdTrig80_",&patElecIdTrig80_);
-    myTree->Branch("patElecIdTrig90_",&patElecIdTrig90_);
-    myTree->Branch("patElecdEtaIn_",&patElecdEtaIn_);
+    myTree->Branch("patElecdEtaInSeed_",&patElecdEtaInSeed_);
     myTree->Branch("patElecdPhiIn_",&patElecdPhiIn_);
     myTree->Branch("patElechOverE_",&patElechOverE_);
     myTree->Branch("patElecsigmaIetaIeta_",&patElecsigmaIetaIeta_);
@@ -2241,6 +1948,7 @@ Tupel::beginJob()
     myTree->Branch("patJetPfAk04nhf_",&patJetPfAk04nhf_);
     myTree->Branch("patJetPfAk04cemf_",&patJetPfAk04cemf_);
     myTree->Branch("patJetPfAk04nemf_",&patJetPfAk04nemf_);
+    myTree->Branch("patJetPfAk04muf_",&patJetPfAk04muf_);
     myTree->Branch("patJetPfAk04cmult_",&patJetPfAk04cmult_);
     myTree->Branch("patJetPfAk04nconst_",&patJetPfAk04nconst_);
     myTree->Branch("patJetPfAk04jetBeta_",&patJetPfAk04jetBeta_);

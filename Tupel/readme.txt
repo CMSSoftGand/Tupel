@@ -1,13 +1,8 @@
 Instructions for ntuple Producer
 ssh -Y <uname>@lxplus.cern.ch
-cmsrel CMSSW_8_0_11
-cd CMSSW_8_0_11/src
-cmsenv
-git-cms-merge-topic 13960
-// met corrections
-git cms-merge-topic cms-met:metTool80X
-git cms-merge-topic -u cms-met:CMSSW_8_0_X-METFilterUpdate
-
+#execute the cmssw.sh script in scripts dir
+https://github.com/UGent/Tupel/tree/Tuple_MiniAOD_TTbar_8x/Tupel/scripts
+./cmssw.sh or copy paste the lines
 //to fetch the most recent pseudotop producer.
 git clone -b Tuple_MiniAOD_TTbar_8x git@github.com:UGent/Tupel
 scram b -j8
@@ -17,9 +12,9 @@ mkdir ~/eos
 eosmount ~/eos
 
 cd Tupel/Tupel/
-// Make symbolic link
-ln -s data/era2016/Spring16_25nsV6_DATA.db
-ln -s data/era2016/Spring16_25nsV6_MC.db
+// Make symbolic link if need correction from db
+#ln -s data/era2016/Spring16_25nsV6_DATA.db
+#ln -s data/era2016/Spring16_25nsV6_MC.db
 // To run the analyzer locally
 cmsRun scripts/simple_run_80X_cfg.py
 // Make a test for crab using test_samples.json;
