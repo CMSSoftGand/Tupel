@@ -1,0 +1,9 @@
+{
+"QCDEM_Pt_20to30" :               [0.5,    0, "/QCD_Pt-20to30_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "QCDEM_Pt_20to30", 920, true,false,1],
+"QCDEM_Pt_30to50" :               [0.5,    0, "/QCD_Pt-30to50_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "QCDEM_Pt_30to50", 920, true,false,1],
+"QCDEM_Pt_50to80" :               [0.5,    0, "/QCD_Pt-50to80_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "QCDEM_Pt_50to80", 920, true,false,1],
+"QCDEM_Pt_80to120" :               [0.5,    0, "/QCD_Pt-80to120_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "QCDEM_Pt_80to120", 920, true,false,1],
+"QCDEM_Pt_120to170" :               [0.5,    0, "/QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "QCDEM_Pt_120to170", 920, true,false,1],
+"QCDEM_Pt_170to300" :               [0.5,    0, "/QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "QCDEM_Pt_170to300", 920, true,false,1],
+"QCDEM_Pt_300toInf" :               [0.5,    0, "/QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "QCDEM_Pt_300toInf", 920, true,false,1]
+}
