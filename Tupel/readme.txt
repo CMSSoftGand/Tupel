@@ -1,7 +1,7 @@
 Instructions for ntuple Producer
 ssh -Y <uname>@lxplus.cern.ch
 #execute the cmssw.sh script in scripts dir
-https://github.com/UGent/Tupel/tree/Tuple_MiniAOD_TTbar_8x/Tupel/scripts
+https://github.com/UGent/Tupel/tree/Tuple_MiniAOD_TTbar_8x/Tupel/scripts/cmssw.sh
 ./cmssw.sh or copy paste the lines
 //to fetch the most recent pseudotop producer.
 git clone -b Tuple_MiniAOD_TTbar_8x git@github.com:UGent/Tupel
