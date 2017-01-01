@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Recent 80X release
-release="CMSSW_8_0_21"
+release="CMSSW_8_0_24"
 scramv1 project CMSSW $release  # cmsrel alias expanded
 
 cd $release/src
