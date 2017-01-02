@@ -8,7 +8,7 @@ import sys
 """
 def saveExpectedBtagEff(opt):
 
-    csvWP='discr_csvV2>%f'%opt.csv if opt.HiForest else 'patJetPfAk04BDiscCSVv2_>%f'%opt.csv
+    csvWP='discr_csvV2>%f'%opt.csv if opt.HiForest else 'patJetPfAk04BDiscpfCMVA_>%f'%opt.csv
     inputDir=opt.input
     
     #open a file
@@ -74,7 +74,7 @@ def main():
     parser.add_option(      '--HiForest',  dest='HiForest', help='use HiForest trees',          default=False, action='store_true')
     parser.add_option('-i', '--in',        dest='input',    help='input directory with files',  default='/store/user/mgul/ntuple.root', type='string')
     parser.add_option('-o', '--out',       dest='output',   help='output file',                 default='data/expTageff.root',                                       type='string')
-    parser.add_option(      '--csv',       dest='csv',      help='csv cut',                     default=0.800,                                                       type=float)
+    parser.add_option(      '--csv',       dest='csv',      help='csv cut',                     default=0.185,                                                       type=float)
     (opt, args) = parser.parse_args()
 
     saveExpectedBtagEff(opt)
