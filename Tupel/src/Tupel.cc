@@ -1993,17 +1993,26 @@ void Tupel::processElectrons(){
     }
 
 
-    //expectedMissingInnerHits_ = el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits();//MISSING!!
+    expectedMissingInnerHits_ = el.gsfTrack()->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS);
     passConversionVeto_ = false;
     if( beamSpotHandle.isValid() && conversions_h.isValid()) {
       passConversionVeto_ = !ConversionTools::hasMatchedConversion(el,conversions_h,
 								   beamSpotHandle->position());
-    }else{
+    } else{
       printf("\n\nERROR!!! conversions not found!!!\n");
     }
 
-
-    //cout<<dEtaIn_<<"  "<<dPhiIn_<<"  "<<hOverE_<<"  "<<sigmaIetaIeta_<<"  "<<full5x5_sigmaIetaIeta_<<"  "<<ooEmooP_<<"  "<< d0_<<"  "<< dz_<<"  "<<expectedMissingInnerHits_<<"  "<<passConversionVeto_<<endl;
+    //std::cout << "dEtaIn_ = "  << dEtaIn_
+    //	      << "\ndPhiIn_ =  " <<dPhiIn_
+    //	      << "\nhOverE_ = " << hOverE_
+    //	      << "\nsigmaIetaIeta_ = " << sigmaIetaIeta_
+    //	      << "\nfull5x5_sigmaIetaIeta_  = " << full5x5_sigmaIetaIeta_
+    //	      << "\nooEmooP_ = "<< ooEmooP_
+    //	      << "\nd0_ = "<< d0_
+    //	      << "\ndz_ = " << dz_
+    //	      << "\nexpectedMissingInnerHits_ = " << expectedMissingInnerHits_
+    //	      << "\npassConversionVeto_ = " << passConversionVeto_
+    //	      << "\n";
 
     ElDEtaTkScAtVtx_->push_back(dEtaIn_);
     ElDPhiTkScAtVtx_->push_back(dPhiIn_);
