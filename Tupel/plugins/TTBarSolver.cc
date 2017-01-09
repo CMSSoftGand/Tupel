@@ -70,7 +70,7 @@ void TTBarSolver::Solve(Permutation &hyp, bool lazy)
   bool USEMASS_(true) ,USENS_(true);
   TH1 *N_right_;
   TH2 *WTmass_right_;
-  TFile *probfile=TFile::Open("/user/mgul/Higgs_tottbar/Anz_8011/CMSSW_8_0_11/src/Tupel/Tupel/data/era2016/htt_permutations.root");
+  TFile *probfile=TFile::Open("/afs/cern.ch/work/m/mgul/public/Hto_ttbar/deepCSV8024/CMSSW_8_0_24/src/Tupel/Tupel/data/moriond17/htt_permutations.root");
   TDirectory *dir = (TDirectory*) probfile->Get("nosys");
   gDirectory->Get("nosys");
   N_right_     =(TH1 *)gDirectory->Get("nosys/nusolver_chi2_right");

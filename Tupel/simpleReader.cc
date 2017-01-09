@@ -1,30 +1,6 @@
 #include "simpleReader.h"
-#include "atest_class.h"
 using namespace std;
 
-/*std::vector<float> getJetResolutionScales(float pt, float eta, float genjpt)
-{
-    std::vector<float> res(3,1.0);
-      float ptSF(1.0), ptSF_err(0.0);
-        if(TMath::Abs(eta)<0.5)       { ptSF=1.095; ptSF_err = 0.018; }
-          else if(TMath::Abs(eta)<0.8)  { ptSF=1.120; ptSF_err = 0.028; }
-            else if(TMath::Abs(eta)<1.1)  { ptSF=1.097; ptSF_err = 0.017; }
-              else if(TMath::Abs(eta)<1.3)  { ptSF=1.103; ptSF_err = 0.033; }
-                else if(TMath::Abs(eta)<1.7)  { ptSF=1.118; ptSF_err = 0.014; }
-                  else if(TMath::Abs(eta)<1.9)  { ptSF=1.100; ptSF_err = 0.033; }
-                    else if(TMath::Abs(eta)<2.1)  { ptSF=1.162; ptSF_err = 0.044; }
-                      else if(TMath::Abs(eta)<2.3)  { ptSF=1.160; ptSF_err = 0.048; }
-                        else if(TMath::Abs(eta)<2.5)  { ptSF=1.161; ptSF_err = 0.060; }
-                          else if(TMath::Abs(eta)<2.8)  { ptSF=1.209; ptSF_err = 0.059; }
-                            else if(TMath::Abs(eta)<3.0)  { ptSF=1.564; ptSF_err = 0.321; }
-                              else if(TMath::Abs(eta)<3.2)  { ptSF=1.384; ptSF_err = 0.033; }
-                                else if(TMath::Abs(eta)<5.0)  { ptSF=1.216; ptSF_err = 0.050; }
-                                  res[0] = TMath::Max((Float_t)0.,(Float_t)(genjpt+(ptSF)*(pt-genjpt)))/pt;
-                                    res[1] = TMath::Max((Float_t)0.,(Float_t)(genjpt+(ptSF-ptSF_err)*(pt-genjpt)))/pt;
-                                      res[2] = TMath::Max((Float_t)0.,(Float_t)(genjpt+(ptSF+ptSF_err)*(pt-genjpt)))/pt;
-                                        return res;
-}
-*/
   void simpleReader(TString fin,TString fout){
   TFile *f = TFile::Open(fin);
   if (f->IsZombie()) {
@@ -38,52 +14,156 @@ using namespace std;
 //    bool is_mu (true);
   bool is_mu (false);
   bool run_sys (false);
-  TString era("/user/mgul/Higgs_tottbar/Anz_8011/CMSSW_8_0_11/src/Tupel/Tupel/data/era2016/");
+    cout<<"Running Muon Channel: = "<<is_mu<<endl;
+// xsec order:    {ttbar, st_tch, st_tw, wjets,    DY,    WW,    WZ,    ZZ,   ,ttW,    ttZ,    qcd pt 15-20,       qcd pt 20-30,      qcd pt 30-50,       qcd pt 50-80,        qcd pt 80-120, qcd pt 120-170, qcd pt 170-300, qcd pt 300-470, qcd pt 470-600,     qcd pt 600-800, qcd pt 800-1000, qcd pt 1000-Inf
+    float xsec[] ={831.76, 70.70, 19.55, 61526.7, 5765.4, 118.7, 47.13 ,16.523,0.2043, 0.2529, 1273190000.*0.003, 558528000.*0.0053, 139803000.*0.01182, 19222500.*0.02276, 2758420.*0.03844, 469797.*0.05362, 117989.*0.07335,7820.25*0.10196, 645.528* 0.12242, 187.109*0.13412, 32.3486*0.14552, 10.4305*0.15544}; 
+//                     qcd pt20-30,        qcd pt 30-50,     , qcd pt 50-80,       qcd pt 80-120,  qcd pt 120-170,   qcd pt 170-300, qcd pt 300-Inf
+    float emqcd_xsec[]={558528000.*0.0053, 139803000.*0.01182, 19222500.*0.02276, 2758420.*0.03844, 469797.*0.05362, 117989.*0.07335, 7820.25*0.10196};
+  TString era("/afs/cern.ch/work/m/mgul/public/Hto_ttbar/deepCSV8024/CMSSW_8_0_24/src/Tupel/Tupel/data/moriond17/");
   ////  standalone_LumiReWeighting puWeight(201525,0), puUp(201525,1), puDown(201525,-1);
 //https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X
           TString btagUncUrl(era+"cMVAv2_ichep.csv");
           cout<<"string is : "<<btagUncUrl<<endl;
           gSystem->ExpandPathName(btagUncUrl);
-          std::vector<BTagCalibrationReader *> sfbReaders, sflReaders;
+          std::vector<BTagCalibrationReader *> sfbReaders,sfcReaders, sflReaders;
           TString btagEffExpUrl(era+"expTageff.root");
           gSystem->ExpandPathName(btagEffExpUrl);
           std::map<TString, TGraphAsymmErrors *> expBtagEff, expBtagEffPy8;
           BTagSFUtil myBTagSFUtil;
           if (!realdata){
+vector<string> bsystypes;
+bsystypes.push_back("central");bsystypes.push_back("down");bsystypes.push_back("up");
             BTagCalibration btvcalib("cMVAv2", btagUncUrl.Data());
-            sfbReaders.push_back( new BTagCalibrationReader(&btvcalib, BTagEntry::OP_MEDIUM, "ttbar", "central") );
-            sfbReaders.push_back( new BTagCalibrationReader(&btvcalib, BTagEntry::OP_MEDIUM, "ttbar", "down") );
-            sfbReaders.push_back( new BTagCalibrationReader(&btvcalib, BTagEntry::OP_MEDIUM, "ttbar", "up") );
-            sflReaders.push_back( new BTagCalibrationReader(&btvcalib, BTagEntry::OP_MEDIUM, "incl", "central") );
-            sflReaders.push_back( new BTagCalibrationReader(&btvcalib, BTagEntry::OP_MEDIUM, "incl", "down") );
-            sflReaders.push_back( new BTagCalibrationReader(&btvcalib, BTagEntry::OP_MEDIUM, "incl", "up") );
+for (unsigned int i=0; i<bsystypes.size();i++){
+            sfbReaders.push_back( new BTagCalibrationReader(BTagEntry::OP_MEDIUM, bsystypes.at(i).c_str()) );
+	    sfcReaders.push_back( new BTagCalibrationReader(BTagEntry::OP_MEDIUM, bsystypes.at(i).c_str()) );
+            sflReaders.push_back( new BTagCalibrationReader(BTagEntry::OP_MEDIUM, bsystypes.at(i).c_str()) );
+sfbReaders[i]->load(btvcalib,BTagEntry::FLAV_B,"ttbar");
+sfcReaders[i]->load(btvcalib,BTagEntry::FLAV_C,"ttbar");
+sflReaders[i]->load(btvcalib,BTagEntry::FLAV_UDSG,"incl");
+}
             TFile *beffIn=TFile::Open(btagEffExpUrl);
             expBtagEff["b"]=(TGraphAsymmErrors *)beffIn->Get("b");
             expBtagEff["c"]=(TGraphAsymmErrors *)beffIn->Get("c");
             expBtagEff["udsg"]=(TGraphAsymmErrors *)beffIn->Get("udsg");
             beffIn->Close();
             }
-//     experimental syst Uncer
-     std::vector<TString> expSysts;
-     expSysts.push_back("UncJER");
-     expSysts.push_back("UncJES");
-     expSysts.push_back("Pileup");
-     expSysts.push_back("Trigger");
-     if (is_mu)expSysts.push_back("MuEfficiency");
-     if (!is_mu)expSysts.push_back("EleEfficiency");
-     expSysts.push_back("BtagEff");
-     expSysts.push_back("CtagEff");
-     expSysts.push_back("LtagEff");
-     Int_t nExpSysts=expSysts.size();
 
+      // Trig SF
+      int mu_id=-999;
+      int e_id=-999;
+      TString eltrigSFurl(era+"SF_HLT_Ele32_eta2p1_WPTight_Gsf.root");
+      TString mutrigSFurl(era+"TriggerSF_v1_IsoMu24.root");
+      TString eIDurl;
+// for 12.9/pb https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaIDRecipesRun2#Cut_based_electron_identificatio
+//for 7.6/fb https://twiki.cern.ch/twiki/bin/view/CMS/MuonWorkInProgressAndPagResults#Results_on_7_6_fb
+        eIDurl=era+"egammaEff_SF2D.root";
+      TString muIDurl(era+"MuonID.root");
+      TString muIsourl(era+"MuonIso.root");
+      std::map<TString,TH2 *> lepEffH;
+      std::vector<float> lepTriggerSF(3,1.0);
+      std::vector<float> lepidSF(3,1.0),lepisoSF(3,1.0);
+      float trigSF(1.0), trigSFUnc(0.03);
+      float idSF(1.0), idSFUnc(0.03);
+      float isoSF(1.0), isoSFUnc(0.03);
+      TString Trig_hist("muon_trigg");
+      if (!is_mu)Trig_hist="Ele32_eta2p1_WPTight_Gsf";
+      TString id_hist("muon_id");
+      if(!is_mu)id_hist="elec_id";
+   if (!realdata){
+   if (is_mu ){
+      TFile *mufIn=TFile::Open(mutrigSFurl);
+//      mufIn->cd("IsoMu22_OR_IsoTkMu22_PtEtaBins_Run274094_to_276097");
+//      gDirectory->Get("efficienciesDATA");
+//         lepEffH[Trig_hist]=(TH2 *)gDirectory->Get("efficienciesDATA/pt_abseta_DATA");
+         lepEffH[Trig_hist]=(TH2 *)mufIn->Get("IsoMu24_OR_IsoTkMu24");
+         for(auto& it : lepEffH) it.second->SetDirectory(0);
+         mufIn->Close();
+
+      TFile *muIDfIn=TFile::Open(muIDurl);
+         lepEffH[id_hist]=(TH2 *)muIDfIn->Get("histo2D_MC");
+         for(auto& it : lepEffH) it.second->SetDirectory(0);
+         muIDfIn->Close();
+
+      TFile *muIsofIn=TFile::Open(muIsourl);
+         lepEffH["muon_iso"]=(TH2 *)muIsofIn->Get("histo2D_MC");
+         for(auto& it : lepEffH) it.second->SetDirectory(0);
+         muIsofIn->Close();
+      }
+   if (!is_mu){
+      TFile *fIn=TFile::Open(eltrigSFurl);
+      lepEffH[Trig_hist]=(TH2 *)fIn->Get("Ele32_eta2p1_WPTight_Gsf");
+      for(auto& it : lepEffH) it.second->SetDirectory(0);
+              fIn->Close();
+
+      TFile *eidfIn=TFile::Open(eIDurl);
+      lepEffH[id_hist]=(TH2 *)eidfIn->Get("EGamma_SF2D");
+      for(auto& it : lepEffH) it.second->SetDirectory(0);
+              eidfIn->Close();
+      }
+     }
+        std::vector<TGraph *>puWgtGr;
+        std::vector<float> puWeight(3,1.0);
+        TString puWgtUrl(era+"pileupWgts.root");
+        if (!realdata){
+          TFile *fIn=TFile::Open(puWgtUrl);
+          if(fIn){
+          puWgtGr.push_back( (TGraph *)fIn->Get("puwgts_nom") );
+          puWgtGr.push_back( (TGraph *)fIn->Get("puwgts_down") );
+          puWgtGr.push_back( (TGraph *)fIn->Get("puwgts_up") );
+          fIn->Close();
+            }
+          }
      if (is_mu){TDirectory *mujets_2btag = theFile->mkdir("mujets_2btag");mujets_2btag->cd();}
      if (!is_mu){TDirectory *eljets_2btag = theFile->mkdir("eljets_2btag");eljets_2btag->cd();}
      TH1::SetDefaultSumw2();
      TH2::SetDefaultSumw2();
      branchAdd(t);
+	   Int_t nentries(t->GetEntriesFast());
+     float scale=-999999.0;
+     float lumi = 12877.401701;
+     if (!is_mu)lumi = 12883.8601;
+        if (fin.Contains( "TTJets"))scale=(xsec[0]*lumi)/nentries;
+        if (fin.Contains( "SingleT_t.root"))scale=(xsec[1]*lumi)/nentries;
+        if (fin.Contains( "_tW_nohad"))scale=(xsec[2]*lumi)/nentries;
+        if (fin.Contains( "WJets"))scale=(xsec[3]*lumi)/nentries;
+        if (fin.Contains( "DYJets"))scale=(xsec[4]*lumi)/nentries;
+        if (fin.Contains( "_WWToLNuQQ"))scale=(xsec[5]*lumi)/nentries;
+        if (fin.Contains( "_WZ"))scale=(xsec[6]*lumi)/nentries;
+        if (fin.Contains( "_ZZ"))scale=(xsec[7]*lumi)/nentries;
+        if (fin.Contains( "TTWJetsToLNu"))scale=(xsec[8]*lumi)/nentries;
+        if (fin.Contains( "TTZToLLNuNu_M-10"))scale=(xsec[9]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_15to20"))scale=(xsec[10]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_20to30"))scale=(xsec[11]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_30to50"))scale=(xsec[12]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_50to80"))scale=(xsec[13]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_80to120"))scale=(xsec[14]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_120to170"))scale=(xsec[15]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_170to300"))scale=(xsec[16]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_300to470"))scale=(xsec[17]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_470to600"))scale=(xsec[18]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_600to800"))scale=(xsec[19]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_800to1000"))scale=(xsec[20]*lumi)/nentries;
+        if (fin.Contains( "_QCD_Pt_1000toInf"))scale=(xsec[21]*lumi)/nentries;
+        
+        if (fin.Contains( "_QCDEM_Pt_20to30"))scale=(emqcd_xsec[0]*lumi)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_30to50"))scale=(emqcd_xsec[1]*lumi)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_50to80"))scale=(emqcd_xsec[2]*lumi)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_80to120"))scale=(emqcd_xsec[3]*lumi)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_120to170"))scale=(emqcd_xsec[4]*lumi)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_170to300"))scale=(emqcd_xsec[5]*lumi)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_300toInf"))scale=(emqcd_xsec[6]*lumi)/nentries;
 
+        cout<<"this is scale:   "<<scale<<",  nentries:  "<<nentries<<endl;
 //  TH1D* h_jets_pt = new TH1D("MZ","M(Z)#rightarrow #mu#mu",40, 71,111.);
-     TH1D* h_events_eachCut = new TH1D("events_eachCut","events_eachCut",10, 0.0,10.0);
+     TH1D* h_events_counter = new TH1D("events_counter","events_counter",8, 0.0,8.0);
+     TH1D* h_events_eachCut = new TH1D("events_eachCut","events_eachCut",6, 0.0,6.0);
+     TH1D* h_events_eachCutp15_40 = new TH1D("events_eachCutp15_40","events_eachCutp15_40",6, 0.0,6.0);
+     TH1D* h_events_eachCutp40_70 = new TH1D("events_eachCutp40_70","events_eachCutp40_70",6, 0.0,6.0);
+     TH1D* h_events_eachCutp70_10 = new TH1D("events_eachCutp70_10","events_eachCutp70_10",6, 0.0,6.0);
+     TH1D* h_events_eachCutp10_50 = new TH1D("events_eachCutp10_50","events_eachCutp10_50",6, 0.0,6.0);
+     TH1D* h_events_eachCutp50 = new TH1D("events_eachCutp50","events_eachCutp50",6, 0.0,6.0);
+     TH1D* h_events_eachCut_el = new TH1D("events_eachCut_el","events_eachCut_el",3, 0.0,3.0);
      TH1D* h_PtJets_afterCut = new TH1D("jets_Pt_afterCut","jets_Pt_afterCut",10, 0.0,1200.);
      TH1D* h_massJets_afterCut = new TH1D("jets_mass_afterCut","jets_mass_afterCut",10, 0.0,200.);
      TH1D* h_Ejets_afterCut = new TH1D("jets_energy_afterCut","jets_energy_afterCut",10, 0.0,2500.);
@@ -103,8 +183,17 @@ using namespace std;
 //-----------------------------Lep W  ------------------------------------------------//
      TH1D* h_Pt_lepW = new TH1D("Pt_LepW","Pt_LepW",50, 0.0,400.);
      TH1D* h_M_lepW = new TH1D("M_LepW","M_LepW",50, 0.0,200.0);
+
+     TH1D* h_M_t = new TH1D("M_T","M_T",50, 0.0,500.0);
+TH1D** h_M_tQCD=new TH1D*[6]; char nam_mw[100];
+for (int i=1; i<6; i++){
+  sprintf(nam_mw,"nam_mW%i",i);
+     h_M_tQCD[i] = new TH1D(nam_mw,nam_mw,50, 0.0,500.0);
+}
+     TH1D* h_M_t_aft = new TH1D("M_T_aft","M_T_aft",50, 0.0,500.0);
 //------------------------------ Jets ------------------------------------------------//
-     TH1D* h_no_Jets = new TH1D("No_ofJets","No_ofJets",7, 0.5,7.5);
+     TH1D* h_no_Jets = new TH1D("n_Jets","n_Jets",11, -0.5,10.5);
+     TH1D* h_no_Jets20 = new TH1D("n_Jets20","n_Jets20",11, -0.5,10.5);
      TH1F** h_PtJet=new TH1F*[5];TH1F** h_EtaJet=new TH1F*[5];TH1F** h_PhiJet=new TH1F*[5];TH1F** h_EJet=new TH1F*[5];TH1F** h_MJet=new TH1F*[5];
      char nam_pt[100];char nam_eta[100];char nam_phi[100];char nam_energy[100];char nam_mass[100];
      for (int i=1; i<5; i++){
@@ -120,9 +209,10 @@ using namespace std;
      h_MJet[i] = new TH1F(nam_mass,nam_mass,50, 0.0,100.);
       }
 //------------------------------bJets-------------------------------------------------//
-  TH1D* h_n_bjets = new TH1D("n_bjets","n_bjets",5, 0.5,5.5);
-  TH1D* h_n_bjets_aft = new TH1D("n_bjets_aft","n_bjets_aft",5, 1,6);
-  TH1D* h_n_cjets_aft = new TH1D("n_cjets_aft","n_cjets_aft",5, 1,6);
+  TH1D* h_n_bjets = new TH1D("n_bjets","n_bjets",6, -0.5,5.5);
+  TH1D* h_n_bjets_corr = new TH1D("n_bjets_corr","n_bjets",6, -0.5,5.5);
+  TH1D* h_n_bjets_aft = new TH1D("n_bjets_aft","n_bjets",6, -0.5,5.5);
+  TH1D* h_n_cjets = new TH1D("n_cjets","n cjets",6, -0.5,5.5);
   TH1F** h_Pt_bJet=new TH1F*[3];TH1F** h_Eta_bJet=new TH1F*[3];TH1F** h_Phi_bJet=new TH1F*[3];TH1F** h_E_bJet=new TH1F*[3];TH1F** h_M_bJet=new TH1F*[3];
   for (int i=1; i<3; i++){
     sprintf(nam_pt,"Pt_bJet%i",i);
@@ -164,126 +254,49 @@ using namespace std;
   TH1D* h_M_hadTop  = new TH1D("M_hadTop","M_hadTop",50, 0.0,500.0);
     TH1D* h_Pt_hadTop  = new TH1D("Pt_hadTop","Pt_hadTop",50, 0.0,600.0);
 //------------------------------Heavy Higgs----------------------------------------//
-  TH1D* h_M_tt   = new TH1D("Mass_H","Mass_H",100, 200.0,1000.0);
-    TH1D* h_Pt_tt   = new TH1D("Pt_H","Pt_H",50, 0.0,500.0);
+  Float_t bins[] = { 250.0, 360.0, 380.0, 400.0, 420.0, 440.0, 460.0, 480.0, 500.0, 520.0, 540.0, 560.0, 580.0, 610.0, 640.0, 680.0, 730.0, 800.0, 920.0, 1200.0};
+  Int_t  binnum = sizeof(bins)/sizeof(Float_t) - 1;
+  TH1D* h_M_tt_binned   = new TH1D("Mass_H_binned","t#bar{t} mass [GeV]",binnum,bins);
+  TH1D* h_M_tt   = new TH1D("Mass_H","t#bar{t} mass [GeV]",100, 250.0,1200.0);
+    TH1D* h_Pt_tt   = new TH1D("Pt_H","t#bar{t} [GeV]",50, 0.0,500.0);
+    TH1D* leptop_cos_ttrest   = new TH1D("cos_theta","cos theta in t#bar{t} RestF ",25,-1., 1.0);
+
+char nam_massb[7]; char nam_massq[7]; char theta[7];
+TH1D** h_M_tt_binnedQCD=new TH1D*[5];TH1D** h_M_ttQCD=new TH1D*[5];TH1D** leptop_cos_ttrestQCD=new TH1D*[5];
+for (int i=1; i<4; i++){
+  sprintf(nam_massb,"Mass_H_binned%i",i);sprintf(nam_massq,"Mass_H%i",i);sprintf(theta,"cos_theta%i",i);
+  h_M_tt_binnedQCD[i]   = new TH1D(nam_massb,nam_massb,binnum,bins);
+  h_M_ttQCD[i]   = new TH1D(nam_massq,nam_massq,100, 250.0,1200.0);
+  leptop_cos_ttrestQCD[i]   = new TH1D(theta,theta,15,-1., 1.0);
+}
 //------------------------------------------------------------------------------------//
-  TH1D* hDPhi_j1_l = new TH1D("DPhi_j1_l","DPhi j1 l",15, -3.5, 3.5);
-  TH1D* hDPhi_j2_l = new TH1D("DPhi_j2_l","DPhi j2 l",15, -3.5, 3.5);
-  TH1D* hdR_jet1_lep = new TH1D("dR_j1_l","dR j1 l",15, 0., 5);
-  TH1D* hdR_jet2_lep = new TH1D("dR_j2_l","dR j2 l",15, 0., 5);
-  TH1D* hDPhi_j1_l_aftCut = new TH1D("DPhi_j1_l_aftCut","DPhi j1 l aftCut",15, -3.5, 3.5);
-  TH1D* hDPhi_j2_l_aftCut = new TH1D("DPhi_j2_l_aftCut","DPhi j2 l aftCut",15, -3.5, 3.5);
-  TH1D* hDPhi_nu_j = new TH1D("DPhi_nu_j","DPhi nu j",15, -3.5, 3.5);
-  TH1D* hDPhi_nu_bj = new TH1D("DPhi_nu_bj","DPhi nu bj",15, -3.5, 3.5);
-  TH1D* hDPhi_j_bj = new TH1D("DPhi_j_bj","DPhi j bj",15, -3.5, 3.5);
 
-    TH1D* hDPhiM600_j_l = new TH1D("DPhiM600_j_l","DPhiM600 j l",15, -3.5, 3.5);
-    TH1D* hDPhiM600_nu_bj = new TH1D("DPhiM600_nu_bj","DPhiM600 nu bj",15, -3.5, 3.5);
-    TH1D* hDPhiM600_j_bj = new TH1D("DPhiM600_j_bj","DPhiM600 j bj",15, -3.5, 3.5);
-
-      TH1D* hDPhiM800_j_l = new TH1D("DPhiM800_j_l","DPhiM800 j l",15, -3.5, 3.5);
-      TH1D* hDPhiM800_nu_bj = new TH1D("DPhiM800_nu_bj","DPhiM800 nu bj",15, -3.5, 3.5);
-      TH1D* hDPhiM800_j_bj = new TH1D("DPhiM800_j_bj","DPhiM800 j bj",15, -3.5, 3.5);
-
-TH2D* hdphi_mass = new TH2D("dphi_mass","dphi_mass",15,-3.15,3.15,15,0,1000);
-  TH1D* Phi_jet = new TH1D("Phi_jet","Phi jet",50, -3.5, 3.5);
-    TH1D* hDPhi_bjets_lep = new TH1D("DPhi_bjets_lep","DPhi bjets lep",50, -3.5, 3.5);
-      TH1D* hDPhi_Lepbjet_Hadbjet = new TH1D("DPhi_Lepbjet_Hadbjet","DPhi Lepbjet Hadbjet",50, -3.5, 3.5);
         TH1D* h_EvtInfo_NumVtx  = new TH1D("EvtInfo_NumVtx","EvtInfo_NumVtx",40, 0.0,40.0);
         TH1D* h_EvtInfo_NumVtx_w  = new TH1D("EvtInfo_NumVtx_w","EvtInfo_NumVtx_w",40, 0.0,40.0);
-          TH1D* h_PU_npT  = new TH1D("PU_npT","PU_npT",50, 0.0,40.0);
-                    TH1D* h_bDisct_cMVAv2 = new TH1D("bDiscMVAv2","bDiscMVAv2",50, 0.0,1.0);
-                      TH1D* h_bDisct_cMVAv2aft = new TH1D("cMVA_v2","cMVA_v2",50, 0.0,1.0);
-                        TH1D* h_pfJet_cmult = new TH1D("Jet_cMult","Jet_cMult",10, 0.0,40.0);
-                        TH1D* h_NuDiscr = new TH1D("NuDiscr","NuDiscr()",25, 0.0,10.0);
-                        TH1D* h_MassDiscr = new TH1D("MassDiscr","MassDiscr()",25, 0.0,20.0);
-
-    std::map<TString, TH2 *> plots2d;
-    plots2d["metptshapes_exp"]= new TH2F("metptshapes_exp", ";Missing transverse energy [GeV];Events" , 100,0.,200., 2*nExpSysts,0,2*nExpSysts);
-    plots2d["nbjetshapes_exp"]= new TH2F("nbjetshapes_exp", "; bJets Multiplicity ;Events" , 5,1,6, 2*nExpSysts,0,2*nExpSysts);
-    plots2d["bjetptshapes_exp"]= new TH2F("bjetptshapes_exp", "; bJets pt ;Events" , 50,0.,250., 2*nExpSysts,0,2*nExpSysts);
-    plots2d["nljetshapes_exp"]= new TH2F("nljetshapes_exp", "; light Jets Multiplicity ;Events" , 5,1,6, 2*nExpSysts,0,2*nExpSysts);
-    plots2d["ljetptshapes_exp"]= new TH2F("ljetptshapes_exp", "; light Jets pt ;Events" , 50,0,300, 2*nExpSysts,0,2*nExpSysts);
-    plots2d["ncjetshapes_exp"]= new TH2F("ncjetshapes_exp", "; c Jets Multiplicity ;Events" , 5,1,6, 2*nExpSysts,0,2*nExpSysts);
-    plots2d["jetptshapes_exp"]= new TH2F("jetptshapes_exp", "; Jets pt ;Events" , 50,0.,300., 2*nExpSysts,0,2*nExpSysts);
-    for(Int_t isyst=0; isyst<nExpSysts; isyst++){
-      for(Int_t ivar=0; ivar<2; ivar++){
-        TString label(expSysts[isyst] + (ivar==0 ? "Down" : "Up"));
-        plots2d["metptshapes_exp"]->GetYaxis()->SetBinLabel(2*isyst+ivar+1, label);
-        plots2d["nbjetshapes_exp"]->GetYaxis()->SetBinLabel(2*isyst+ivar+1, label);
-        plots2d["bjetptshapes_exp"]->GetYaxis()->SetBinLabel(2*isyst+ivar+1, label);
-        plots2d["nljetshapes_exp"]->GetYaxis()->SetBinLabel(2*isyst+ivar+1, label);
-        plots2d["ljetptshapes_exp"]->GetYaxis()->SetBinLabel(2*isyst+ivar+1, label);
-        plots2d["ncjetshapes_exp"]->GetYaxis()->SetBinLabel(2*isyst+ivar+1, label);
-        plots2d["jetptshapes_exp"]->GetYaxis()->SetBinLabel(2*isyst+ivar+1, label);
-      }
-    }
-
-        double real_count=0;
-        double complex_count=0;
-        double solved_complex_count=0;
-
-//        vector<float> weight_;
-        vector<float> e_met;
-        vector<float> px_met;
-        vector<float> py_met;
-        vector<float> dphi_nu_j;
-        vector<float> dphi_nu_bj;
-        vector<float> dphi_j_bj;
-        vector<float> muon_pt;
-        vector<float> muon_eta;
-        vector<float> dphi_j_l;
-        vector<float> n_ofjets;
-        vector<float> n_ofbjets;
-        vector<float> n_ofljets;
-        vector<float> jet1_pt;
-        vector<float> bjet1_pt;
-        vector<float> bjet2_eta;
-        vector<float> ht;
-        vector<float> jets_e;
-        vector<float> jets_m;
-        vector<float> jets_l_pt;
-        vector<float> hadW_pt;
-        vector<float> hadW_rap;
-        vector<float> lepW_pt;
-        vector<float> lepW_rap;
-        vector<float> top_m;
-        vector<float> top_pt;
-        vector<float> top_rap;
-        vector<float> atop_m;
-        vector<float> atop_pt;
-        vector<float> atop_rap;
-        vector<float> higgs_pt;
-        vector<float> higgs_m;
-        vector<float> higgs_rap;
+        TH1D* h_PU_npT  = new TH1D("PU_npT","PU_npT",50, 0.0,40.0);
+        TH1D* h_bDisct_cMVAv2 = new TH1D("bDiscMVAv2","bDiscMVAv2",50, 0.0,1.0);
+        TH1D* h_bDisct_cMVAv2aft = new TH1D("cMVA_v2","cMVA_v2",50, 0.0,1.0);
+        TH1D* h_pfJet_cmult = new TH1D("Jet_cMult","Jet_cMult",10, 0.0,40.0);
+        TH1D* h_NuDiscr = new TH1D("NuDiscr","NuDiscr()",25, 0.0,10.0);
+        TH1D* h_MassDiscr = new TH1D("MassDiscr","MassDiscr()",25, 0.0,20.0);
+        TH1D* h_lheSigEvn = new TH1D("lheSigEvn","lheSigEvn",10, 0.0,10.0);
 
         TLorentzVector v_elec;
         TLorentzVector v_muon;
         TLorentzVector v_muon9;
         TLorentzVector v_met;
-        TLorentzVector v_lepW;
         TLorentzVector v_jets;
         TLorentzVector v_jetAll[1000];
         TLorentzVector v_jet[100];
         TLorentzVector v_bjets;
         TLorentzVector v_bjets9;
-        TLorentzVector v_Hadbjet;
-        TLorentzVector v_Lepbjet;
-
-
-        TLorentzVector v_ljet_temp;
         TLorentzVector v_ljets;
-        TLorentzVector hadWT_;
-
-        TLorentzVector v_Heavy_H;
-        TTree *weight_tree;
-	Int_t nentries(t->GetEntriesFast());
-//        nentries=100000;
+//        TTree *weight_tree;
+        nentries=5000;
         for (int jentry=0; jentry < nentries; jentry++)
         {
         t->GetEntry(jentry);
-        if(jentry%10000==0)cout<<" << "<<jentry<<"/"<<nentries<<endl;
-        double w=1;
+        if(jentry%1==0)cout<<" << "<<jentry<<"/"<<nentries<<endl;
 /*        float iSecret;
         srand (time(NULL));
         iSecret = rand() % 100 + 1;
@@ -292,18 +305,6 @@ TH2D* hdphi_mass = new TH2D("dphi_mass","dphi_mass",15,-3.15,3.15,15,0,1000);
         bool elrun_below_273726 (iSecret <= 4.);
         bool elrun_above_273726 (4. < iSecret );//&& iSecret < 42.);//Fix me when available the rest
 */
-        std::vector<TGraph *>puWgtGr;
-        std::vector<float> puWeight(3,1.0);
-        TString puWgtUrl(era+"pileupWgts.root");
-        if (!realdata){
-          TFile *fIn=TFile::Open(puWgtUrl);
-          if(fIn){
-          puWgtGr.push_back( (TGraph *)fIn->Get("puwgts_nom") );
-          puWgtGr.push_back( (TGraph *)fIn->Get("puwgts_down") );
-          puWgtGr.push_back( (TGraph *)fIn->Get("puwgts_up") );
-          fIn->Close();
-            }
-          }
           if(!realdata){
           if(puWgtGr.size())
           {
@@ -312,39 +313,46 @@ TH2D* hdphi_mass = new TH2D("dphi_mass","dphi_mass",15,-3.15,3.15,15,0,1000);
           puWeight[2]=puWgtGr[2]->Eval(int(PU_npT));
           }
           }
-          w=puWeight[0];
-        h_events_eachCut->Fill(0);
-	if (first_PV!=1)continue;
-        if (is_mu) if (HLT_IsoMu22!=1 && HLT_IsoTkMu22!=1)continue;
+        double w=1;
+        w=puWeight[0];
+        if (!realdata)w*=mcWeight_;
+        h_events_counter->Fill(0.,w);
+        bool no_trig_samp(false);
+        if (fin.Contains( "qcd_EMEnriched") || fin.Contains( "WWToLNuQQ" ) || fin.Contains( "tW_nohad" ) || fin.Contains( "TeV_WZ" )|| fin.Contains( "TeV_ZZ" ) || fin.Contains( "V_W1Jets") || fin.Contains( "V_W2Jets") || fin.Contains( "V_W3Jets") || fin.Contains( "V_W4Jets") )no_trig_samp=true;
+//        if (lheSigEvn!=1 )continue;
+        if (is_mu) if (HLT_IsoMu24!=1 && HLT_IsoTkMu24!=1)continue;
         if (!is_mu)if (HLT_Ele32_eta2p1_WPTight_Gsf!=1)continue;
-        h_events_eachCut->Fill(1);
+        h_events_eachCut->Fill(0.,w);
+        h_events_eachCutp15_40->Fill(0.,w);
+        h_events_eachCutp40_70->Fill(0.,w);
+        h_events_eachCutp70_10->Fill(0.,w);
+        h_events_eachCutp10_50->Fill(0.,w);
+        h_events_eachCutp50->Fill(0.,w);
+//        if (fin.Contains( "HToTT-semilep"))if (lheSigEvn!=3)continue;//Resonance: 5%=1, 10%=3, 25%=5, 50%=7;;; Interference: 5%=2, 10%=4, 25%=6, 50%=8;
         //noise
-//cout<<"these are filters: "<<Flag_HBHENoiseFilter<<",  "<<Flag_HBHENoiseIsoFilter<<",  "<<Flag_CSCTightHalo2015Filter<<endl;
-//          if(Flag_HBHENoiseFilter!=1 || Flag_HBHENoiseIsoFilter!=1 || Flag_CSCTightHalo2015Filter!=1)continue;
-//          if(Flag_HBHENoiseFilter!=1)continue;
-
-          if( Flag_HBHENoiseIsoFilter!=1)continue;
-          if( Flag_globalTightHalo2016Filter!=1)continue;
+	      if (first_PV!=1)continue;
+          if (Flag_HBHENoiseFilter!=1 || Flag_HBHENoiseIsoFilter!=1 || Flag_globalTightHalo2016Filter!=1)continue;
           if (Flag_EcalDeadCellTriggerPrimitiveFilter!=1 || Flag_goodVertices!=1 || Flag_eeBadScFilter!=1)continue;
-      int n_pat_elec = 0,n_elec15=0;
-      std::vector<TLorentzVector>lep_vector;
+
+      int n_pat_elec = 0,n_elec20=0;
+      std::vector<TLorentzVector>lep_vector, loose_lep_vector;
       TLorentzVector v_lep;
       vector<unsigned int> n_lep_v;
       vector<int> lep_charge;
-      vector<unsigned int> n_lep15_v;
-
-      std::vector<TLorentzVector>el_vector;
+      vector<unsigned int> n_lep10_v;
+      std::vector<TLorentzVector>el_vector, loose_el_vector;
       vector<int>el_charge;
       vector<unsigned int> n_elec_v;
-      vector<unsigned int> n_elec15_v;
+      vector<unsigned int> n_elec20_v;
       for (unsigned int elec =0; elec < patElecPt_->size(); ++elec){
         if(patElecPt_->at(elec)>20 && fabs(patElecScEta_->at(elec))<2.5 && patElecIdveto_->at(elec) !=0){
-            n_elec15_v.push_back(n_elec15);
-            n_elec15++;
+            TLorentzVector loose_el_vector_;
+            loose_el_vector_.SetPtEtaPhiE(patElecPt_->at(elec),patElecEta_->at(elec),patElecPhi_->at(elec),patElecEnergy_->at(elec));
+            loose_el_vector.push_back(loose_el_vector_);
+            n_elec20_v.push_back(n_elec20);
+            n_elec20++;
             }
       if (patElecPt_->at(elec) > 35. && fabs(patElecScEta_->at(elec)) <2.1 && patElecIdtight_->at(elec)>0 ){
-
-
      if (1.4442 < fabs( patElecScEta_->at(elec)) && fabs(patElecScEta_->at(elec))< 1.5660)continue;
       n_pat_elec++;
       n_elec_v.push_back(n_pat_elec);
@@ -354,93 +362,105 @@ TH2D* hdphi_mass = new TH2D("dphi_mass","dphi_mass",15,-3.15,3.15,15,0,1000);
       }
       }
       //////-----------------------------------muon------------------------------------------------------------//
-      std::vector<TLorentzVector>mu_vector;
+      bool loose_mu_cut(false);
+      std::vector<TLorentzVector>mu_vector,loose_mu_vector;
       vector<int>mu_charge;
       vector<unsigned int> n_muon_v;
-      vector<unsigned int> n_muon15_v;
-      vector<double> mu_eta_v;
-      float Pt_muon=0,Eta_muon=0,Phi_muon=0,E_muon=0,muon_TIso=0;
-      int n_muon=0,n_muon15=0;
-      for(unsigned int mu=0; mu<patMuonPt_->size();mu++){
-          muon_TIso=patMuonPfIsoDbeta_->at(mu);
-          h_patMuonPfIsoDbeta->Fill(muon_TIso,w);
-          if(patMuonPt_->at(mu) > 26. && fabs(patMuonEta_->at(mu))<2.4 &&
-             patMuonTightId_->at(mu)>0 && patMuonPfIsoDbeta_->at(mu) < 0.15)
-            {
+      vector<unsigned int> n_muon10_v;
+      int n_muon=0,n_muon10=0;
+      float muon_TIso=0;
 
-            double mu_eta = patMuonEta_->at(mu);      
-            mu_eta_v.push_back(mu_eta);
-            n_muon++;
+      float mu_pt=0,mu_eta=0.,mu_Tid=0., mu_iso=0., mu_phi=0.,mu_E=0., mu_Lid=0.;
+      for(unsigned int mu=0; mu<patMuonPt_->size();mu++){
+           mu_pt=patMuonPt_->at(mu); mu_eta=patMuonEta_->at(mu); mu_Tid=patMuonTightId_->at(mu); mu_iso=patMuonPfIsoDbeta_->at(mu);
+           mu_phi=patMuonPhi_->at(mu); mu_E=patMuonEn_->at(mu); mu_Lid=patMuonLooseId_->at(mu);
+          h_patMuonPfIsoDbeta->Fill(patMuonPfIsoDbeta_->at(mu),w);
+          if (mu_pt>10 && fabs(mu_eta)<2.4 && mu_Lid>0 && fabs(mu_iso) <0.25)loose_mu_cut=true;
+          if(mu_pt > 26. && fabs(mu_eta)<2.4 && mu_Tid>0 && fabs(mu_iso) < 0.15)
+            {n_muon++;
             n_muon_v.push_back(n_muon);
-            v_muon.SetPtEtaPhiE(patMuonPt_->at(mu),patMuonEta_->at(mu),
-            patMuonPhi_->at(mu),patMuonEn_->at(mu));
+            v_muon.SetPtEtaPhiE(mu_pt,mu_eta,mu_phi,mu_E);
             mu_vector.push_back(v_muon);
             mu_charge.push_back(patMuonCharge_->at(mu));
             muon_TIso=patMuonPfIsoDbeta_->at(mu);
             }
-            if(patMuonPt_->at(mu)>10 && fabs(patMuonEta_->at(mu))<2.4 && patMuonLooseId_->at(mu)>0 && fabs(patMuonPfIsoDbeta_->at(mu))<0.25){
-            n_muon15_v.push_back(n_muon15);
-            n_muon15++;
+        if(loose_mu_cut){
+          n_muon10_v.push_back(n_muon10);
+          TLorentzVector v_muon_;
+          v_muon_.SetPtEtaPhiE(mu_pt,mu_eta,mu_phi,mu_E);
+          loose_mu_vector.push_back(v_muon_);
+          n_muon10++;
+          }
             }
-            }
-        if (!is_mu){n_lep_v = n_elec_v; n_lep15_v = n_elec15_v; lep_vector = el_vector; lep_charge = el_charge; v_lep=v_elec;}
-        if (is_mu){n_lep_v = n_muon_v; n_lep15_v = n_muon15_v; lep_vector = mu_vector; lep_charge = mu_charge; v_lep=v_muon;}
+
+        if (!is_mu){n_lep_v = n_elec_v; n_lep10_v = n_elec20_v; lep_vector = el_vector;loose_lep_vector = loose_el_vector; lep_charge = el_charge; v_lep=v_elec;}
+        if (is_mu){n_lep_v = n_muon_v; n_lep10_v = n_muon10_v; lep_vector = mu_vector;loose_lep_vector = loose_mu_vector; lep_charge = mu_charge; v_lep=v_muon;}
             //-------------MET--------------------------------------------------//
             for (unsigned int nu =0; nu < METPt->size(); nu++)
                 {
                 v_met.SetPxPyPzE(METPx->at(0),METPy->at(0),METPz->at(0),METE->at(0));
                 }
             //----------------------------------PF Jets------------------------------------------------//
-
+int test_njets20=0;
             int n_pat_bjets=0,ncjets=0;
             int n_ljets=0;
             float jet_cMult=0;
             int n_pat_jets=0;
-            double DR_mu_j=9999;
+            double DR_mu_j=9999,Up=0., Cn=0.,Dn=0.,sig_Up=0.,sig_Dn=0.,jesUnc=0.;
             vector<unsigned int> no_jets;
             vector<unsigned int> n_bjets_v;
             vector<TLorentzVector> bjets_v;
             vector<TLorentzVector> ljets_v;
             vector<TLorentzVector> vec_bjets;
             vector<unsigned int> n_ljets_v;
+            vector<unsigned int> n_bjets_vector;
             vector<float> cMVA_v;
-            double cMVA=-99,cMVAv2=-999, jet_pt=0.,nom=1., denom=1.,ind_jet_const=0.;
+            double cMVA=-99,cMVAv2=-999, nom=1., denom=1.,ind_jet_const=0.;
             vector <TLorentzVector> temp1;
             vector <TLorentzVector> v_ljetsAll;
-            TLorentzVector lorenz_v; 
-	    TLorentzVector lorenz_v_raw;
+            TLorentzVector jp4_Up;
+            TLorentzVector jp4_Dn; 
             vector<TLorentzVector>jet_vector;
             vector<double> JER_Uncer;
-            TLorentzVector metp4; 
-	    int looseId=0;
+            TLorentzVector metp4;
+            int n_bjets_t=0; 
             for (unsigned int pf=0;pf < patJetPfAk04PtJERSmear->size();++pf){
-lorenz_v_raw.SetPtEtaPhiE(patJetPfAk04RawPt_->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04RawEn_->at(pf));
-              double Up = patJetPfAk04PtJERSmearUp->at(pf);//Fix Me I will be after or before the cut
-              double Dn = patJetPfAk04PtJERSmearDn->at(pf);
-              double Cn = patJetPfAk04PtJERSmear->at(pf);
-              double sig_Up=abs(Up-Cn)/Cn;
-              double sig_Dn=abs(Dn-Cn)/Cn;
-              JER_Uncer.push_back(max(sig_Up,sig_Dn));
-//cout<<"tis is jet loose id:  "<<patJetPfAk04LooseId_->at(pf)<<endl;
-//else looseId=0;
-              if(patJetPfAk04PtJERSmear->at(pf) > 30.&& fabs(patJetPfAk04Eta_->at(pf)) < 2.4 && patJetPfAk04LooseId_->at(pf)>0){
-              n_pat_jets++;
-              TLorentzVector v_jetsTemp;
-              v_jetsTemp.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
+              if(patJetPfAk04PtJERSmear->at(pf) > 20.&& fabs(patJetPfAk04Eta_->at(pf)) < 2.4 && patJetPfAk04LooseId_->at(pf)>0){
+                TLorentzVector v_jetsTemp20;
+       v_jetsTemp20.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
+       if (n_lep_v.size()>0)DR_mu_j= DeltaR(loose_lep_vector[0].Eta(), v_jetsTemp20.Eta(), loose_lep_vector[0].Phi(), v_jetsTemp20.Phi());
+                if(DR_mu_j>=0.4){
+                  test_njets20++;
+              }}
 
-              if (n_lep_v.size()>0)DR_mu_j= DeltaR(lep_vector[0].Eta(), v_jetsTemp.Eta(), lep_vector[0].Phi(), v_jetsTemp.Phi());
-              if(DR_mu_j<0.4)continue;
+              if(patJetPfAk04PtJERSmear->at(pf) > 30.&& fabs(patJetPfAk04Eta_->at(pf)) < 2.4 && patJetPfAk04LooseId_->at(pf)>0){
+                TLorentzVector v_jetsTemp;
+                v_jetsTemp.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
+                if (lep_vector.size()>0)DR_mu_j= DeltaR(lep_vector[0].Eta(), v_jetsTemp.Eta(), lep_vector[0].Phi(), v_jetsTemp.Phi());
+                if(DR_mu_j<0.4)continue;
+              n_pat_jets++;
+              Up = patJetPfAk04PtJERSmearUp->at(pf);//Fix Me I will be after or before the cut
+              Dn = patJetPfAk04PtJERSmearDn->at(pf);
+              Cn = patJetPfAk04PtJERSmear->at(pf);
+              sig_Up=abs(Up-Cn)/Cn;
+              sig_Dn=abs(Dn-Cn)/Cn;
+              JER_Uncer.push_back(max(sig_Up,sig_Dn));
+              jesUnc= unc_->at(pf);
               v_jets.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
+              jp4_Up.SetPtEtaPhiE(patJetPfAk04PtJERSmearUp->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
+              jp4_Dn.SetPtEtaPhiE(patJetPfAk04PtJERSmearDn->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
               jet_vector.push_back(v_jets);
               h_bDisct_cMVAv2->Fill(patJetPfAk04BDiscpfCMVA_->at(pf),w);
               if(patJetPfAk04BDiscpfCMVA_->at(pf) > cMVA) cMVA = patJetPfAk04BDiscpfCMVA_->at(pf);
 	            cMVAv2=patJetPfAk04BDiscpfCMVA_->at(pf);
               cMVA_v.push_back(patJetPfAk04BDiscpfCMVA_->at(pf));
               jet_cMult=patJetPfAk04cmult_->at(pf);
-              h_no_Jets->Fill(n_pat_jets,w);
               no_jets.push_back(n_pat_jets);
-              jet_pt=patJetPfAk04PtJERSmear->at(pf); 
               int jflav( abs(patJetPfAk04PartonFlavour_->at(pf)) );
+              if (cMVAv2>0.185){
+                n_bjets_t++;
+              n_bjets_vector.push_back(n_bjets_t);
+              }
               bool isBTagged(cMVAv2>0.185);
               if(!realdata){
                 float jptForBtag(v_jets.Pt()>1000. ? 999. : v_jets.Pt()), jetaForBtag(fabs(v_jets.Eta()));
@@ -448,41 +468,37 @@ lorenz_v_raw.SetPtEtaPhiE(patJetPfAk04RawPt_->at(pf),patJetPfAk04Eta_->at(pf),pa
                 if(abs(jflav)==4){
                   ncjets++;
                   expEff    = expBtagEff["c"]->Eval(jptForBtag);
-                  jetBtagSF = sfbReaders[0]->eval( BTagEntry::FLAV_C, jetaForBtag, jptForBtag);
-                  jetBtagSF *= expEff>0 ? 1 : 0. ;
+                  jetBtagSF = sfcReaders[0]->eval( BTagEntry::FLAV_C, jetaForBtag, jptForBtag);
+                //  cout<<"jetBtagSF for c:  "<<jetBtagSF<<endl;
+                  jetBtagSF *= expEff>0 ? expBtagEff["c"]->Eval(jptForBtag)/expBtagEff["c"]->Eval(jptForBtag) : 0.;
                   }
                 else if(abs(jflav)==5){
                   n_pat_bjets++;
                   expEff    = expBtagEff["b"]->Eval(jptForBtag);
                   jetBtagSF = sfbReaders[0]->eval( BTagEntry::FLAV_B, jetaForBtag, jptForBtag);
-                  jetBtagSF *= expEff>0 ? 1 : 0. ;
+                  jetBtagSF *= expEff>0 ? expBtagEff["b"]->Eval(jptForBtag)/expBtagEff["b"]->Eval(jptForBtag) : 0.;
                   }
                 else{
                   n_ljets++;
                   expEff    = expBtagEff["udsg"]->Eval(jptForBtag);
                   jetBtagSF = sflReaders[0]->eval( BTagEntry::FLAV_UDSG, jetaForBtag, jptForBtag);
-                  jetBtagSF *= expEff>0 ? 1 : 0. ;
+                  jetBtagSF *= expEff> 0 ? expBtagEff["udsg"]->Eval(jptForBtag)/expBtagEff["udsg"]->Eval(jptForBtag) : 0.;
                   }
                 myBTagSFUtil.modifyBTagsWithSF(isBTagged,    jetBtagSF,     expEff);//btag SF works, certified
               }
+
+//              cout<<"this is isBTagged:  "<<isBTagged<<endl;
               if(isBTagged){
-                n_bjets_v.push_back(n_pat_jets); 
+                n_bjets_v.push_back(n_pat_bjets); 
                 bjets_v.push_back(v_jets);
                 v_bjets=v_jets;
                 TLorentzVector *lepT, *bjetsT;    
                 lepT= &v_lep;
                 bjetsT= &v_bjets;
                 double test;
-                bool info(true);
                 NeutrinoSolver NS(lepT, bjetsT);
                 metp4 = TLorentzVector(NS.GetBest(v_met.X(), v_met.Y(), 1., 1., 0.,test));
-                //if (test == -1 && (metp4+lep_vector[0]).M()==0.1057)continue;
                 if (test == -1 )continue;
-              TLorentzVector *tt1;
-              tt1=&v_jets;
-//              TTBarSolver ttsolver;
-//              ttsolver.Solve(tt1, tt1, tt1, tt1, tt1, &metp4);
-//              cout<<"this is tt1 Pt:  "<<tt1->Pt()<<",  "<<metp4.Pt()<<endl;
                 }
 
               if(!isBTagged){//Fix me, I have some some events with isBTagged==0 but cMVA>0.185
@@ -494,6 +510,8 @@ lorenz_v_raw.SetPtEtaPhiE(patJetPfAk04RawPt_->at(pf),patJetPfAk04Eta_->at(pf),pa
               }
             }
 
+              h_n_bjets->Fill(n_bjets_t,w);
+              h_n_bjets_corr->Fill(n_pat_bjets,w);
 
               float PtJets=0,massJets=0,EJets=0;
               for (unsigned int i=0;i<jet_vector.size();i++)
@@ -505,145 +523,10 @@ lorenz_v_raw.SetPtEtaPhiE(patJetPfAk04RawPt_->at(pf),patJetPfAk04Eta_->at(pf),pa
               EJets+=v_jetAll[i].E();
                 }
               }
-              if (is_mu)if (n_elec_v.size() !=0 || n_elec15_v.size() !=0 )continue;
-              if (!is_mu)if (n_muon_v.size() !=0 || n_muon15_v.size() !=0)continue;
-              h_events_eachCut->Fill(2);
-              if(n_lep_v.size() != 1 || n_lep15_v.size() !=1)continue;
-              h_events_eachCut->Fill(3);
-double trans_m_w=sqrt(pow(lep_vector[0].Pt() + v_met.Pt(), 2) - pow(lep_vector[0].Px() + v_met.Px(), 2) - pow(lep_vector[0].Py() + v_met.Py(), 2));
-              if (trans_m_w < 50.)continue;
-              h_events_eachCut->Fill(4);
-              if(no_jets.size() < 4)continue;
-              h_events_eachCut->Fill(5);
-              h_bDisct_cMVAv2aft->Fill(cMVA);
-              if (n_bjets_v.size() < 2)continue;
-              h_events_eachCut->Fill(6);
-              if(n_ljets_v.size() < 2)continue;
-              h_events_eachCut->Fill(7);
-              h_PU_npT->Fill(PU_npT,w);
-              h_n_ljets_aft->Fill(ljets_v.size(),w);
-              h_n_bjets_aft->Fill(n_pat_bjets,w);
-              h_n_cjets_aft->Fill(ncjets,w);
-              if (n_bjets_v.size() < 2)continue;
-              h_EvtInfo_NumVtx->Fill(EvtInfo_NumVtx);
-              h_EvtInfo_NumVtx_w->Fill(EvtInfo_NumVtx,w);
-//----------------Rochester algorithm----------------
-    int lepChar=lep_charge[0];
-    double nuDisc, massDiscr, nuchi2;
-    TTBarSolver solver;
-    TLorentzVector *wja;
-    TLorentzVector wja_new;
-    TLorentzVector *wjb;
-    TLorentzVector wjb_new;
-    TLorentzVector *Blep_temp;
-    TLorentzVector *Bhad_temp;
-    TLorentzVector Bhad;
-    TLorentzVector Blep;
-    TLorentzVector Whad;
-    TLorentzVector Thad;
-    TLorentzVector Wlep;
-    TLorentzVector Tlep;
-    Permutation test;
-    Permutation best_permutation;
 
-    for (unsigned int i=0; i<ljets_v.size(); i++){
-    for (unsigned int j=i+1;j<ljets_v.size(); j++){
-      if (i==j)continue;
-    for (unsigned int k=0; k<bjets_v.size(); k++){
-    for (unsigned int l=k+1; l<bjets_v.size(); l++){
-      if (k==l)continue;
-    Permutation permutation(&ljets_v[i], &ljets_v[j], &bjets_v[l], &bjets_v[k], &v_lep, &v_met,lepChar);
-    solver.Solve(permutation);
-    if(permutation.Prob()  < best_permutation.Prob())
-    {
-      best_permutation = permutation;
-      Bhad=best_permutation.bhadt();
-      Blep=best_permutation.blept();
-      Whad=best_permutation.WHad();
-      Thad=best_permutation.THad();
-      Wlep=best_permutation.WLep();
-      nuDisc=best_permutation.NuDiscr();
-      nuchi2=best_permutation.NuChisq();
-      massDiscr=best_permutation.MassDiscr();
-    }
-    }}}}
-    if (Thad.M()!=0){
-    Tlep=Blep+metp4+lep_vector[0];
-    h_M_hadW->Fill(Whad.M(),w);
-    h_Pt_hadW->Fill(Whad.Pt(),w);
-    h_M_hadTop->Fill(Thad.M(),w);
-    h_Pt_hadTop->Fill(Thad.Pt(),w);
-    h_M_lepTop->Fill((Blep+metp4+lep_vector[0]).M(),w);
-    h_Pt_lepTop->Fill(Tlep.Pt(),w);
-    h_M_lepW->Fill(Wlep.M(),w);
-    h_Pt_lepW->Fill(Wlep.Pt(),w);
-    h_M_tt->Fill((Tlep+Thad).M(),w);
-    h_Pt_tt->Fill((Tlep+Thad).Pt(),w);
-    }
 
 //-----------------------------------------------
       // Trig SF
-bool is_sf(true);
-if (is_sf){
-      int mu_id=-999;
-      int e_id=-999;
-      for (unsigned int i=0; i<St03Id->size(); ++i){ 
-        if (fabs(St03Id->at(i)) == 13) mu_id=St03Id->at(i);
-        if (fabs(St03Id->at(i)) == 11) e_id=St03Id->at(i);
-         }
-      TString eltrigSFurl(era+"SF_HLT_Ele32_eta2p1_WPTight_Gsf.root");
-      TString mutrigSFurl(era+"SingleMuonTrigger_Z_RunBCD_prompt80X_7p65.root");
-      TString eIDurl;
-// for 12.9/pb https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammaIDRecipesRun2#Cut_based_electron_identificatio
-//for 7.6/fb https://twiki.cern.ch/twiki/bin/view/CMS/MuonWorkInProgressAndPagResults#Results_on_7_6_fb
-        eIDurl=era+"egammaEff_SF2D.root";
-      TString muIDurl(era+"MuonID_Z_RunBCD_prompt80X_7p65.root");
-      TString muIsourl(era+"MuonIso_Z_RunBCD_prompt80X_7p65.root");
-      std::map<TString,TH2 *> lepEffH;
-      std::vector<float> lepTriggerSF(3,1.0);
-      std::vector<float> lepidSF(3,1.0),lepisoSF(3,1.0);
-      float trigSF(1.0), trigSFUnc(0.03);
-      float idSF(1.0), idSFUnc(0.03);
-      float isoSF(1.0), isoSFUnc(0.03);
-      TString Trig_hist("muon_trigg");
-      if (!is_mu)Trig_hist="Ele32_eta2p1_WPTight_Gsf_EffData";
-      TString id_hist("muon_id");
-      if(!is_mu)id_hist="elec_id";
-
-   if (!realdata){
-   if (is_mu ){
-      TFile *mufIn=TFile::Open(mutrigSFurl);
-      mufIn->cd("IsoMu22_OR_IsoTkMu22_PtEtaBins_Run274094_to_276097");
-      gDirectory->Get("efficienciesDATA");
-         lepEffH[Trig_hist]=(TH2 *)gDirectory->Get("efficienciesDATA/pt_abseta_DATA");
-         for(auto& it : lepEffH) it.second->SetDirectory(0);
-         mufIn->Close();
-
-      TFile *muIDfIn=TFile::Open(muIDurl);
-      muIDfIn->cd("MC_NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1");
-      gDirectory->Get("efficienciesDATA");
-         lepEffH[id_hist]=(TH2 *)gDirectory->Get("efficienciesDATA/abseta_pt_DATA");
-         for(auto& it : lepEffH) it.second->SetDirectory(0);
-         muIDfIn->Close();
-
-      TFile *muIsofIn=TFile::Open(muIsourl);
-      muIsofIn->cd("MC_NUM_TightRelIso_DEN_TightID_PAR_pt_spliteta_bin1");
-      gDirectory->Get("efficienciesDATA");
-         lepEffH["muon_iso"]=(TH2 *)gDirectory->Get("efficienciesDATA/pt_abseta_DATA");
-         for(auto& it : lepEffH) it.second->SetDirectory(0);
-         muIsofIn->Close();
-      }
-   if (!is_mu){
-      TFile *fIn=TFile::Open(eltrigSFurl);
-      lepEffH[Trig_hist]=(TH2 *)fIn->Get("Ele32_eta2p1_WPTight_Gsf__EffData");
-      for(auto& it : lepEffH) it.second->SetDirectory(0);
-              fIn->Close();
-
-      TFile *eidfIn=TFile::Open(eIDurl);
-      lepEffH[id_hist]=(TH2 *)eidfIn->Get("EGamma_SF2D");
-      for(auto& it : lepEffH) it.second->SetDirectory(0);
-              eidfIn->Close();
-      }
           if(lepEffH.find(Trig_hist)!=lepEffH.end()){
             for(UInt_t il=0; il<TMath::Min((UInt_t)1,(UInt_t)n_lep_v.size()); il++)
             {
@@ -689,35 +572,94 @@ if (is_sf){
               lepisoSF[0]*=isoSF; lepisoSF[1]*=(isoSF-isoSFUnc); lepisoSF[2]*=(isoSF+isoSFUnc);
             }
       }
-  }
-     w*=lepTriggerSF[0]*lepidSF[0]*lepisoSF[0];
-}
-/*     cout<<"this is only w:  "<<w<<endl;
+     if (!realdata)w*=lepTriggerSF[0]*lepidSF[0]*lepisoSF[0];
+
+
+     cout<<"this is only w:  "<<w<<endl;
      w*=lepTriggerSF[0];
      cout<<"this is w1:  "<<w<<endl;
      w*=lepTriggerSF[0]*lepidSF[0];
      cout<<"this is  w2:  "<<w<<endl;
      w*=lepTriggerSF[0]*lepidSF[0]*lepisoSF[0];
      cout<<"this is  w3:  "<<w<<endl;
-*/
+     w*=lepTriggerSF[0]*lepidSF[0]*lepisoSF[0];
+cout<<"this is final w: :::::::::"<<w<<endl;
 
 
+   bool lep0_cut(false), lep1_cut(false), trans_mW_cut(false),jets_cut(false), bjets_cut(false), ljets_cut(false);
+              if (is_mu)if (n_elec_v.size() ==0 && n_elec20_v.size() ==0 )lep0_cut=true;
+              if (!is_mu)if (n_muon_v.size() ==0 && n_muon10_v.size() ==0)lep0_cut=true;
+              if(n_lep_v.size() == 1 && n_lep10_v.size() ==1)lep1_cut=true;
+double trans_m_w=0.;
+if (lep_vector.size()>0)trans_m_w=sqrt(pow(lep_vector[0].Pt() + v_met.Pt(), 2) - pow(lep_vector[0].Px() + v_met.Px(), 2) - pow(lep_vector[0].Py() + v_met.Py(), 2));
+              if (trans_m_w > 50.)trans_mW_cut=true;
+              if(n_pat_jets > 3)jets_cut=true;
+              if (bjets_v.size() > 1)bjets_cut=true;
+              if(n_ljets_v.size() > 1)ljets_cut=true;
+//----------------Rochester algorithm----------------
+if (lep0_cut ){h_events_eachCut->Fill(1.,w);
+    if (lep1_cut){h_events_eachCut->Fill(2.,w);
+    h_M_t->Fill(trans_m_w,w);
+       if (trans_mW_cut){h_events_eachCut->Fill(3,w);h_events_eachCut_el->Fill(0.,w);
+          h_no_Jets->Fill(n_pat_jets,w);
+          h_no_Jets20->Fill(test_njets20,w);
+          if (jets_cut){ h_events_eachCut->Fill(4.,w);h_events_eachCut_el->Fill(1.,w);
+              if (bjets_cut){h_events_eachCut->Fill(5.,w);h_events_eachCut_el->Fill(2.,w);
+                  if (ljets_cut){h_PU_npT->Fill(PU_npT,w);
+                    h_n_ljets_aft->Fill(ljets_v.size(),w);
+                    h_n_bjets_aft->Fill(n_bjets_v.size(),w);
+                    h_n_cjets->Fill(ncjets,w);
+                    h_EvtInfo_NumVtx->Fill(EvtInfo_NumVtx);
+                    h_EvtInfo_NumVtx_w->Fill(EvtInfo_NumVtx,w);
+                    h_M_t_aft->Fill(trans_m_w,w);
 
-//h_M_hadW->Fill(best_permutation.WHad().M(),w);
-// h_M_hadTop->Fill(had_tMass.at(0),w);
-/*h_Pt_hadW->Fill(best_permutation.THad().M(),w);
-h_M_lepTop->Fill(best_permutation.TLep().M(),w);
-h_Pt_lepTop->Fill(best_permutation.TLep().Pt(),w);*/
-/*
-//  cout<<"out side,  hadWT_;  "<<hadWT_.M()<<endl;
-//  lepW reconstruction
- TLorentzVector lepWT_ = mu_vector[0]+metp4;
-//     cout<<"this is lep W; mu_vector.size:  "<<mu_vector.size()<<", metp4 , "<<metp4.Pt()<<",  lepWT_.M   "<<lepWT_.M()<<",  "<<lepWT_.Pt()<<endl;
 
-*/
+    int lepChar=lep_charge[0];
+    double nuDisc, massDiscr, nuchi2;
+    TTBarSolver solver;
+    TLorentzVector Bhad;
+    TLorentzVector Blep;
+    TLorentzVector Whad;
+    TLorentzVector Thad;
+    TLorentzVector Wlep;
+    TLorentzVector Tlep;
+    double costheta=999.;
+    Permutation test;
+    Permutation best_permutation;
+
+    for (unsigned int i=0; i<ljets_v.size(); i++){
+    for (unsigned int j=i+1;j<ljets_v.size(); j++){
+      if (i==j)continue;
+    for (unsigned int k=0; k<bjets_v.size(); k++){
+    for (unsigned int l=k+1; l<bjets_v.size(); l++){
+      if (k==l)continue;
+    Permutation permutation(&ljets_v[i], &ljets_v[j], &bjets_v[l], &bjets_v[k], &v_lep, &v_met,lepChar);
+    solver.Solve(permutation);
+    if(permutation.Prob()  < best_permutation.Prob())
+    {
+      best_permutation = permutation;
+      Bhad=best_permutation.bhadt();
+      Blep=best_permutation.blept();
+      Whad=best_permutation.WHad();
+      Thad=best_permutation.THad();
+      Tlep=best_permutation.TLep();
+      Wlep=best_permutation.WLep();
+      nuDisc=best_permutation.NuDiscr();
+      nuchi2=best_permutation.NuChisq();
+      massDiscr=best_permutation.MassDiscr();
+
+      hyp::TTbar ttang(best_permutation);
+      auto ttcm = ttang.to_CM();
+      auto tlepcm = ttang.tlep().to_CM();
+      auto thadcm = ttang.thad().to_CM();
+      costheta = ttang.unit3D().Dot(ttcm.tlep().unit3D());
+    }
+    }}}}
+
 //----------------------------Muon parameters--------------------------------------------//
- h_met_Pz->Fill(metp4.Pz(),w);
-float        Pt_lep = v_lep.Pt();
+        h_lheSigEvn->Fill(lheSigEvn,w);
+        h_met_Pz->Fill(metp4.Pz(),w);
+        float Pt_lep = v_lep.Pt();
         h_Pt_lep->Fill(Pt_lep,w);
         h_Eta_lep->Fill(v_lep.Eta(),w);
 //        Phi_lep = v_lep.Phi();
@@ -728,6 +670,7 @@ float        Pt_lep = v_lep.Pt();
 
 //-----------------------------Jets param------------------------------------------------//
 //--------------------All jets-------------------------
+        h_bDisct_cMVAv2aft->Fill(cMVA,w);
         h_pfJet_cmult->Fill(jet_cMult,w);
         h_PtJets_afterCut->Fill(PtJets,w);
         h_massJets_afterCut->Fill(massJets,w);
@@ -759,102 +702,25 @@ float        Pt_lep = v_lep.Pt();
         h_M_lJet[i]->Fill(temp1[i-1].M(),w);
         }
 
-if (metp4.Pt()>0)h_met_E->Fill(metp4.Pt(),w);
-
-//  exp systematics
-
-    if (!run_sys)continue;
-   /* 
-    for(size_t ivar=0; ivar<expSysts.size(); ivar++)
-    {
-     TString varName=expSysts[ivar]; 
-     bool updateBtag(varName.Contains("tagEff"));
-     bool updateJER(varName.Contains("UncJER"));
-     for(int isign=0; isign<2; isign++)
-      {
-      float newWgt(w);
-      if(varName=="Pileup" && puWeight[0]!=0){
-        newWgt*=(isign==0 ? puWeight[1]/puWeight[0] : puWeight[2]/puWeight[0]);
-      }
-      if(varName=="Trigger")
-        newWgt *= (isign==0 ? lepTriggerSF[1]/lepTriggerSF[0] : lepTriggerSF[2]/lepTriggerSF[0]);
-      if(varName=="MuEfficiency" || "EleEfficiency")
-        newWgt *= (isign==0 ? lepidSF[1]/lepidSF[0] : lepidSF[2]/lepidSF[0]);
-      //jets
-      std::vector<TLorentzVector> varBJets,varLightJets;
-      TLorentzVector jetDiff(0,0,0,0),jetSum(0,0,0,0);
-      vector<TLorentzVector> jp44;
-      if( updateBtag  ){   //Fix Me
-        varBJets=bjets_v;
-        varLightJets=ljets_v;
-      }
-      else
-      {
-
-      TLorentzVector jp4;
-      TLorentzVector jp4Up;
-      TLorentzVector jp4Dn;
-      int jflav (0);
-      for (unsigned int ij=0; ij<no_jets.size();ij++){
-      jflav= abs(patJetPfAk04PartonFlavour_->at(ij)) ;
-      jp4.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(ij),patJetPfAk04Eta_->at(ij),patJetPfAk04Phi_->at(ij),patJetPfAk04En_->at(ij));
-      jp4Up.SetPtEtaPhiE(patJetPfAk04PtJERSmearUp->at(ij),patJetPfAk04Eta_->at(ij),patJetPfAk04Phi_->at(ij),patJetPfAk04En_->at(ij));
-      jp4Dn.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(ij),patJetPfAk04Eta_->at(ij),patJetPfAk04Phi_->at(ij),patJetPfAk04En_->at(ij));
-      jp44.push_back(jp4);
-      }
-        jetDiff -= jp4;
-        jetSum += jp4;
-      if(varName!="UncJES"){
-        jp4 *=(1.0+(isign==0?-1.:1.)*unc_->at(ivar));
-       }
-      if(varName=="UncJER"){
-        jp4 = (isign==0? jp4Dn:jp4Up); 
-        }
-        float cMVA_new = cMVA_v[0];  // Fix me it is 0 or k
-        bool isBTagged(cMVA_new>0.800);
-        if(!realdata){
-          float jptForBtag(jp4.Pt()>1000. ? 999. : jp4.Pt()), jetaForBtag(fabs(jp4.Eta()));
-          float expEff(1.0), jetBtagSF(1.0);
-          if(jflav==4){
-            expEff        = expBtagEff["c"]->Eval(jptForBtag);
-            int idx(0);
-            if(varName=="CtagEff")   idx=(isign==0 ? 1 : 2);
-            jetBtagSF  = sfbReaders[idx]->eval( BTagEntry::FLAV_C, jetaForBtag, jptForBtag);
-            jetBtagSF *= expEff>0 ? 1 : 0. ;
-            }
-          else if(jflav==5){
-            expEff=expBtagEff["b"]->Eval(jptForBtag);
-            int idx(0);
-            if(varName=="BtagEff")   idx=(isign==0 ? 1 : 2);
-            jetBtagSF=sfbReaders[idx]->eval( BTagEntry::FLAV_B, jetaForBtag, jptForBtag);
-            jetBtagSF *= expEff>0 ? 1 : 0. ;
-            }
-          else{
-            expEff=expBtagEff["udsg"]->Eval(jptForBtag);
-            int idx(0);
-            if(varName=="LtagEff")   idx=(isign==0 ? 1 : 2);
-            jetBtagSF=sflReaders[idx]->eval( BTagEntry::FLAV_UDSG, jetaForBtag, jptForBtag);
-            jetBtagSF *= expEff>0 ? 1 : 0. ;
-          }
-          myBTagSFUtil.modifyBTagsWithSF(isBTagged,    jetBtagSF,     expEff);
-          }
-          if(isBTagged) varBJets.push_back(bjets_v[0]);
-          else          varLightJets.push_back(bjets_v[0]);
-          
-        }
-        if (metp4.Pt()>0)plots2d["metptshapes_exp"]->Fill(metp4.Pt(),2*ivar+isign,newWgt);
-        if (varBJets.size() > 0.)plots2d["nbjetshapes_exp"]->Fill(varBJets.size(),2*ivar+isign,newWgt);
-        if (varBJets.size() > 0.)plots2d["bjetptshapes_exp"]->Fill(varBJets[0].Pt(),2*ivar+isign,newWgt);
-        if (varLightJets.size() > 0.)plots2d["nljetshapes_exp"]->Fill(varLightJets.size(),2*ivar+isign,newWgt);
-        if (varLightJets.size() > 0.)plots2d["ljetptshapes_exp"]->Fill(varLightJets[0].Pt(),2*ivar+isign,newWgt);
-        if (ncjets > 0.)plots2d["ncjetshapes_exp"]->Fill(ncjets,2*ivar+isign,newWgt);
-        if (jp44.size()>0)plots2d["jetptshapes_exp"]->Fill(jp44[0].Pt(),2*ivar+isign,newWgt);
-      }
-    }*/
-
+        if (metp4.Pt()>0)h_met_E->Fill(metp4.Pt(),w);
+    if (Thad.M()!=0){
+    h_M_hadW->Fill(Whad.M(),w);
+    h_Pt_hadW->Fill(Whad.Pt(),w);
+    h_M_hadTop->Fill(Thad.M(),w);
+    h_Pt_hadTop->Fill(Thad.Pt(),w);
+    h_M_lepTop->Fill(Tlep.M(),w);
+    h_Pt_lepTop->Fill(Tlep.Pt(),w);
+    h_M_lepW->Fill(Wlep.M(),w);
+    h_Pt_lepW->Fill(Wlep.Pt(),w);
+    h_M_tt->Fill((Tlep+Thad).M(),w);
+    h_M_tt_binned->Fill((Tlep+Thad).M(),w);
+    h_Pt_tt->Fill((Tlep+Thad).Pt(),w);
+    if (costheta!=999.)leptop_cos_ttrest->Fill(costheta,w);
+    }
+}}}}}}
  // TTree weight_tree;
-  weight_tree = new TTree("tree","tree");
-  weight_tree->Fill();
+//  weight_tree = new TTree("tree","tree");
+//  weight_tree->Fill();
         }//entries loop
         theFile->Write();
         theFile->Close();

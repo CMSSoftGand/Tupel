@@ -51,10 +51,12 @@
 #include "plugins/TTBarSolver.cc"
 #include "interface/BTagCalibration.h"
 #include "interface/TTBarSolver.h"
-#include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
+#include "CondTools/BTau/interface/BTagCalibrationReader.h"
 #include "interface/standalone_LumiReWeighting.h"
 #include "interface/Permutation.h"
 #include "plugins/Permutation.cc"
+#include "interface/Hypotheses.h"
+#include "plugins/Hypotheses.cc"
 #include "vector"
 using namespace std;
 //TTBarSolver ttsolver;
@@ -306,6 +308,7 @@ using namespace std;
    Double_t        mcWeight_=0;
    vector<double>  *mcWeights_=0;
    Double_t        nup=0;
+   Double_t        lheSigEvn=0;
 
    // List of branches
    TBranch        *b_Uncorec_METPt;   //!
@@ -548,6 +551,7 @@ using namespace std;
    TBranch        *b_mcWeight_;   //!
    TBranch        *b_mcWeights_;   //!
    TBranch        *b_nup;   //!
+   TBranch        *b_lheSigEvn;   //!
 
   void branchAdd(TTree *tree){
    tree->SetBranchAddress("Uncorec_METPt", &Uncorec_METPt, &b_Uncorec_METPt);
@@ -791,6 +795,7 @@ using namespace std;
    tree->SetBranchAddress("mcWeight_", &mcWeight_, &b_mcWeight_);
    tree->SetBranchAddress("mcWeights_", &mcWeights_, &b_mcWeights_);
    tree->SetBranchAddress("nup", &nup, &b_nup);
+   tree->SetBranchAddress("lheSigEvn", &lheSigEvn, &b_lheSigEvn);
   }
 
     double pi = 3.1415926535897932384626433832795028841971693;
