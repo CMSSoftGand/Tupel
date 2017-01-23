@@ -23,7 +23,8 @@ def main():
     #prepare output directory
     if opt.outDir is None: opt.outDir=opt.inDir
     pwd=os.getcwd()
-    os.system("cp $X509_USER_PROXY ~/myProxy" )
+    os.system("cp $X509_USER_PROXY /user/$USER/" )
+#    os.system("export X509_USER_PROXY=/user/$USER/x509up_$(id -u $USER)" )
     if os.path.exists("tmp_combine"):
         os.system("rm -rf tmp_combine/")
     os.system("mkdir tmp_combine/")
@@ -39,7 +40,8 @@ def main():
           fout.write("cd %s%s\n"%(pwd,"/../../"))
           fout.write("eval `scram runtime -sh`\n")
           fout.write("pwd\n")
-          fout.write("export X509_USER_PROXY=~/myProxy \n")
+#          fout.write("export X509_USER_PROXY=~/myProxy \n")
+          fout.write("export X509_USER_PROXY=/user/$USER/x509up_u$(id -u $USER) \n")
           fout.write("python %s/scripts/checkProductionIntegrity.py -i %s%s -o %s --nocheck 0 \n"% (pwd,opt.inDir,dsetname,opt.outDir))
         os.system("chmod 755 job_%s.sh"% dsetname)
    
