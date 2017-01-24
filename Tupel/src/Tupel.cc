@@ -3,7 +3,6 @@
 Code by: Bugra Bilin, Kittikul Kovitanggoon, Tomislav Seva, Efe Yazgan, ...
 
 */
-
 #include <map>
 #include <string>
 #include <vector>
@@ -33,7 +32,8 @@ Code by: Bugra Bilin, Kittikul Kovitanggoon, Tomislav Seva, Efe Yazgan, ...
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "EgammaAnalysis/ElectronTools/interface/EGammaCutBasedEleId.h"
-#include "EgammaAnalysis/ElectronTools/interface/ElectronEffectiveArea.h"
+//#include "EgammaAnalysis/ElectronTools/interface/ElectronEffectiveArea.h"
+#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "PhysicsTools/SelectorUtils/interface/CutApplicatorBase.h"
@@ -85,13 +85,13 @@ private:
   /// everything that needs to be done after the event loop
 //   double getJER(double jetEta, int sysType);
   virtual void endJob() ;
-
   std::string channel_;
   bool keepparticlecoll_;
   std::string elecMatch_;
   std::string muonMatch_;
   std::string muonMatch2_;
-
+EffectiveAreas effAreas_;
+//  std::unique_ptr<EffectiveAreas> ea_;
   edm::EDGetTokenT<pat::Photon> photonSrc_;
 //  edm::EDGetTokenT<pat::ElectronCollection> elecSrc_;
   edm::EDGetTokenT<edm::View<pat::Electron> > electronToken_;
@@ -99,6 +99,7 @@ private:
   edm::EDGetTokenT<edm::ValueMap<bool> > eleIdlooseToken_;
   edm::EDGetTokenT<edm::ValueMap<bool> > eleIdmediumToken_;
   edm::EDGetTokenT<edm::ValueMap<bool> > eleIdtightToken_;
+  edm::EDGetTokenT<edm::ValueMap<bool> > eleHLTPreseToken_;
   edm::EDGetTokenT<pat::MuonCollection> muonSrc_;
   edm::EDGetTokenT<pat::PackedCandidateCollection> pfcandSrc_;
   edm::EDGetTokenT<edm::View<pat::Jet> >jetToken_;
@@ -111,8 +112,6 @@ private:
   edm::EDGetTokenT<LHEEventProduct> lheEventToken;
   edm::EDGetTokenT<reco::GenParticleCollection> genParticleSrc_;
   edm::EDGetTokenT<pat::PackedGenParticleCollection> packedgenParticleSrc_;
-
-
 
   edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
@@ -429,6 +428,8 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
   elecMatch_= iConfig.getParameter< std::string >( "elecMatch" ) ;
   muonMatch_= iConfig.getParameter< std::string >( "muonMatch" ) ;
   muonMatch2_= iConfig.getParameter< std::string >( "muonMatch2" ) ;
+//  ea_ . reset (new EffectiveAreas( edm::FileInPath(iConfig.getParameter<std::string>("effAreas_file")).fullPath () ) );
+//effAreas_(edm::FileInPath(iConfig.getParameter< std::string >( "effAreas_file")).fullPath ());
 //jecunctable_=iConfig.getParameter<std::string >("jecunctable");
 
   photonSrc_=consumes<pat::Photon>(iConfig.getParameter<edm::InputTag>("photonSrc"));
@@ -438,6 +439,7 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
   eleIdlooseToken_=consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("cutBasedElectronID_Summer16_80X_V1_loose"));
   eleIdmediumToken_=consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("cutBasedElectronID_Summer16_80X_V1_medium"));
   eleIdtightToken_=consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("cutBasedElectronID_Summer16_80X_V1_tight"));
+  eleHLTPreseToken_=consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("cutBasedElectronHLTPreselection_Summer16_V1"));
   muonSrc_=consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonSrc"));
   pfcandSrc_=consumes<pat::PackedCandidateCollection>(iConfig.getParameter<edm::InputTag>("pfcandSrc"));
   jetToken_=consumes<edm::View<pat::Jet> >(iConfig.getParameter<edm::InputTag>("jetSrc" ));
@@ -490,14 +492,6 @@ edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
 iSetup.get<JetCorrectionsRecord>().get("AK4PFchs",JetCorParColl); 
 JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
 JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty(JetCorPar);
-
-JME::JetResolution resolution;
-JME::JetResolutionScaleFactor resolution_sf;
-      if(! iEvent.isRealData()){
- resolution= JME::JetResolution::get(iSetup, "AK4PFchs_pt");
-
- resolution_sf = JME::JetResolutionScaleFactor::get(iSetup, "AK4PFchs");
-}
   const pat::helper::TriggerMatchHelper matchHelper;	
   edm::Handle<GenParticleCollection> genParticles_h;
   iEvent.getByToken(genParticleSrc_, genParticles_h);
@@ -552,11 +546,13 @@ JME::JetResolutionScaleFactor resolution_sf;
 			  
   edm ::Handle<reco::VertexCollection> vtx_h;
   iEvent.getByToken(vertexToken_, vtx_h); 
-  if(pvHandle.isValid()){
+//  if(pvHandle.isValid()){
   int nvtx=vtx_h->size();
+  if(vtx_h->empty()) return;
+  const reco::Vertex &primVtx = vtx_h->front();
+  reco::VertexRef primVtxRef(vtx_h,0);
   if(nvtx==0) return;
-  reco::VertexRef primVtx(vtx_h,0);
-  }
+//  }
   edm::Handle<double>  rho_;
   iEvent.getByToken(mSrcRho_, rho_);
   double rhoIso=99;
@@ -1123,7 +1119,6 @@ int ngjets=0;
 	if (genEventInfoProd->hasBinningValues())
 	  ptHat_ = genEventInfoProd->binningValues()[0];
 	mcWeight_ = genEventInfoProd->weight();
-
       }
       /// now get the PDF information
       edm::Handle<GenEventInfoProduct> pdfInfoHandle;
@@ -1138,11 +1133,11 @@ int ngjets=0;
 	  scalePDF_pdfInfo_.push_back(pdfInfoHandle->pdf()->scalePDF);
 	}   
       } 
-      edm::Handle<LHEEventProduct>   lheEventProdH;
+/*      edm::Handle<LHEEventProduct>   lheEventProdH;
       iEvent.getByToken(lheEventToken, lheEventProdH);
       if (iEvent.getByToken(lheEventToken, lheEventProdH)){
       lheSigEvn=lheEventProdH->hepeup().IDPRUP;
-	}
+	}*/
       edm::Handle<LHEEventProduct>   lheEventInfoProd;
       if (iEvent.getByToken(lheEventSrc_,lheEventInfoProd)) {
         //mcWeights_ = genEventInfoProd->weights();
@@ -1189,6 +1184,7 @@ cout<<"I am here:  "<<endl;
 	trigname.push_back(trigNames->triggerName(i));
 	trigaccept.push_back(HLTResHandle->accept(i));
 	if (trigaccept[i]){
+if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trigname[i]<<endl;}
 //cout<<"this is trigger:  "<<trigname[i]<<endl;
 	  if(std::string(trigname[i]).find("HLT_Ele32_eta2p1_WPTight_Gsf")!=std::string::npos){ Ele32_eta2p1_WPTight_Gsf=1;
 }
@@ -1362,6 +1358,8 @@ cout<<"I am here:  "<<endl;
   iEvent.getByToken(eleIdmediumToken_ ,ele_mediumid_decisions);
   edm::Handle<edm::ValueMap<bool> > ele_tightid_decisions;
   iEvent.getByToken(eleIdtightToken_ ,ele_tightid_decisions);
+  edm::Handle<edm::ValueMap<bool> > ele_HLTPrese;
+  iEvent.getByToken(eleHLTPreseToken_ ,ele_HLTPrese);
 
   int ElecFill=0;
   for (unsigned int j = 0; j < electrons->size(); ++j){
@@ -1397,12 +1395,10 @@ cout<<"I am here:  "<<endl;
      }else{
        ooEmooP_ = fabs(1.0/el.ecalEnergy() - el.eSuperClusterOverP()/el.ecalEnergy() );
      }
-
-     d0_ = (-1) * el.gsfTrack()->dxy(vtx_h->at(0).position() );
-     dz_ = el.gsfTrack()->dz( vtx_h->at(0).position() );
-
-//    expectedMissingInnerHits_ = el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits();//MISSING!!
-    expectedMissingInnerHits_ = el.gsfTrack()->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS);//MISSING!!
+     d0_ = el.gsfTrack()->dxy(primVtx.position() );
+     dz_ = el.gsfTrack()->dz( primVtx.position() );
+//if (run==1 && lumi==210023 && event==33645705)cout<<"fabs(d0): "<<d0_<<", fabs(dz):  "<<dz_<<", x: "<<primVtx.x()<<", y: "<<primVtx.y()<<", z: "<<primVtx.z()<<endl;
+     expectedMissingInnerHits_ = el.gsfTrack()->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS);//MISSING!!
      passConversionVeto_ = false;
      if( beamSpotHandle.isValid() && conversions_h.isValid()) {
        passConversionVeto_ = !ConversionTools::hasMatchedConversion(el,conversions_h,
@@ -1438,10 +1434,12 @@ cout<<"I am here:  "<<endl;
            bool isPassEle_looseId = (*ele_looseid_decisions)[e];
            bool isPassEle_mediumId = (*ele_mediumid_decisions)[e];
            bool isPassEle_tightId = (*ele_tightid_decisions)[e];
+           bool isPassEle_HLTPrese = (*ele_HLTPrese)[e];
            patElecIdveto_.push_back(isPassEle_vetoId);
            patElecIdloose_.push_back(isPassEle_looseId);
            patElecIdmedium_.push_back(isPassEle_mediumId);
            patElecIdtight_.push_back(isPassEle_tightId);
+      	   patElec_mva_presel_.push_back(isPassEle_HLTPrese);
       double Elec17_Elec8_Matched=0;
       patElecTrig_.push_back(Elec17_Elec8_Matched);//no matching yet...BB 
       reco::Vertex::Point pos(0,0,0);
@@ -1457,8 +1455,10 @@ cout<<"I am here:  "<<endl;
       patElecPhi_.push_back(el.phi());	
       patElecEnergy_.push_back(el.energy());
       patElecCharge_.push_back(el.charge());
-      
-      AEff = ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03, el.superCluster()->eta(), ElectronEffectiveArea::kEleEAData2012);
+//const float eA = effAreas_.getEffectiveArea(fabs(el.superCluster()->eta()));
+ //    cout<<"this is ea:  "<<ea_.release()<<endl;
+//AEff = ea_.getEffectiveArea(fabs(el.superCluster()->eta()));
+//      AEff = ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03, el.superCluster()->eta(), ElectronEffectiveArea::kEleEAData2012);
       rhoPrime = std::max(rhoIso, 0.0);
       
       const double chIso03_ = el.chargedHadronIso();
@@ -1472,30 +1472,6 @@ cout<<"I am here:  "<<endl;
       patElecPfIso_.push_back(( chIso03_ + nhIso03_ + phIso03_ ) / el.pt());
       patElecPfIsodb_.push_back(( chIso03_ + max(0.0, nhIso03_ + phIso03_ - 0.5*puChIso03_) )/ el.pt());
       patElecPfIsoRho_.push_back(( chIso03_ + max(0.0, nhIso03_ + phIso03_ - rhoPrime*AEff) )/ el.pt());
-     
-      bool myTrigPresel = false;
-      if(fabs(el.superCluster()->eta()) < 1.479){
-	if(el.sigmaIetaIeta() < 0.014 &&
-	   el.hadronicOverEm() < 0.15 &&
-	   el.dr03TkSumPt()/el.pt() < 0.2 &&
-	   el.dr03EcalRecHitSumEt()/el.pt() < 0.2 &&
-	   el.dr03HcalTowerSumEt()/el.pt() < 0.2 
-//         && el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits() == 0
-         )
-	  myTrigPresel = true;
-      }
-      else {
-	if(el.sigmaIetaIeta() < 0.035 &&
-	   el.hadronicOverEm() < 0.10 &&
-	   el.dr03TkSumPt()/el.pt() < 0.2 &&
-	   el.dr03EcalRecHitSumEt()/el.pt() < 0.2 &&
-	   el.dr03HcalTowerSumEt()/el.pt() < 0.2 
-//	   && el.gsfTrack()->trackerExpectedHitsInner().numberOfLostHits() == 0
-	   )
-	  myTrigPresel = true;
-	  }
-      
-      patElec_mva_presel_.push_back(myTrigPresel);
       if(el.pt()>20)ElecFill++; 
     }
     double PFjetFill=0;
@@ -1511,18 +1487,12 @@ cout<<"I am here:  "<<endl;
     //for(edm::View<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
   edm::Handle<edm::View<pat::Jet> >jets;
   iEvent.getByToken(jetToken_,jets);
-//  edm::Handle<edm::ValueMap<double> > deepFJetTags_probudsg;
-//  iEvent.getByToken(deepFJetTags_probudsgToken_ ,deepFJetTags_probudsg);
 
     for ( unsigned int i=0; i<jets->size(); ++i ) {
-//      const pat::Jet & jet = jets->at(i);
     const auto jet = *jets->ptrAt(i);
     const auto j = jets->ptrAt(i);
       if((channel_!="noselection")&&(jet.pt()<15 || abs(jet.eta())>2.5))continue;
       if((channel_=="noselection")&&(jet.pt()<15 || abs(jet.eta())>5.0))continue;
-//double deepFJetTags_udsg = (*deepFJetTags_probudsg)[j];
-    //  cout<<"I am here"<<endl;                     
-      //patJetPfAk04jetpuMVA_.push_back(jet.userFloat("pileupJetId:fullDiscriminant"));//not available!
       chf = jet.chargedHadronEnergyFraction();
       nhf = (jet.neutralHadronEnergy()+jet.HFHadronEnergy())/jet.correctedJet(0).energy();
       cemf = jet.chargedEmEnergyFraction();
@@ -1531,12 +1501,6 @@ cout<<"I am here:  "<<endl;
       cmult = jet.chargedMultiplicity();
       nconst = jet.chargedMultiplicity()+jet.neutralMultiplicity();
       nNeutralParticles = jet.neutralMultiplicity(); 
-//  cout<<"this is disc udsg:  "<<deepFJetTags_udsg<<endl; 
-  cout<<"this is disc udsg:  "<<jet.bDiscriminator("deepFlavourJetTags:probudsg")<<endl; 
-  cout<<"this is disc b:  "<<jet.bDiscriminator("deepFlavourJetTags:probb")<<endl; 
-  cout<<"this is disc c:  "<<jet.bDiscriminator("deepFlavourJetTags:probc")<<endl; 
-  cout<<"this is disc bb:  "<<jet.bDiscriminator("deepFlavourJetTags:probbb")<<endl; 
-  cout<<"this is disc cc:  "<<jet.bDiscriminator("deepFlavourJetTags:probcc")<<endl; 
       patJetPfAk04BDiscdeepFudsg_.push_back(jet.bDiscriminator("deepFlavourJetTags:probudsg"));
       patJetPfAk04BDiscdeepFb_.push_back(jet.bDiscriminator("deepFlavourJetTags:probb"));
       patJetPfAk04BDiscdeepFbb_.push_back(jet.bDiscriminator("deepFlavourJetTags:probbb"));
@@ -1609,6 +1573,8 @@ cout<<"I am here:  "<<endl;
   //    smearDn = getJER(jet.eta(), -1); //JER nominal=0, up=+1, down=-1
       if(!realdata){
         bool matchGen=false;
+	JME::JetResolution resolution = JME::JetResolution::get(iSetup, "AK4PFchs_pt");
+	JME::JetResolutionScaleFactor resolution_sf = JME::JetResolutionScaleFactor::get(iSetup, "AK4PFchs");
         JME::JetParameters parameters_1;
         parameters_1.setJetPt(jet.pt());
         parameters_1.setJetEta(jet.eta());
@@ -1622,6 +1588,8 @@ cout<<"I am here:  "<<endl;
 
 //        cout<<gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r)<<endl;
         smear=gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r);
+	//float s = gRandom->Gaus(0,1);
+	//smear=s*(sqrt(sf*sf-1)*r)+jet.pt();
         smearUp=gRandom->Gaus(jet.pt(),sqrt(sf_up*sf_up-1)*r);
         smearDn=gRandom->Gaus(jet.pt(),sqrt(sf_dn*sf_dn-1)*r);
 	if (jet.genJet()){
@@ -1630,17 +1598,16 @@ cout<<"I am here:  "<<endl;
     jet_vv.SetPtEtaPhiE(jet.pt(),jet.eta(),jet.phi(),jet.energy());
     gjet_vv.SetPtEtaPhiE(jet.genJet()->pt(),jet.genJet()->eta(),jet.genJet()->phi(),jet.genJet()->energy());
     double DR_gj_j=jet_vv.DeltaR(gjet_vv);
-//    double DPt_gj_j=fabs(jet.pt()-jet.genJet()->pt());
-//    if( DR_gj_j<0.2 &&DPt_gj_j<3*r )
-    if( DR_gj_j<0.2 ){
+    double DPt_gj_j=fabs(jet.pt()-jet.genJet()->pt());
+    if( DR_gj_j<0.2 &&DPt_gj_j<3*r*jet.pt() ){
+//    if( DR_gj_j<0.2 ){
 	  matchGen=true;
-          //cout<<"Burdayım ulan "<<endl;
 	  MGjPt.push_back(jet.genJet()->pt());
 	  MGjeta.push_back(jet.genJet()->eta());
 	  MGjphi.push_back(jet.genJet()->phi());
 	  MGjE.push_back(jet.genJet()->energy());
-
           smear=std::max(0.0,jet.genJet()->pt() +sf *( jet.pt()-jet.genJet()->pt() ) );
+//        smearUp=gRandom->Gaus(jet.pt(),sqrt(sf_up*sf_up-1)*r);
           smearUp=std::max(0.0,jet.genJet()->pt() +sf_up *( jet.pt()-jet.genJet()->pt() ) );
           smearDn=std::max(0.0,jet.genJet()->pt() +sf_dn *( jet.pt()-jet.genJet()->pt() ) );
          // cout<<"Burdayım ulan  "<<smear<<"  "<<smearUp<<"  "<<smearDn<<endl;
