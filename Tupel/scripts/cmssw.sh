@@ -20,7 +20,7 @@ git cms-merge-topic -u cms-met:fromCMSSW_8_0_20_postICHEPfilter
 
 #electron ID summer-16
 #https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2?rev=39#Recipe_for_regular_users_for_8_0
-git cms-merge-topic ikrav:egm_id_80X_v1
+git cms-merge-topic ikrav:egm_id_80X_v2
 
 #deepCSV
 git cms-merge-topic -u mverzett:DeepFlavour-from-CMSSW_8_0_21

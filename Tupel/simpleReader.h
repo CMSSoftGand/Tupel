@@ -198,7 +198,7 @@ using namespace std;
    vector<unsigned>  *patElecIdnonTrig90_=0;
    vector<unsigned>  *patElecIdTrig80_=0;
    vector<unsigned>  *patElecIdTrig90_=0;
-   vector<double>  *patElecdEtaIn_=0;
+   vector<double>  *patElecdEtaInSeed_=0;
    vector<double>  *patElecdPhiIn_=0;
    vector<double>  *patElechOverE_=0;
    vector<double>  *patElecsigmaIetaIeta_=0;
@@ -264,6 +264,11 @@ using namespace std;
    vector<bool>    *patJetPfAk04jetpukLoose_=0;
    vector<bool>    *patJetPfAk04jetpukMedium_=0;
    vector<bool>    *patJetPfAk04jetpukTight_=0;
+   vector<double>  *patJetPfAk04BDiscdeepFudsg_;
+   vector<double>  *patJetPfAk04BDiscdeepFb_;
+   vector<double>  *patJetPfAk04BDiscdeepFbb_;
+   vector<double>  *patJetPfAk04BDiscdeepFc_;
+   vector<double>  *patJetPfAk04BDiscdeepFcc_;
    vector<double>  *patJetPfAk04BDiscCSVv2_=0;
    vector<double>  *patJetPfAk04BDiscpfCMVA_=0;
    vector<double>  *patJetPfAk04BDiscCSVV1_=0;
@@ -433,7 +438,7 @@ using namespace std;
    TBranch        *b_patMuon_PF_IsoDY_;   //!
    TBranch        *b_patMuon_Mu17_Mu8_Matched_;   //!
    TBranch        *b_patMuon_Mu17_TkMu8_Matched_;   //!
-   TBranch        *b_patElecdEtaIn_;   //!
+   TBranch        *b_patElecdEtaInSeed_;   //!
    TBranch        *b_patElecIdveto_;   //!
    TBranch        *b_patElecIdloose_;   //!
    TBranch        *b_patElecIdmedium_;   //!
@@ -507,6 +512,11 @@ using namespace std;
    TBranch        *b_patJetPfAk04jetpukLoose_;   //!
    TBranch        *b_patJetPfAk04jetpukMedium_;   //!
    TBranch        *b_patJetPfAk04jetpukTight_;   //!
+   TBranch        *b_patJetPfAk04BDiscdeepFudsg_;   //!
+   TBranch        *b_patJetPfAk04BDiscdeepFb_;   //!
+   TBranch        *b_patJetPfAk04BDiscdeepFbb_;   //!
+   TBranch        *b_patJetPfAk04BDiscdeepFc_;   //!
+   TBranch        *b_patJetPfAk04BDiscdeepFcc_;   //!
    TBranch        *b_patJetPfAk04BDiscCSVv2_;   //!
    TBranch        *b_patJetPfAk04BDiscpfCMVA_;   //!
    TBranch        *b_patJetPfAk04BDiscCSVV1_;   //!
@@ -676,7 +686,7 @@ using namespace std;
    tree->SetBranchAddress("patMuon_PF_IsoDY_", &patMuon_PF_IsoDY_, &b_patMuon_PF_IsoDY_);
    tree->SetBranchAddress("patMuon_Mu17_Mu8_Matched_", &patMuon_Mu17_Mu8_Matched_, &b_patMuon_Mu17_Mu8_Matched_);
    tree->SetBranchAddress("patMuon_Mu17_TkMu8_Matched_", &patMuon_Mu17_TkMu8_Matched_, &b_patMuon_Mu17_TkMu8_Matched_);
-   tree->SetBranchAddress("patElecdEtaIn_", &patElecdEtaIn_, &b_patElecdEtaIn_);
+   tree->SetBranchAddress("patElecdEtaInSeed_", &patElecdEtaInSeed_, &b_patElecdEtaInSeed_);
    tree->SetBranchAddress("patElecIdveto_", &patElecIdveto_, &b_patElecIdveto_);
    tree->SetBranchAddress("patElecIdloose_", &patElecIdloose_, &b_patElecIdloose_);
    tree->SetBranchAddress("patElecIdmedium_", &patElecIdmedium_, &b_patElecIdmedium_);
@@ -746,6 +756,11 @@ using namespace std;
    tree->SetBranchAddress("patJetPfAk04jetpukLoose_", &patJetPfAk04jetpukLoose_, &b_patJetPfAk04jetpukLoose_);
    tree->SetBranchAddress("patJetPfAk04jetpukMedium_", &patJetPfAk04jetpukMedium_, &b_patJetPfAk04jetpukMedium_);
    tree->SetBranchAddress("patJetPfAk04jetpukTight_", &patJetPfAk04jetpukTight_, &b_patJetPfAk04jetpukTight_);
+   tree->SetBranchAddress("patJetPfAk04BDiscdeepFudsg_", &patJetPfAk04BDiscdeepFudsg_, &b_patJetPfAk04BDiscdeepFudsg_);
+   tree->SetBranchAddress("patJetPfAk04BDiscdeepFb_", &patJetPfAk04BDiscdeepFb_, &b_patJetPfAk04BDiscdeepFb_);
+   tree->SetBranchAddress("patJetPfAk04BDiscdeepFbb_", &patJetPfAk04BDiscdeepFbb_, &b_patJetPfAk04BDiscdeepFbb_);
+   tree->SetBranchAddress("patJetPfAk04BDiscdeepFc_", &patJetPfAk04BDiscdeepFc_, &b_patJetPfAk04BDiscdeepFc_);
+   tree->SetBranchAddress("patJetPfAk04BDiscdeepFcc_", &patJetPfAk04BDiscdeepFcc_, &b_patJetPfAk04BDiscdeepFcc_);
    tree->SetBranchAddress("patJetPfAk04BDiscCSVv2_", &patJetPfAk04BDiscCSVv2_, &b_patJetPfAk04BDiscCSVv2_);
    tree->SetBranchAddress("patJetPfAk04BDiscpfCMVA_", &patJetPfAk04BDiscpfCMVA_, &b_patJetPfAk04BDiscpfCMVA_);
 //   tree->SetBranchAddress("patJetPfAk04BDiscCSVV1_", &patJetPfAk04BDiscCSVV1_, &b_patJetPfAk04BDiscCSVV1_);

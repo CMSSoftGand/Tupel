@@ -20,6 +20,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 from Configuration.AlCa.GlobalTag import GlobalTag
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v5' if options.runOnData else '80X_mcRun2_asymptotic_2016_TrancheIV_v6')
+#dataFile='file:pickevents.root'
+
 dataFile='/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
 #dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-15to20_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/00524E06-5BBB-E611-829C-0025905B8590.root'
 #dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/001C9AD4-0AB9-E611-9F03-0242AC130002.root'
@@ -35,6 +37,7 @@ if options.runOnData :
 	jecFile='sqlite:Summer16_23Sep2016AllV2_DATA.db'
 	jecTag='JetCorrectorParametersCollection_Summer16_23Sep2016AllV2_DATA_AK4PFchs'	
 	dataFile='/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/02148252-C198-E611-9790-0CC47A6C0682.root'
+#	dataFile='/store/data/Run2016B/SingleElectron/MINIAOD/23Sep2016-v3/00000/00099863-E799-E611-A876-141877343E6D.root'
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(dataFile)
@@ -84,26 +87,6 @@ runMetCorAndUncFromMiniAOD(process,
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load("JetMETCorrections.Modules.JetResolutionESProducer_cfi")
-'''
-process.load("CondCore.CondDB.CondDB_cfi")
-import os
-
-process.jer = cms.ESSource("PoolDBESSource",
-	DBParameters = cms.PSet(
-	messageLevel = cms.untracked.int32(0)
-	),
-	toGet = cms.VPSet(
-		cms.PSet(
-		record = cms.string('JetCorrectionsRecord'),
-		tag    = cms.string(jecTag),
-		label  = cms.untracked.string('AK4PFchs')
-		),
-	),
-        connect = cms.string(jecFile)
-        )
-
-process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
-'''
 # Check interactively the good lumis
 #if options.runOnData :
 #	import FWCore.PythonUtilities.LumiList as LumiList
@@ -151,6 +134,7 @@ process.tupel = cms.EDAnalyzer("Tupel",
   cutBasedElectronID_Summer16_80X_V1_loose = cms.InputTag('egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-loose'),
   cutBasedElectronID_Summer16_80X_V1_medium = cms.InputTag('egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-medium'),
   cutBasedElectronID_Summer16_80X_V1_tight = cms.InputTag('egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-tight'),
+  cutBasedElectronHLTPreselection_Summer16_V1 = cms.InputTag('egmGsfElectronIDs:cutBasedElectronHLTPreselection-Summer16-V1'),
   channel    = cms.string( 'noselection' ),
   keepparticlecoll    = cms.bool(False),
   mSrcRho      = cms.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now
@@ -159,6 +143,7 @@ process.tupel = cms.EDAnalyzer("Tupel",
   #metSource = cms.VInputTag("slimmedMETs","slimmedMETs","slimmedMETs","slimmedMETs"), #no MET corr yet
   metSource = cms.VInputTag("slimmedMETs","slimmedMETs"),
   lheSource=cms.InputTag("source")
+#  effAreas_file = cms.string('RecoEgamma/ElectronIdentification/data/Summer16/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_80X.txt')
 )
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector

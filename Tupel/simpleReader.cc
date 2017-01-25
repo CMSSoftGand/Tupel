@@ -121,39 +121,39 @@ sflReaders[i]->load(btvcalib,BTagEntry::FLAV_UDSG,"incl");
      branchAdd(t);
 	   Int_t nentries(t->GetEntriesFast());
      float scale=-999999.0;
-     float lumi = 12877.401701;
-     if (!is_mu)lumi = 12883.8601;
-        if (fin.Contains( "TTJets"))scale=(xsec[0]*lumi)/nentries;
-        if (fin.Contains( "SingleT_t.root"))scale=(xsec[1]*lumi)/nentries;
-        if (fin.Contains( "_tW_nohad"))scale=(xsec[2]*lumi)/nentries;
-        if (fin.Contains( "WJets"))scale=(xsec[3]*lumi)/nentries;
-        if (fin.Contains( "DYJets"))scale=(xsec[4]*lumi)/nentries;
-        if (fin.Contains( "_WWToLNuQQ"))scale=(xsec[5]*lumi)/nentries;
-        if (fin.Contains( "_WZ"))scale=(xsec[6]*lumi)/nentries;
-        if (fin.Contains( "_ZZ"))scale=(xsec[7]*lumi)/nentries;
-        if (fin.Contains( "TTWJetsToLNu"))scale=(xsec[8]*lumi)/nentries;
-        if (fin.Contains( "TTZToLLNuNu_M-10"))scale=(xsec[9]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_15to20"))scale=(xsec[10]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_20to30"))scale=(xsec[11]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_30to50"))scale=(xsec[12]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_50to80"))scale=(xsec[13]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_80to120"))scale=(xsec[14]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_120to170"))scale=(xsec[15]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_170to300"))scale=(xsec[16]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_300to470"))scale=(xsec[17]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_470to600"))scale=(xsec[18]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_600to800"))scale=(xsec[19]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_800to1000"))scale=(xsec[20]*lumi)/nentries;
-        if (fin.Contains( "_QCD_Pt_1000toInf"))scale=(xsec[21]*lumi)/nentries;
+     float luminosity = 12877.401701;
+     if (!is_mu)luminosity = 12883.8601;
+        if (fin.Contains( "TTJets"))scale=(xsec[0]*luminosity)/nentries;
+        if (fin.Contains( "SingleT_t.root"))scale=(xsec[1]*luminosity)/nentries;
+        if (fin.Contains( "_tW_nohad"))scale=(xsec[2]*luminosity)/nentries;
+        if (fin.Contains( "WJets"))scale=(xsec[3]*luminosity)/nentries;
+        if (fin.Contains( "DYJets"))scale=(xsec[4]*luminosity)/nentries;
+        if (fin.Contains( "_WWToLNuQQ"))scale=(xsec[5]*luminosity)/nentries;
+        if (fin.Contains( "_WZ"))scale=(xsec[6]*luminosity)/nentries;
+        if (fin.Contains( "_ZZ"))scale=(xsec[7]*luminosity)/nentries;
+        if (fin.Contains( "TTWJetsToLNu"))scale=(xsec[8]*luminosity)/nentries;
+        if (fin.Contains( "TTZToLLNuNu_M-10"))scale=(xsec[9]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_15to20"))scale=(xsec[10]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_20to30"))scale=(xsec[11]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_30to50"))scale=(xsec[12]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_50to80"))scale=(xsec[13]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_80to120"))scale=(xsec[14]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_120to170"))scale=(xsec[15]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_170to300"))scale=(xsec[16]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_300to470"))scale=(xsec[17]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_470to600"))scale=(xsec[18]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_600to800"))scale=(xsec[19]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_800to1000"))scale=(xsec[20]*luminosity)/nentries;
+        if (fin.Contains( "_QCD_Pt_1000toInf"))scale=(xsec[21]*luminosity)/nentries;
         
-        if (fin.Contains( "_QCDEM_Pt_20to30"))scale=(emqcd_xsec[0]*lumi)/nentries;
-        if (fin.Contains( "_QCDEM_Pt_30to50"))scale=(emqcd_xsec[1]*lumi)/nentries;
-        if (fin.Contains( "_QCDEM_Pt_50to80"))scale=(emqcd_xsec[2]*lumi)/nentries;
-        if (fin.Contains( "_QCDEM_Pt_80to120"))scale=(emqcd_xsec[3]*lumi)/nentries;
-        if (fin.Contains( "_QCDEM_Pt_120to170"))scale=(emqcd_xsec[4]*lumi)/nentries;
-        if (fin.Contains( "_QCDEM_Pt_170to300"))scale=(emqcd_xsec[5]*lumi)/nentries;
-        if (fin.Contains( "_QCDEM_Pt_300toInf"))scale=(emqcd_xsec[6]*lumi)/nentries;
-
+        if (fin.Contains( "_QCDEM_Pt_20to30"))scale=(emqcd_xsec[0]*luminosity)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_30to50"))scale=(emqcd_xsec[1]*luminosity)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_50to80"))scale=(emqcd_xsec[2]*luminosity)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_80to120"))scale=(emqcd_xsec[3]*luminosity)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_120to170"))scale=(emqcd_xsec[4]*luminosity)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_170to300"))scale=(emqcd_xsec[5]*luminosity)/nentries;
+        if (fin.Contains( "_QCDEM_Pt_300toInf"))scale=(emqcd_xsec[6]*luminosity)/nentries;
+//nloSF=((double)(SumofPosWeights+SumofNegWeights)/(SumofPosWeights-SumofNegWeights))*mcWeight_;
         cout<<"this is scale:   "<<scale<<",  nentries:  "<<nentries<<endl;
 //  TH1D* h_jets_pt = new TH1D("MZ","M(Z)#rightarrow #mu#mu",40, 71,111.);
      TH1D* h_events_counter = new TH1D("events_counter","events_counter",8, 0.0,8.0);
@@ -291,20 +291,25 @@ for (int i=1; i<4; i++){
         TLorentzVector v_bjets;
         TLorentzVector v_bjets9;
         TLorentzVector v_ljets;
+	ofstream outputFile1, outputFile2,outputFile3;
+ofstream test1, test2, test3, after_trigg, before_trigg;
+test1.open("test1.txt",std::ios::trunc);
+test2.open("test2.txt",std::ios::trunc);
+test3.open("test3.txt",std::ios::trunc);
+after_trigg.open("after_trigg.txt",std::ios::trunc);
+before_trigg.open("before_trigg.txt",std::ios::trunc);
+	outputFile1.open("event_synchro_step1.txt",std::ios::trunc);
+        outputFile2.open("event_synchro_step2.txt",std::ios::trunc);
+        outputFile3.open("event_synchro_step3.txt",std::ios::trunc);
+        outputFile1<< "run:lumi:event"<<endl;
+        outputFile2<< "run:lumi:event"<<endl;
+        outputFile3<< "run:lumi:event"<<endl;
 //        TTree *weight_tree;
-        nentries=5000;
+//        nentries=5000;
         for (int jentry=0; jentry < nentries; jentry++)
         {
         t->GetEntry(jentry);
-        if(jentry%1==0)cout<<" << "<<jentry<<"/"<<nentries<<endl;
-/*        float iSecret;
-        srand (time(NULL));
-        iSecret = rand() % 100 + 1;
-        bool run_273158_274093 (iSecret <= 5.);
-        bool run_274094_276097 (5. < iSecret);// && iSecret < 63.);//Fix me when available the rest
-        bool elrun_below_273726 (iSecret <= 4.);
-        bool elrun_above_273726 (4. < iSecret );//&& iSecret < 42.);//Fix me when available the rest
-*/
+        if(jentry%10000==0)cout<<" << "<<jentry<<"/"<<nentries<<endl;
           if(!realdata){
           if(puWgtGr.size())
           {
@@ -315,12 +320,16 @@ for (int i=1; i<4; i++){
           }
         double w=1;
         w=puWeight[0];
-        if (!realdata)w*=mcWeight_;
+//        if (!realdata)w*=mcWeight_;
         h_events_counter->Fill(0.,w);
         bool no_trig_samp(false);
         if (fin.Contains( "qcd_EMEnriched") || fin.Contains( "WWToLNuQQ" ) || fin.Contains( "tW_nohad" ) || fin.Contains( "TeV_WZ" )|| fin.Contains( "TeV_ZZ" ) || fin.Contains( "V_W1Jets") || fin.Contains( "V_W2Jets") || fin.Contains( "V_W3Jets") || fin.Contains( "V_W4Jets") )no_trig_samp=true;
 //        if (lheSigEvn!=1 )continue;
+if (run==1 && lumi_==94557 && event==15148051)cout<<"trigg:  "<<HLT_IsoMu24<<",  "<<HLT_IsoTkMu24<<endl;
+before_trigg<< run<<":"<< lumi_ << ":"<< event <<","<<endl;
+before_trigg<< "HLT_Ele32_eta2p1_WPTight_Gsf: "<< HLT_Ele32_eta2p1_WPTight_Gsf <<","<<endl;
         if (is_mu) if (HLT_IsoMu24!=1 && HLT_IsoTkMu24!=1)continue;
+after_trigg<< run<<":"<< lumi_ << ":"<< event <<","<<endl;
         if (!is_mu)if (HLT_Ele32_eta2p1_WPTight_Gsf!=1)continue;
         h_events_eachCut->Fill(0.,w);
         h_events_eachCutp15_40->Fill(0.,w);
@@ -333,7 +342,7 @@ for (int i=1; i<4; i++){
 	      if (first_PV!=1)continue;
           if (Flag_HBHENoiseFilter!=1 || Flag_HBHENoiseIsoFilter!=1 || Flag_globalTightHalo2016Filter!=1)continue;
           if (Flag_EcalDeadCellTriggerPrimitiveFilter!=1 || Flag_goodVertices!=1 || Flag_eeBadScFilter!=1)continue;
-
+	outputFile1<< run<<":"<< lumi_ << ":"<< event <<","<<endl;
       int n_pat_elec = 0,n_elec20=0;
       std::vector<TLorentzVector>lep_vector, loose_lep_vector;
       TLorentzVector v_lep;
@@ -345,6 +354,8 @@ for (int i=1; i<4; i++){
       vector<unsigned int> n_elec_v;
       vector<unsigned int> n_elec20_v;
       for (unsigned int elec =0; elec < patElecPt_->size(); ++elec){
+
+
         if(patElecPt_->at(elec)>20 && fabs(patElecScEta_->at(elec))<2.5 && patElecIdveto_->at(elec) !=0){
             TLorentzVector loose_el_vector_;
             loose_el_vector_.SetPtEtaPhiE(patElecPt_->at(elec),patElecEta_->at(elec),patElecPhi_->at(elec),patElecEnergy_->at(elec));
@@ -370,34 +381,34 @@ for (int i=1; i<4; i++){
       int n_muon=0,n_muon10=0;
       float muon_TIso=0;
 
-      float mu_pt=0,mu_eta=0.,mu_Tid=0., mu_iso=0., mu_phi=0.,mu_E=0., mu_Lid=0.;
       for(unsigned int mu=0; mu<patMuonPt_->size();mu++){
-           mu_pt=patMuonPt_->at(mu); mu_eta=patMuonEta_->at(mu); mu_Tid=patMuonTightId_->at(mu); mu_iso=patMuonPfIsoDbeta_->at(mu);
-           mu_phi=patMuonPhi_->at(mu); mu_E=patMuonEn_->at(mu); mu_Lid=patMuonLooseId_->at(mu);
+if (run==280018 && lumi_==426 && event==735899762){cout<< "patMuonTightId_->at(mu)  "<<patMuonTightId_->at(mu)<<"   **************"<<endl;}
           h_patMuonPfIsoDbeta->Fill(patMuonPfIsoDbeta_->at(mu),w);
-          if (mu_pt>10 && fabs(mu_eta)<2.4 && mu_Lid>0 && fabs(mu_iso) <0.25)loose_mu_cut=true;
-          if(mu_pt > 26. && fabs(mu_eta)<2.4 && mu_Tid>0 && fabs(mu_iso) < 0.15)
+          if(patMuonPt_->at(mu) > 26. && fabs(patMuonEta_->at(mu))<2.4 && patMuonTightId_->at(mu)>0 && fabs(patMuonPfIsoDbeta_->at(mu)) < 0.15)
             {n_muon++;
             n_muon_v.push_back(n_muon);
-            v_muon.SetPtEtaPhiE(mu_pt,mu_eta,mu_phi,mu_E);
+            v_muon.SetPtEtaPhiE(patMuonPt_->at(mu),patMuonEta_->at(mu),patMuonPhi_->at(mu),patMuonEn_->at(mu));
             mu_vector.push_back(v_muon);
             mu_charge.push_back(patMuonCharge_->at(mu));
             muon_TIso=patMuonPfIsoDbeta_->at(mu);
             }
-        if(loose_mu_cut){
+        if(patMuonPt_->at(mu)>10 && fabs(patMuonEta_->at(mu))<2.4 && patMuonLooseId_->at(mu)>0 && fabs(patMuonPfIsoDbeta_->at(mu)) <0.25){
+          n_muon10++;
           n_muon10_v.push_back(n_muon10);
           TLorentzVector v_muon_;
-          v_muon_.SetPtEtaPhiE(mu_pt,mu_eta,mu_phi,mu_E);
+          v_muon_.SetPtEtaPhiE(patMuonPt_->at(mu),patMuonEta_->at(mu),patMuonPhi_->at(mu),patMuonEn_->at(mu));
           loose_mu_vector.push_back(v_muon_);
-          n_muon10++;
           }
             }
 
         if (!is_mu){n_lep_v = n_elec_v; n_lep10_v = n_elec20_v; lep_vector = el_vector;loose_lep_vector = loose_el_vector; lep_charge = el_charge; v_lep=v_elec;}
         if (is_mu){n_lep_v = n_muon_v; n_lep10_v = n_muon10_v; lep_vector = mu_vector;loose_lep_vector = loose_mu_vector; lep_charge = mu_charge; v_lep=v_muon;}
             //-------------MET--------------------------------------------------//
+        float uncorec_metpt=0.,uncorec_metphi=0.;
             for (unsigned int nu =0; nu < METPt->size(); nu++)
                 {
+                uncorec_metpt=Uncorec_METPt->at(nu);
+                uncorec_metphi=Uncorec_METPhi->at(nu);
                 v_met.SetPxPyPzE(METPx->at(0),METPy->at(0),METPz->at(0),METE->at(0));
                 }
             //----------------------------------PF Jets------------------------------------------------//
@@ -423,22 +434,10 @@ int test_njets20=0;
             vector<TLorentzVector>jet_vector;
             vector<double> JER_Uncer;
             TLorentzVector metp4;
+	    TLorentzVector lorenz_v_raw;
             int n_bjets_t=0; 
             for (unsigned int pf=0;pf < patJetPfAk04PtJERSmear->size();++pf){
-              if(patJetPfAk04PtJERSmear->at(pf) > 20.&& fabs(patJetPfAk04Eta_->at(pf)) < 2.4 && patJetPfAk04LooseId_->at(pf)>0){
-                TLorentzVector v_jetsTemp20;
-       v_jetsTemp20.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
-       if (n_lep_v.size()>0)DR_mu_j= DeltaR(loose_lep_vector[0].Eta(), v_jetsTemp20.Eta(), loose_lep_vector[0].Phi(), v_jetsTemp20.Phi());
-                if(DR_mu_j>=0.4){
-                  test_njets20++;
-              }}
-
-              if(patJetPfAk04PtJERSmear->at(pf) > 30.&& fabs(patJetPfAk04Eta_->at(pf)) < 2.4 && patJetPfAk04LooseId_->at(pf)>0){
-                TLorentzVector v_jetsTemp;
-                v_jetsTemp.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
-                if (lep_vector.size()>0)DR_mu_j= DeltaR(lep_vector[0].Eta(), v_jetsTemp.Eta(), lep_vector[0].Phi(), v_jetsTemp.Phi());
-                if(DR_mu_j<0.4)continue;
-              n_pat_jets++;
+lorenz_v_raw.SetPtEtaPhiE(patJetPfAk04RawPt_->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04RawEn_->at(pf));
               Up = patJetPfAk04PtJERSmearUp->at(pf);//Fix Me I will be after or before the cut
               Dn = patJetPfAk04PtJERSmearDn->at(pf);
               Cn = patJetPfAk04PtJERSmear->at(pf);
@@ -446,6 +445,14 @@ int test_njets20=0;
               sig_Dn=abs(Dn-Cn)/Cn;
               JER_Uncer.push_back(max(sig_Up,sig_Dn));
               jesUnc= unc_->at(pf);
+	      int looseId=0;
+if (patJetPfAk04LooseId_->at(pf) > 0)looseId=1;
+              if(patJetPfAk04PtJERSmear->at(pf) > 20.&& fabs(patJetPfAk04Eta_->at(pf)) < 2.4 && patJetPfAk04LooseId_->at(pf)>0){
+                TLorentzVector v_jetsTemp;
+                v_jetsTemp.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
+                if (lep_vector.size()>0)DR_mu_j= DeltaR(lep_vector[0].Eta(), v_jetsTemp.Eta(), lep_vector[0].Phi(), v_jetsTemp.Phi());
+                if(DR_mu_j<0.4)continue;
+              n_pat_jets++;
               v_jets.SetPtEtaPhiE(patJetPfAk04PtJERSmear->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
               jp4_Up.SetPtEtaPhiE(patJetPfAk04PtJERSmearUp->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
               jp4_Dn.SetPtEtaPhiE(patJetPfAk04PtJERSmearDn->at(pf),patJetPfAk04Eta_->at(pf),patJetPfAk04Phi_->at(pf),patJetPfAk04En_->at(pf));
@@ -457,19 +464,18 @@ int test_njets20=0;
               jet_cMult=patJetPfAk04cmult_->at(pf);
               no_jets.push_back(n_pat_jets);
               int jflav( abs(patJetPfAk04PartonFlavour_->at(pf)) );
-              if (cMVAv2>0.185){
+              if (cMVAv2>0.4432){
                 n_bjets_t++;
               n_bjets_vector.push_back(n_bjets_t);
               }
-              bool isBTagged(cMVAv2>0.185);
-              if(!realdata){
+              bool isBTagged(cMVAv2>0.4432);
+/*              if(!realdata){
                 float jptForBtag(v_jets.Pt()>1000. ? 999. : v_jets.Pt()), jetaForBtag(fabs(v_jets.Eta()));
                 float expEff(1.0), jetBtagSF(1.0);
                 if(abs(jflav)==4){
                   ncjets++;
                   expEff    = expBtagEff["c"]->Eval(jptForBtag);
                   jetBtagSF = sfcReaders[0]->eval( BTagEntry::FLAV_C, jetaForBtag, jptForBtag);
-                //  cout<<"jetBtagSF for c:  "<<jetBtagSF<<endl;
                   jetBtagSF *= expEff>0 ? expBtagEff["c"]->Eval(jptForBtag)/expBtagEff["c"]->Eval(jptForBtag) : 0.;
                   }
                 else if(abs(jflav)==5){
@@ -488,18 +494,19 @@ int test_njets20=0;
               }
 
 //              cout<<"this is isBTagged:  "<<isBTagged<<endl;
-              if(isBTagged){
-                n_bjets_v.push_back(n_pat_bjets); 
+*/              if(isBTagged){
+if (run==1&& lumi_==214204 && event==34315481)cout<<"this is n_pat_bjets:  "<<n_pat_bjets<<endl;
+                n_bjets_v.push_back(n_pat_jets); 
                 bjets_v.push_back(v_jets);
                 v_bjets=v_jets;
                 TLorentzVector *lepT, *bjetsT;    
                 lepT= &v_lep;
                 bjetsT= &v_bjets;
-                double test;
+/*                double test;
                 NeutrinoSolver NS(lepT, bjetsT);
                 metp4 = TLorentzVector(NS.GetBest(v_met.X(), v_met.Y(), 1., 1., 0.,test));
                 if (test == -1 )continue;
-                }
+*/                }
 
               if(!isBTagged){//Fix me, I have some some events with isBTagged==0 but cMVA>0.185
                 temp1.push_back(v_jets);
@@ -523,7 +530,6 @@ int test_njets20=0;
               EJets+=v_jetAll[i].E();
                 }
               }
-
 
 //-----------------------------------------------
       // Trig SF
@@ -575,8 +581,8 @@ int test_njets20=0;
      if (!realdata)w*=lepTriggerSF[0]*lepidSF[0]*lepisoSF[0];
 
 
-     cout<<"this is only w:  "<<w<<endl;
-     w*=lepTriggerSF[0];
+//     cout<<"this is only w:  "<<w<<endl;
+/*     w*=lepTriggerSF[0];
      cout<<"this is w1:  "<<w<<endl;
      w*=lepTriggerSF[0]*lepidSF[0];
      cout<<"this is  w2:  "<<w<<endl;
@@ -584,27 +590,39 @@ int test_njets20=0;
      cout<<"this is  w3:  "<<w<<endl;
      w*=lepTriggerSF[0]*lepidSF[0]*lepisoSF[0];
 cout<<"this is final w: :::::::::"<<w<<endl;
-
+*/
 
    bool lep0_cut(false), lep1_cut(false), trans_mW_cut(false),jets_cut(false), bjets_cut(false), ljets_cut(false);
               if (is_mu)if (n_elec_v.size() ==0 && n_elec20_v.size() ==0 )lep0_cut=true;
               if (!is_mu)if (n_muon_v.size() ==0 && n_muon10_v.size() ==0)lep0_cut=true;
               if(n_lep_v.size() == 1 && n_lep10_v.size() ==1)lep1_cut=true;
+if (run==280018 && lumi_==426 && event==735899762){cout<< "n_lep_v.size():  "<<n_lep_v.size()<<",  n_lep10_v.size():  "<<n_lep10_v.size() <<"   **************"<<endl;}
 double trans_m_w=0.;
 if (lep_vector.size()>0)trans_m_w=sqrt(pow(lep_vector[0].Pt() + v_met.Pt(), 2) - pow(lep_vector[0].Px() + v_met.Px(), 2) - pow(lep_vector[0].Py() + v_met.Py(), 2));
               if (trans_m_w > 50.)trans_mW_cut=true;
               if(n_pat_jets > 3)jets_cut=true;
-              if (bjets_v.size() > 1)bjets_cut=true;
+              if (n_bjets_v.size() > 1)bjets_cut=true;
+test1<< run<<":"<< lumi_ << ":"<< event <<","<<endl;
+test1<< "n_ljets_v: "<< n_ljets_v.size()<<",  n_pat_jets: "<<n_pat_jets<<",  n_bjets_v.size():  "<<n_bjets_v.size()<<",   bjets_v.size() : "<<bjets_v.size()<<endl;
               if(n_ljets_v.size() > 1)ljets_cut=true;
+//cout<<"#jets:  "<<n_pat_jets<<", #bjets:  "<<bjets_v.size()<<", #ljets:  "<<n_ljets_v.size()<<endl;
 //----------------Rochester algorithm----------------
 if (lep0_cut ){h_events_eachCut->Fill(1.,w);
     if (lep1_cut){h_events_eachCut->Fill(2.,w);
+outputFile2<< run<<":"<< lumi_ << ":"<< event <<","<<endl;
+
     h_M_t->Fill(trans_m_w,w);
+test3<< run<<":"<< lumi_ << ":"<< event <<","<<endl;
+if(run==1 && lumi_==205654 && event==32945872)cout<<"trans_mW_cut:  "<<trans_m_w<<endl;
+if(run==1 && lumi_==328476 && event==52621878)cout<<"trans_mW_cut:  "<<trans_m_w<<endl;
        if (trans_mW_cut){h_events_eachCut->Fill(3,w);h_events_eachCut_el->Fill(0.,w);
+test2<< run<<":"<< lumi_ << ":"<< event <<","<<endl;
           h_no_Jets->Fill(n_pat_jets,w);
           h_no_Jets20->Fill(test_njets20,w);
           if (jets_cut){ h_events_eachCut->Fill(4.,w);h_events_eachCut_el->Fill(1.,w);
               if (bjets_cut){h_events_eachCut->Fill(5.,w);h_events_eachCut_el->Fill(2.,w);
+outputFile3<< run<<":"<< lumi_ << ":"<< event <<","<<endl;
+
                   if (ljets_cut){h_PU_npT->Fill(PU_npT,w);
                     h_n_ljets_aft->Fill(ljets_v.size(),w);
                     h_n_bjets_aft->Fill(n_bjets_v.size(),w);
@@ -717,7 +735,10 @@ if (lep0_cut ){h_events_eachCut->Fill(1.,w);
     h_Pt_tt->Fill((Tlep+Thad).Pt(),w);
     if (costheta!=999.)leptop_cos_ttrest->Fill(costheta,w);
     }
-}}}}}}
+}
+}}}}}
+
+//}}}// objects testing
  // TTree weight_tree;
 //  weight_tree = new TTree("tree","tree");
 //  weight_tree->Fill();

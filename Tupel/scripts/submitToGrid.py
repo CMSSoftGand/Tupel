@@ -8,7 +8,7 @@ creates the crab cfg and submits the job
 """
 def submitProduction(tag,lfnDirBase,dataset,isData,cfg,workDir,lumiMask,submit=False):
     
-    jecDB="Spring16_25nsV6_DATA.db" if isData else "Spring16_25nsV6_MC.db"
+    jecDB="Summer16_23Sep2016AllV2_DATA.db" if isData else "Summer16_23Sep2016V2_MC.db"
     os.system('ln -s ${CMSSW_BASE}/src/Tupel/Tupel/data/era2016/%s' % jecDB)
 
 #    muCorFile='RoccoR_13tev.txt'
@@ -32,20 +32,21 @@ def submitProduction(tag,lfnDirBase,dataset,isData,cfg,workDir,lumiMask,submit=F
     config_file.write('config.JobType.psetName = "'+cfg+'"\n')
     config_file.write('config.JobType.disableAutomaticOutputCollection = False\n')
     config_file.write('config.JobType.pyCfgParams = [\'runOnData=%s\']\n' % bool(isData))    
-#    config_file.write('config.JobType.inputFiles = [\'%s\',\'%s\']\n'%(jecDB,muCorFile))
+#    config_file.write('config.JobType.inputFiles = [\'%s\',\'%s\']\n'%(jecDB))
     config_file.write('config.JobType.inputFiles = [\'%s\']\n'%(jecDB))
     config_file.write('\n')
     config_file.write('config.section_("Data")\n')
     config_file.write('config.Data.inputDataset = "%s"\n' % dataset)
     config_file.write('config.Data.inputDBS = "global"\n')
+#    config_file.write('config.Data.inputDBS = "phys03"\n')
     if isData : 
         config_file.write('config.Data.splitting = "LumiBased"\n')
-        config_file.write('config.Data.unitsPerJob = 6\n')
+        config_file.write('config.Data.unitsPerJob = 5\n')
         config_file.write('config.Data.totalUnits= -1\n')
         config_file.write('config.Data.lumiMask = \'%s\'\n' %lumiMask)
     else : 
         config_file.write('config.Data.splitting = "LumiBased"\n')
-        config_file.write('config.Data.unitsPerJob = 100\n')
+        config_file.write('config.Data.unitsPerJob = 80\n')
         config_file.write('config.Data.totalUnits= -1\n')
     config_file.write('config.Data.publication = False\n')
     config_file.write('config.Data.ignoreLocality = False\n')
@@ -68,8 +69,8 @@ def main():
     parser.add_option('-c', '--cfg',         dest='cfg'   ,      help='cfg to be sent to grid',       default=None,    type='string')
     parser.add_option('-j', '--json',        dest='json'  ,      help='json with list of files',      default=None,    type='string')
     parser.add_option('-o', '--only',        dest='only'  ,      help='submit only these (csv)',      default=None,    type='string')
-    parser.add_option('-l', '--lumi',        dest='lumiMask',    help='json with list of good lumis', default='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-277148_13TeV_PromptReco_Collisions16_JSON.txt')
-    parser.add_option('-w', '--workDir',     dest='workDir',     help='working directory',            default='grid',  type='string')
+    parser.add_option('-l', '--lumi',        dest='lumiMask',    help='json with list of good lumis', default='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Final/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt')
+    parser.add_option('-w', '--workDir',     dest='workDir',     help='working directory',            default='sys_samples_grid',  type='string')
     parser.add_option(      '--lfn',         dest='lfn',         help='base lfn to store outputs',    default='/store/group/phys_top/psilva/', type='string')
     parser.add_option('-s', '--submit',      dest='submit',      help='submit jobs',                  default=False,   action='store_true')
     (opt, args) = parser.parse_args()

@@ -82,7 +82,7 @@ private:
   /// everything that needs to be done during the event loop 
   virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
-  /// everything that needs to be done after the event loop
+/// everything that needs to be done after the event loop
 //   double getJER(double jetEta, int sysType);
   virtual void endJob() ;
   std::string channel_;
@@ -90,10 +90,7 @@ private:
   std::string elecMatch_;
   std::string muonMatch_;
   std::string muonMatch2_;
-EffectiveAreas effAreas_;
-//  std::unique_ptr<EffectiveAreas> ea_;
   edm::EDGetTokenT<pat::Photon> photonSrc_;
-//  edm::EDGetTokenT<pat::ElectronCollection> elecSrc_;
   edm::EDGetTokenT<edm::View<pat::Electron> > electronToken_;
   edm::EDGetTokenT<edm::ValueMap<bool> > eleIdvetoToken_;
   edm::EDGetTokenT<edm::ValueMap<bool> > eleIdlooseToken_;
@@ -128,10 +125,9 @@ EffectiveAreas effAreas_;
 
   // ----------member data ---------------------------
   TTree *myTree;
-  double MyWeight;
   unsigned int event,run,lumi;
   int realdata,bxnumber;
-  double EvtInfo_NumVtx,PU_npT,PU_npIT,nup,lheSigEvn,first_PV;
+  double EvtInfo_NumVtx,PU_npT,PU_npIT,nup,first_PV;
     double wtot_write=0;
     bool accept=false;
   //particles
@@ -199,22 +195,6 @@ EffectiveAreas effAreas_;
   std::vector<double> St01PhotonMomId;
   std::vector<double> St01PhotonNumberMom;
   std::vector<double> St01PhotonStatus;
-  std::vector<double> GjPt;
-  std::vector<double> Gjeta;
-  std::vector<double> Gjphi;
-  std::vector<double> GjE;
-  std::vector<double> GjPx;
-  std::vector<double> GjPy;
-  std::vector<double> GjPz;
-  std::vector<double> GjChargedFraction;
-std::vector<double> GjConstId;
-std::vector<double> GjNConst;
-std::vector<double> GjConstPt;
-std::vector<double> GjConstCharge;
-std::vector<double> GjConstEta;
-std::vector<double> GjConstPhi;
-std::vector<double> GjConstE;
-
 
   std::vector<bool> matchGjet;
   std::vector<double> MGjPt;
@@ -251,13 +231,6 @@ std::vector<double> GjConstE;
   std::vector<double> patJetPfAk04RawEn_;
   std::vector<double> patJetPfAk04HadEHF_;
   std::vector<double> patJetPfAk04EmEHF_;
-  //std::vector<double> patJetPfAk04jetBSZ_;
-  //std::vector<double> patJetPfAk04jetBZ_;
-  std::vector<double> patJetPfAk04jetBetaClassic_;
-  std::vector<double> patJetPfAk04jetBeta_;
-  std::vector<double> patJetPfAk04jetBetaStar_;
-  std::vector<double> patJetPfAk04jetBetaStarClassic_;
-  std::vector<double> patJetPfAk04jetpuMVA_;
   std::vector<double> patJetPfAk04chf_;
   std::vector<double> patJetPfAk04nhf_;
   std::vector<double> patJetPfAk04cemf_;
@@ -265,9 +238,6 @@ std::vector<double> GjConstE;
   std::vector<double> patJetPfAk04muf_;
   std::vector<double> patJetPfAk04cmult_;
   std::vector<double> patJetPfAk04nconst_;
-  std::vector<bool> patJetPfAk04jetpukLoose_;
-  std::vector<bool> patJetPfAk04jetpukMedium_;
-  std::vector<bool> patJetPfAk04jetpukTight_;
   std::vector<double> patJetPfAk04PtUp_;
   std::vector<double> patJetPfAk04PtDn_;
   std::vector<double> patJetPfAk04BDiscdeepFudsg_;
@@ -298,7 +268,6 @@ std::vector<double> patJetPfAk04ConstE;
   std::vector<double> patMuonLooseId_;
   std::vector<double> patMuonMediumId_;
   std::vector<double> patMuonTightId_;
-  std::vector<double> patMuonTrig_;
   std::vector<double> patMuonDetIsoRho_;
   std::vector<double> patMuonPfIsoDbeta_;
   std::vector<double> patMuonM_;
@@ -321,8 +290,6 @@ std::vector<double> patJetPfAk04ConstE;
   std::vector<double> patMuon_PF_IsoSumChargedHadronPt_;
   std::vector<double> patMuon_PF_IsoSumNeutralHadronEt_;
   std::vector<double> patMuon_PF_IsoDY_;
-  std::vector<double> patMuon_Mu17_Mu8_Matched_;
-  std::vector<double> patMuon_Mu17_TkMu8_Matched_; 
   std::vector<unsigned>  patElecIdveto_;
   std::vector<unsigned>  patElecIdloose_;
   std::vector<unsigned>  patElecIdmedium_;
@@ -338,18 +305,13 @@ std::vector<double> patJetPfAk04ConstE;
     std::vector<double> patElecdz_;
     std::vector<int>   patElecexpectedMissingInnerHits_;
     std::vector<int>   patElecpassConversionVeto_;     
-  std::vector<double> patElecTrig_;
   std::vector<double> patElecDz_;
-  std::vector<double> patElecMVATrigId_;
-  std::vector<double> patElecMVANonTrigId_;
   std::vector<double> patElecPt_;
   std::vector<double> patElecEta_;
   std::vector<double> patElecScEta_;
   std::vector<double> patElecPhi_;
   std::vector<double> patElecEnergy_;
   std::vector<double> patElecCharge_;
-  std::vector<double> patElecMediumIDOff_;
-  std::vector<double> patElecMediumIDOff_Tom_;
   std::vector<double> patPfCandPt;
   std::vector<double> patPfCandEta;
   std::vector<double> patPfCandPhi;
@@ -379,11 +341,6 @@ std::vector<double> patPfCandVertexRef;
   std::vector<double> patElecPfIsoRho_;
   std::vector<unsigned>  patElecId_;
   std::vector<double> charged_;
-  std::vector<double> photon_;
-  std::vector<double> neutral_;
-  std::vector<double> charged_Tom_;
-  std::vector<double> photon_Tom_;
-  std::vector<double> neutral_Tom_;
   std::vector<double> patElec_mva_presel_;
   std::vector<double> id1_pdfInfo_;
   std::vector<double> id2_pdfInfo_;
@@ -416,8 +373,6 @@ using namespace std;
 using namespace reco;
 int ccnevent=0;
 Tupel::Tupel(const edm::ParameterSet& iConfig)
-
-
 
 {
 //trigger_( iConfig.getParameter< edm::InputTag >( "trigger" ) ),
@@ -592,9 +547,7 @@ patPfCandVertexRef.clear();
     EvtInfo_NumVtx=0;
     PU_npT=0;
     PU_npIT=0;
-    MyWeight=0;
     nup=0;
-    lheSigEvn=0;
     rhoPrime=0;
     AEff=0; 
     Uncorec_METPt.clear();
@@ -661,36 +614,11 @@ St03NumberMom.clear();
     St01PhotonMomId.clear();
     St01PhotonNumberMom.clear();
     St01PhotonStatus.clear();
-    GjPt.clear();
-    Gjeta.clear();
-    Gjphi.clear();
-    GjE.clear();
-    GjPx.clear();
-    GjPy.clear();
-    GjPz.clear();
-    GjChargedFraction.clear();
-      GjConstId.clear();
-GjNConst.clear();
-      GjConstPt.clear();
-GjConstCharge.clear();
-      GjConstEta.clear();
-      GjConstPhi.clear();
-      GjConstE.clear();
-
     matchGjet.clear();
     MGjPt.clear();
     MGjeta.clear();
     MGjphi.clear();
     MGjE.clear();
-/*    caloJetPt_.clear();
-    caloJetRawPt_.clear();
-    caloJetEn_.clear();
-    caloJetEta_.clear();
-    caloJetPhi_.clear();
-    caloJetHadEHF_.clear();
-    caloJetEmEHF_.clear();
-    caloJetEmFrac_.clear();
-    caloJetn90_.clear();*/
     patJetPfAk04PtJERSmear.clear();
     patJetPfAk04PtJERSmearUp.clear();
     patJetPfAk04PtJERSmearDn.clear();
@@ -710,13 +638,6 @@ GjConstCharge.clear();
     patJetPfAk04RawEn_.clear();
     patJetPfAk04HadEHF_.clear();
     patJetPfAk04EmEHF_.clear();
-    //patJetPfAk04jetBSZ_.clear();
-    //patJetPfAk04jetBZ_.clear();
-    patJetPfAk04jetBetaClassic_.clear();
-    patJetPfAk04jetBeta_.clear();
-    patJetPfAk04jetBetaStar_.clear();
-    patJetPfAk04jetBetaStarClassic_.clear();
-    patJetPfAk04jetpuMVA_.clear();
     patJetPfAk04chf_.clear();
     patJetPfAk04nhf_.clear();
     patJetPfAk04cemf_.clear();
@@ -724,9 +645,6 @@ GjConstCharge.clear();
     patJetPfAk04muf_.clear();
     patJetPfAk04cmult_.clear();
     patJetPfAk04nconst_.clear();
-    patJetPfAk04jetpukLoose_.clear();
-    patJetPfAk04jetpukMedium_.clear();
-    patJetPfAk04jetpukTight_.clear();
     patJetPfAk04PtUp_.clear();
     patJetPfAk04PtDn_.clear();
     patJetPfAk04BDiscdeepFudsg_.clear();
@@ -756,7 +674,6 @@ GjConstCharge.clear();
     patMuonLooseId_.clear();
     patMuonMediumId_.clear();
     patMuonTightId_.clear();
-    patMuonTrig_.clear();
     patMuonDetIsoRho_.clear();
     patMuonPfIsoDbeta_.clear();
     patMuonM_.clear();
@@ -779,8 +696,6 @@ GjConstCharge.clear();
     patMuon_PF_IsoSumChargedHadronPt_.clear();
     patMuon_PF_IsoSumNeutralHadronEt_.clear();
     patMuon_PF_IsoDY_.clear();
-    patMuon_Mu17_Mu8_Matched_.clear();
-    patMuon_Mu17_TkMu8_Matched_.clear();
     //electrons
     patElecIdveto_.clear();
     patElecIdloose_.clear();
@@ -796,32 +711,22 @@ GjConstCharge.clear();
     patElecdz_.clear();
     patElecexpectedMissingInnerHits_.clear();
     patElecpassConversionVeto_.clear();     
-    patElecTrig_.clear();
     patElecDz_.clear();
-    patElecMVATrigId_.clear();
-    patElecMVANonTrigId_.clear();
     patElecPt_.clear();
     patElecEta_.clear();
     patElecScEta_.clear();
     patElecPhi_.clear();
     patElecEnergy_.clear();
     patElecCharge_.clear();
-    patElecMediumIDOff_.clear();
-    patElecMediumIDOff_Tom_.clear();
-  patElecchIso03_.clear();
-  patElecnhIso03_.clear();
-  patElecphIso03_.clear();
-  patElecpuChIso03_.clear();
+    patElecchIso03_.clear();
+    patElecnhIso03_.clear();
+    patElecphIso03_.clear();
+    patElecpuChIso03_.clear();
     patElecPfIso_.clear();
     patElecPfIsodb_.clear();
     patElecPfIsoRho_.clear();
-  patElecId_.clear();
+    patElecId_.clear();
     charged_.clear();
-    photon_.clear();  
-    neutral_.clear();
-    charged_Tom_.clear();
-    photon_Tom_.clear();
-    neutral_Tom_.clear();
     patElec_mva_presel_.clear();
     //HLT 
     
@@ -1233,8 +1138,6 @@ if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trign
       }
     }
     double MuFill=0;
-    double Mu17_Mu8_Matched=0;
-    double Mu17_TkMu8_Matched=0;
         //cout<<"dddddddddddddddddd"<<endl;
     if(muon){
     for (unsigned int j = 0; j < muons->size(); ++j){
@@ -1242,16 +1145,6 @@ if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trign
 //     if(recomu[j].isGlobalMuon()){ 
         if((channel_!="noselection")&&(mu[j].pt()<15 || abs(mu[j].eta())>2.4))continue;
         if((channel_=="noselection")&&(mu[j].pt()<10 || abs(mu[j].eta())>3.0))continue;
-	//const pat::TriggerObjectRef trigRef( matchHelper.triggerMatchObject( muons,j,muonMatch_, iEvent, *triggerEvent ) );
-	//if ( trigRef.isAvailable() && trigRef.isNonnull() ) {
-	//  Mu17_Mu8_Matched=1;
-//	}
-//	const pat::TriggerObjectRef trigRef2( matchHelper.triggerMatchObject( muons,j,muonMatch2_, iEvent, *triggerEvent ) );
-//	if ( trigRef2.isAvailable() && trigRef2.isNonnull() ) {
-//	  Mu17_TkMu8_Matched=1;
-//	}
-	patMuon_Mu17_Mu8_Matched_.push_back(Mu17_Mu8_Matched);
-	patMuon_Mu17_TkMu8_Matched_.push_back(Mu17_TkMu8_Matched);
 	//MuFill=1;
 	patMuonPt_.push_back(mu[j].pt());
 	patMuonEta_.push_back(mu[j].eta());
@@ -1308,9 +1201,6 @@ if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trign
         patMuonTightId_.push_back(tightid);
 	if(mu[j].isGlobalMuon() && mu[j].isPFMuon() && normChi2<10 && muonHits>0 && nMatches>1 && mu[j].dB()<0.2 && dZ<0.5 && pixelHits>0 && trkLayers>5)idpass=1;
 	patMuonCombId_.push_back(idpass);
-	int TrigSum=0;
-	if(Mu17_Mu8_Matched==1) TrigSum=1;
-	patMuonTrig_.push_back(TrigSum);
 	float muEta = mu[j].eta(); // essentially track direction at Vtx (recommended prescription)
 	float Aecal=0.041; // initiallize with EE value
 	float Ahcal=0.032; // initiallize with HE value
@@ -1440,14 +1330,9 @@ if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trign
            patElecIdmedium_.push_back(isPassEle_mediumId);
            patElecIdtight_.push_back(isPassEle_tightId);
       	   patElec_mva_presel_.push_back(isPassEle_HLTPrese);
-      double Elec17_Elec8_Matched=0;
-      patElecTrig_.push_back(Elec17_Elec8_Matched);//no matching yet...BB 
       reco::Vertex::Point pos(0,0,0);
       if(vtx_h->size() > 0) pos = vtx_h->at(0).position();
       patElecDz_.push_back(el.gsfTrack()->dz(pos));
-      const string mvaTrigV0 = "mvaTrigV0";
-      const string mvaNonTrigV0 = "mvaNonTrigV0";
-      
       patElecPt_.push_back(el.pt());
       patElecEta_.push_back(el.eta());
       
@@ -1455,12 +1340,15 @@ if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trign
       patElecPhi_.push_back(el.phi());	
       patElecEnergy_.push_back(el.energy());
       patElecCharge_.push_back(el.charge());
-//const float eA = effAreas_.getEffectiveArea(fabs(el.superCluster()->eta()));
- //    cout<<"this is ea:  "<<ea_.release()<<endl;
-//AEff = ea_.getEffectiveArea(fabs(el.superCluster()->eta()));
-//      AEff = ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03, el.superCluster()->eta(), ElectronEffectiveArea::kEleEAData2012);
+	float elec_SCEta = fabs(el.superCluster()->eta());
+	if (0.0 < elec_SCEta && elec_SCEta <= 1.0)AEff=0.1703;	
+	if (1.0 < elec_SCEta && elec_SCEta <= 1.479)AEff=0.1715;	
+	if (1.479 < elec_SCEta && elec_SCEta <= 2.0)AEff=0.1213;	
+	if (2.0 < elec_SCEta && elec_SCEta <= 2.2)AEff=0.1230;	
+	if (2.2 < elec_SCEta && elec_SCEta <= 2.3)AEff=0.1635;	
+	if (2.3 < elec_SCEta && elec_SCEta <= 2.4)AEff=0.1937;	
+	if (2.4 < elec_SCEta && elec_SCEta <= 5.0)AEff=0.2393;
       rhoPrime = std::max(rhoIso, 0.0);
-      
       const double chIso03_ = el.chargedHadronIso();
       const double nhIso03_ = el.neutralHadronIso();
       const double phIso03_ = el.photonIso();
@@ -1650,34 +1538,10 @@ if(
 
 void
 Tupel::beginRun(edm::Run const& iRun, edm::EventSetup const&){
-
-
-/*
-edm::Handle<LHERunInfoProduct> run;
- 
-typedef std::vector<LHERunInfoProduct::Header>::const_iterator headers_const_iterator;
- 
-iRun.getByToken( "externalLHEProducer", run );
-// iRun.getByToken( "source", run );
-LHERunInfoProduct myLHERunInfoProduct = *(run.product());
- 
-for (headers_const_iterator iter=myLHERunInfoProduct.headers_begin(); iter!=myLHERunInfoProduct.headers_end(); iter++){
-  std::cout << iter->tag() << std::endl;
-  std::vector<std::string> lines = iter->lines();
-  for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
-   std::cout << lines.at(iLine);
-  }
-}
-*/
 }
 void 
 Tupel::beginJob()
 {
-  
-//  jecUnc = new JetCorrectionUncertainty(jecunctable_);
-
-
-//jecUnc = new JetCorrectionUncertainty("aaaa");
     // register to the TFileService
     edm::Service<TFileService> fs;
     TFileDirectory TestDir = fs->mkdir("test");
@@ -1763,7 +1627,6 @@ Tupel::beginJob()
     myTree->Branch("first_PV",&first_PV);
     myTree->Branch("PU_npT",&PU_npT);
     myTree->Branch("PU_npIT",&PU_npIT);
-    myTree->Branch("MyWeight",&MyWeight);
 
     myTree->Branch("St03Pt",&St03Pt);
     myTree->Branch("St03Eta",&St03Eta);
@@ -1774,33 +1637,6 @@ Tupel::beginJob()
     myTree->Branch("St03Status",&St03Status);
     myTree->Branch("St03MotherId",&St03MotherId);
     myTree->Branch("St03NumberMom",&St03NumberMom);    
-
-/*    
-    myTree->Branch("St01PhotonPt",&St01PhotonPt);
-    myTree->Branch("St01PhotonEta",&St01PhotonEta);
-    myTree->Branch("St01PhotonPhi",&St01PhotonPhi);
-    myTree->Branch("St01PhotonE",&St01PhotonE);
-    myTree->Branch("St01PhotonM",&St01PhotonM);
-    myTree->Branch("St01PhotonId",&St01PhotonId);
-    myTree->Branch("St01PhotonMomId",&St01PhotonMomId);
-    myTree->Branch("St01PhotonNumberMom",&St01PhotonNumberMom);
-    myTree->Branch("St01PhotonStatus",&St01PhotonStatus);
-  */  
-    myTree->Branch("GjPt",&GjPt);
-    myTree->Branch("Gjeta",&Gjeta);
-    myTree->Branch("Gjphi",&Gjphi);
-    myTree->Branch("GjE",&GjE);
-    myTree->Branch("GjPx",&GjPx);
-    myTree->Branch("GjPy",&GjPy);
-    myTree->Branch("GjPz",&GjPz);
-    myTree->Branch("GjChargedFraction",&GjChargedFraction);
-    myTree->Branch("GjConstId",&GjConstId);
-    myTree->Branch("GjNConst",&GjNConst);
-    myTree->Branch("GjConstPt",&GjConstPt);
-    myTree->Branch("GjConstCharge",&GjConstCharge);
-    myTree->Branch("GjConstEta",&GjConstEta);
-    myTree->Branch("GjConstPhi",&GjConstPhi);
-    myTree->Branch("GjConstE",&GjConstE);
 
     myTree->Branch("matchGjet",&matchGjet);
     myTree->Branch("MGjPt",&MGjPt);
@@ -1837,7 +1673,6 @@ Tupel::beginJob()
     myTree->Branch("patMuonLooseId_",&patMuonLooseId_);
     myTree->Branch("patMuonMediumId_",&patMuonMediumId_);
     myTree->Branch("patMuonTightId_",&patMuonTightId_);
-    myTree->Branch("patMuonTrig_",&patMuonTrig_);
     myTree->Branch("patMuonDetIsoRho_",&patMuonDetIsoRho_);
     myTree->Branch("patMuonPfIsoDbeta_",&patMuonPfIsoDbeta_);
     myTree->Branch("patMuonM_",&patMuonM_);
@@ -1860,8 +1695,6 @@ Tupel::beginJob()
     myTree->Branch("patMuon_PF_IsoSumChargedHadronPt_",&patMuon_PF_IsoSumChargedHadronPt_);
     myTree->Branch("patMuon_PF_IsoSumNeutralHadronEt_",&patMuon_PF_IsoSumNeutralHadronEt_);
     myTree->Branch("patMuon_PF_IsoDY_",&patMuon_PF_IsoDY_);
-    myTree->Branch("patMuon_Mu17_Mu8_Matched_",&patMuon_Mu17_Mu8_Matched_);
-    myTree->Branch("patMuon_Mu17_TkMu8_Matched_",&patMuon_Mu17_TkMu8_Matched_);
 
     myTree->Branch("patElecIdveto_",&patElecIdveto_);
     myTree->Branch("patElecIdloose_",&patElecIdloose_);
@@ -1877,18 +1710,13 @@ Tupel::beginJob()
     myTree->Branch("patElecdz_",&patElecdz_);
     myTree->Branch("patElecexpectedMissingInnerHits_",&patElecexpectedMissingInnerHits_);
     myTree->Branch("patElecpassConversionVeto_",&patElecpassConversionVeto_);     
-    myTree->Branch("patElecTrig_",&patElecTrig_);
     myTree->Branch("patElecDz_",&patElecDz_);
-    myTree->Branch("patElecMVATrigId_",&patElecMVATrigId_);
-    myTree->Branch("patElecMVANonTrigId_",&patElecMVANonTrigId_);
     myTree->Branch("patElecPt_",&patElecPt_);
     myTree->Branch("patElecEta_",&patElecEta_);
     myTree->Branch("patElecScEta_",&patElecScEta_);
     myTree->Branch("patElecPhi_",&patElecPhi_);
     myTree->Branch("patElecEnergy_",&patElecEnergy_);
     myTree->Branch("patElecCharge_",&patElecCharge_);
-    myTree->Branch("patElecMediumIDOff_",&patElecMediumIDOff_);
-    myTree->Branch("patElecMediumIDOff_Tom_",&patElecMediumIDOff_Tom_);
 
     myTree->Branch("patElecchIso03_",&patElecchIso03_);
     myTree->Branch("patElecnhIso03_",&patElecnhIso03_);
@@ -1898,12 +1726,7 @@ Tupel::beginJob()
     myTree->Branch("patElecPfIsodb_",&patElecPfIsodb_);
     myTree->Branch("patElecPfIsoRho_",&patElecPfIsoRho_);
     myTree->Branch("rhoPrime",&rhoPrime);
-    myTree->Branch("neutral_",&neutral_);
-    myTree->Branch("photon_",&photon_);
     myTree->Branch("charged_",&charged_);
-    myTree->Branch("neutral_Tom_",&neutral_Tom_);
-    myTree->Branch("photon_Tom_",&photon_Tom_);
-    myTree->Branch("charged_Tom_",&charged_Tom_);
     myTree->Branch("AEff",&AEff);
     myTree->Branch("patElec_mva_presel_",&patElec_mva_presel_);
     
@@ -1933,14 +1756,6 @@ Tupel::beginJob()
     myTree->Branch("patJetPfAk04muf_",&patJetPfAk04muf_);
     myTree->Branch("patJetPfAk04cmult_",&patJetPfAk04cmult_);
     myTree->Branch("patJetPfAk04nconst_",&patJetPfAk04nconst_);
-    myTree->Branch("patJetPfAk04jetBeta_",&patJetPfAk04jetBeta_);
-    myTree->Branch("patJetPfAk04jetBetaClassic_",&patJetPfAk04jetBetaClassic_);
-    myTree->Branch("patJetPfAk04jetBetaStar_",&patJetPfAk04jetBetaStar_);
-    myTree->Branch("patJetPfAk04jetBetaStarClassic_",&patJetPfAk04jetBetaStarClassic_);
-    myTree->Branch("patJetPfAk04jetpuMVA_",&patJetPfAk04jetpuMVA_);
-    myTree->Branch("patJetPfAk04jetpukLoose_",&patJetPfAk04jetpukLoose_);
-    myTree->Branch("patJetPfAk04jetpukMedium_",&patJetPfAk04jetpukMedium_);
-    myTree->Branch("patJetPfAk04jetpukTight_",&patJetPfAk04jetpukTight_);
     myTree->Branch("patJetPfAk04BDiscdeepFudsg_",&patJetPfAk04BDiscdeepFudsg_);
     myTree->Branch("patJetPfAk04BDiscdeepFb_",&patJetPfAk04BDiscdeepFb_);
     myTree->Branch("patJetPfAk04BDiscdeepFbb_",&patJetPfAk04BDiscdeepFbb_);
@@ -1960,15 +1775,6 @@ Tupel::beginJob()
     myTree->Branch("patJetPfAk04ConstE",&patJetPfAk04ConstE);
 
     //CaloJets
- /*   myTree->Branch("caloJetPt_",&caloJetPt_);
-    myTree->Branch("caloJetRawPt_",&caloJetRawPt_);
-    myTree->Branch("caloJetEn_",&caloJetEn_);
-    myTree->Branch("caloJetEta_",&caloJetEta_);
-    myTree->Branch("caloJetPhi_",&caloJetPhi_);
-    myTree->Branch("caloJetHadEHF_",&caloJetHadEHF_);
-    myTree->Branch("caloJetEmEHF_",&caloJetEmEHF_);
-    myTree->Branch("caloJetEmFrac_",&caloJetEmFrac_);
-    myTree->Branch("caloJetn90_",&caloJetn90_);*/
     
     myTree->Branch("id1_pdfInfo_",&id1_pdfInfo_);
     myTree->Branch("id2_pdfInfo_",&id2_pdfInfo_);
@@ -1979,7 +1785,6 @@ Tupel::beginJob()
     myTree->Branch("mcWeight_",&mcWeight_);
     myTree->Branch("mcWeights_",&mcWeights_);
     myTree->Branch("nup",&nup);   
-    myTree->Branch("lheSigEvn",&lheSigEvn);   
 }
 /*
 double Tupel::getJER(double jetEta, int sysType){
