@@ -25,10 +25,10 @@ def main():
     pwd=os.getcwd()
     os.system("cp $X509_USER_PROXY /user/$USER/" )
 #    os.system("export X509_USER_PROXY=/user/$USER/x509up_$(id -u $USER)" )
-    if os.path.exists("tmp_combine"):
-        os.system("rm -rf tmp_combine/")
-    os.system("mkdir tmp_combine/")
-    os.chdir("tmp_combine")
+    if os.path.exists("tmp_combine_elecdata"):
+        os.system("rm -rf tmp_combine_elecdata/")
+    os.system("mkdir tmp_combine_elecdata/")
+    os.chdir("tmp_combine_elecdata")
     dset_list=getEOSlslist(directory=opt.inDir,prepend='')
     for dset in dset_list:
         dsetname=dset.split('/')[-1]

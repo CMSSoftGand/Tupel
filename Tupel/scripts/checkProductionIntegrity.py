@@ -77,9 +77,15 @@ def main():
         moveIndividualFiles=True
         if len(file_list)>0:
                #subgroupMerge = int( raw_input('This set has %d files. Merge into groups? (enter 0 if no merging)' % len(file_list)) )
-            subgroupMerge=100 if 'Data' in dsetname else 10 
-            if 'TTJets' or 'WJets' or 'DYJets' in pub : subgroupMerge=50
-            if 'GluGlu' in pub : subgroupMerge=5
+            if 'Data' in pub:subgroupMerge=70  
+            elif 'TTJets' in pub : subgroupMerge=50
+            elif 'TTWJets' in pub : subgroupMerge=10
+            elif 'TTZToLL' in pub : subgroupMerge=10
+            elif 'QCD' in pub : subgroupMerge=50
+            elif 'ST_t' in pub : subgroupMerge=10
+            elif 'HToTT-semilep' in pub: subgroupMerge=10 # why this line is not working under the following line??
+            elif 'WJets' or 'DYJets' in pub : subgroupMerge=30
+            else: subgroupMerge=4
 #                if '/store/cmst3/group/hintt' in opt.inDir: 
 #                    subgroupMerge=10 if '/data' in dsetname else 3
 
@@ -114,6 +120,7 @@ def main():
 #                        os.system('cp %s /pnfs/iihe/cms%s/'%(mergedFileName,newDir))
 #                    os.system('srmcp file:///%s srm://maite.iihe.ac.be:8443/pnfs/iihe/cms%s/%s'%(mergedFileName,newDir,mergedFileNameonly))
                     os.system('srmcp file://%s/%s srm://maite.iihe.ac.be:8443/pnfs/iihe/cms%s/%s'%(cwd,mergedFileName,newDir,mergedFileNameonly))
+                    print'this is srmcp file:///%s srm://maite.iihe.ac.be:8443/pnfs/iihe/cms%s/%s'%(mergedFileName,newDir,mergedFileNameonly)
                     os.system('rm %s'%mergedFileName)
                         #os.system('xrdcp  -f %s root://eoscms//eos/cms/%s/MergedMiniEvents_%d.root' %(mergedFileName,newDir,ilist))
 
