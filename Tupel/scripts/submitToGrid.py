@@ -8,7 +8,7 @@ creates the crab cfg and submits the job
 """
 def submitProduction(tag,lfnDirBase,dataset,isData,cfg,workDir,lumiMask,submit=False):
     
-    jecDB="Summer16_23Sep2016AllV2_DATA.db" if isData else "Summer16_23Sep2016V2_MC.db"
+    jecDB="Summer16_23Sep2016AllV3_DATA.db" if isData else "Summer16_23Sep2016V3_MC.db"
     os.system('ln -s ${CMSSW_BASE}/src/Tupel/Tupel/data/era2016/%s' % jecDB)
 
 #    muCorFile='RoccoR_13tev.txt'

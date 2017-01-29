@@ -30,11 +30,11 @@ dataFile='/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia
 #dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/029FD095-D6BB-E611-A642-848F69FD471E.root'
 #dataFile='root://lyogrid06.in2p3.fr//dpm/in2p3.fr/home/cms/data/store/user/aapopov/Production/HToTT-semilep_pseudoscalar-M750-portmanteau_13TeV-madgraph-pythia8/MiniAOD/160829_105936/0000/AToTT_MiniAOD_10.root'
 jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-jecFile='sqlite:Summer16_23Sep2016V2_MC.db'
+jecFile='sqlite:Summer16_23Sep2016V3_MC.db'
 jecTag='JetCorrectorParametersCollection_Summer16_23Sep2016V2_MC_AK4PFchs'
 if options.runOnData :
 	jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']
-	jecFile='sqlite:Summer16_23Sep2016AllV2_DATA.db'
+	jecFile='sqlite:Summer16_23Sep2016AllV3_DATA.db'
 	jecTag='JetCorrectorParametersCollection_Summer16_23Sep2016AllV2_DATA_AK4PFchs'	
 	dataFile='/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/02148252-C198-E611-9790-0CC47A6C0682.root'
 #	dataFile='/store/data/Run2016B/SingleElectron/MINIAOD/23Sep2016-v3/00000/00099863-E799-E611-A876-141877343E6D.root'
