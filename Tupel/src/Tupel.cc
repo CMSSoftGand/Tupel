@@ -71,17 +71,70 @@ class TTree;
 class Tupel : public edm::EDAnalyzer {
 
 public:
+
+
+/*reco::GenJet const *match(reco::Jet const &jet, reco::GenJet const &genJets,double jetConeSize, double maxDPt) const
+{
+    reco::GenJet const *matchedJet = nullptr;
+    double minDR2 = std::numeric_limits<double>::infinity();
+    double const maxDR2 = jetConeSize * jetConeSize / 4.;
+    
+    for (auto const &genJet: genJets)
+    {
+        double const dR2 = ROOT::Math::VectorUtil::DeltaR2(jet.p4(), genJet.p4());
+        
+        if (dR2 > maxDR2 or dR2 > minDR2)
+            continue;
+        
+        if (std::abs(jet.pt() - genJet.pt()) > maxDPt)
+            continue;
+        
+        minDR2 = dR2;
+        matchedJet = &genJet;
+    }
+    
+    
+    return matchedJet;
+}*/
+
   /// default constructor
   explicit Tupel(const edm::ParameterSet&);
   /// default destructor
   ~Tupel();
 
 private:
+double m_dR_max;
+double m_dPt_max_factor;
 /// everything that needs to be done before the event loop
   virtual void beginJob() ;
   /// everything that needs to be done during the event loop 
   virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
+
+/*reco::GenJet const *match(reco::Jet const &jet,edm::View<reco::GenJet> const &genJets, double resolution)const
+{
+double min_dR = std::numeric_limits<double>::infinity();
+                const reco::GenJet* matched_genJet = nullptr;
+
+                for (const auto& genJet: genJets) {
+                    double dR = deltaR(genJet, jet);
+
+                    if (dR > min_dR)
+                        continue;
+
+                    if (dR < m_dR_max) {
+                        double dPt = std::abs(genJet.pt() - jet.pt());
+                        if (dPt > m_dPt_max_factor * resolution)
+                            continue;
+
+                        min_dR = dR;
+                        matched_genJet = &genJet;
+                    }
+                }
+
+                return matched_genJet;
+            }
+*/
 /// everything that needs to be done after the event loop
 //   double getJER(double jetEta, int sysType);
   virtual void endJob() ;
@@ -102,11 +155,9 @@ private:
   edm::EDGetTokenT<edm::View<pat::Jet> >jetToken_;
 //  edm::EDGetTokenT<edm::ValueMap<double> > deepFJetTags_probudsgToken_;
   edm::EDGetTokenT<reco::GenJetCollection> gjetToken_;
-//  edm::EDGetTokenT<pat::METCollection> metSrc_;
   std::vector<edm::EDGetTokenT<pat::METCollection> > metSources;
   edm::EDGetTokenT<double> mSrcRho_;
-  edm::EDGetTokenT<LHEEventProduct> lheSource_;
-  edm::EDGetTokenT<LHEEventProduct> lheEventToken;
+  edm::EDGetTokenT<LHEEventProduct> lheEventInfoToken;
   edm::EDGetTokenT<reco::GenParticleCollection> genParticleSrc_;
   edm::EDGetTokenT<pat::PackedGenParticleCollection> packedgenParticleSrc_;
 
@@ -116,8 +167,9 @@ private:
   edm::EDGetTokenT<GenEventInfoProduct> genInfoToken_;
   edm::EDGetTokenT<edm::TriggerResults> HLTToken_;
   edm::EDGetTokenT<edm::TriggerResults> HLTTokenFilters_;
+  edm::EDGetTokenT<edm::TriggerResults> eventTokenFilters_;
 
-  edm::EDGetTokenT<LHEEventProduct> lheEventSrc_;
+  edm::EDGetTokenT<LHEEventProduct> lheEventToken_;
   edm::EDGetTokenT<LHERunInfoProduct> lheRunInfoToken_;
   edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   bool elecIdsListed_=false;
@@ -349,6 +401,7 @@ std::vector<double> patPfCandVertexRef;
   std::vector<double> scalePDF_pdfInfo_;
   double ptHat_,mcWeight_; 
   std::vector<double> mcWeights_;
+  std::vector<double> mcWeightsfact_;
   double rhoPrime,AEff;
   //HLT
     double HLT_IsoMu22_v;
@@ -356,7 +409,11 @@ std::vector<double> patPfCandVertexRef;
     double HLT_IsoTkMu22_v;
     double HLT_IsoTkMu24;
 
+  double Flag_badMuons; //TO BE USED
+  double Flag_duplicateMuons; //TO BE USED
   double HLT_Ele32_eta2p1_WPTight_Gsf; //TO BE USED
+  double HLT_Ele25_eta2p1_WPTight_Gsf; //TO BE USED
+  double HLT_Ele27_WPTight_Gsf; //TO BE USED
   double Flag_HBHENoiseFilter; //TO BE USED
   double Flag_HBHENoiseIsoFilter; //TO BE USED
   double Flag_globalTightHalo2016Filter; //TO BE USED
@@ -400,10 +457,8 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
   jetToken_=consumes<edm::View<pat::Jet> >(iConfig.getParameter<edm::InputTag>("jetSrc" ));
 //  deepFJetTags_probudsgToken_=consumes<edm::ValueMap<double> >(iConfig.getParameter<edm::InputTag>("deepFlavourJetTags_probudsg"));
   gjetToken_=consumes<reco::GenJetCollection>(iConfig.getParameter<edm::InputTag>("gjetSrc" ));
-//  metSrc_=consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metSrc"));
   mSrcRho_=consumes<double>(edm::InputTag("fixedGridRhoFastjetAll" ));//hardcode
-  lheSource_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
-  lheEventToken=consumes<LHEEventProduct>(edm::InputTag ("source"));
+  lheEventInfoToken=consumes<LHEEventProduct>(edm::InputTag ("lheEventInfoProduct",""));
 
 
  // metSources(consumes<std::vector< pat::MET > >(iConfig.getParameter<std::vector<edm::InputTag> >("metSource"));
@@ -419,7 +474,8 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
   genInfoToken_=consumes<GenEventInfoProduct>(edm::InputTag ("generator"));//hardcode
   HLTToken_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag > ("HLTSrc"));
   HLTTokenFilters_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerfilters"));
-  lheEventSrc_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
+  eventTokenFilters_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("EvtFilterSrc"));
+  lheEventToken_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
   lheRunInfoToken_=consumes<LHERunInfoProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
   PupSrc_=consumes<std::vector< PileupSummaryInfo> >(edm::InputTag ("slimmedAddPileupInfo"));//hardcode
  for (edm::InputTag const & tag : iConfig.getParameter< std::vector<edm::InputTag> > ("metSource"))metSources.push_back(consumes<pat::METCollection>(tag));
@@ -486,10 +542,6 @@ JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty(JetCorPar);
   edm::Handle<pat::PackedCandidateCollection > pfcand;
   iEvent.getByToken(pfcandSrc_,pfcand);
   const vector<pat::PackedCandidate> * pfcands = pfcand.failedToGet () ? 0 : &*pfcand ;
-  
-  // get met collection  
- // edm::Handle<edm::View<pat::MET> > mets;
-//  iEvent.getByToken(metSrc_,mets);
   
   // get photon collection  
   edm::Handle<edm::View<pat::Photon> > photons;
@@ -729,8 +781,12 @@ St03NumberMom.clear();
     charged_.clear();
     patElec_mva_presel_.clear();
     //HLT 
-    
+   
+      Flag_duplicateMuons=0;
+      Flag_badMuons=0; 
     HLT_Ele32_eta2p1_WPTight_Gsf=0;
+    HLT_Ele25_eta2p1_WPTight_Gsf=0;
+    HLT_Ele27_WPTight_Gsf=0;
       HLT_IsoMu22_v=0;
       HLT_IsoMu24=0;
       HLT_IsoTkMu22_v=0;
@@ -745,6 +801,7 @@ St03NumberMom.clear();
     ptHat_=0;
     mcWeight_=0;
     mcWeights_.clear();
+    mcWeightsfact_.clear();
     ///////////////////end clear vector////////////////////// 
     event = iEvent.id().event();
     run = iEvent.id().run();
@@ -1007,23 +1064,17 @@ int ngjets=0;
 
     //cout<<"aaaaaa"<<endl;
 
-    if (!realdata){
-      //matrix element info
-      Handle<LHEEventProduct> lheH;
-      iEvent.getByToken(lheSource_,lheH);//to be modularized!!!
-      if(lheH.isValid()) nup=lheH->hepeup().NUP;
-    }
     
     //cout<<"bbbbbbbbb"<<endl;
     ////Add 08/27/13//////
       double w=1;
-
     if(!realdata){
       edm::Handle<GenEventInfoProduct>   genEventInfoProd;
       if (iEvent.getByToken(genInfoToken_,genEventInfoProd)) {
 	if (genEventInfoProd->hasBinningValues())
-	  ptHat_ = genEventInfoProd->binningValues()[0];
+	ptHat_ = genEventInfoProd->binningValues()[0];
 	mcWeight_ = genEventInfoProd->weight();
+//cout<<"fact: "<<fact<<endl;
       }
       /// now get the PDF information
       edm::Handle<GenEventInfoProduct> pdfInfoHandle;
@@ -1038,22 +1089,34 @@ int ngjets=0;
 	  scalePDF_pdfInfo_.push_back(pdfInfoHandle->pdf()->scalePDF);
 	}   
       } 
-/*      edm::Handle<LHEEventProduct>   lheEventProdH;
-      iEvent.getByToken(lheEventToken, lheEventProdH);
-      if (iEvent.getByToken(lheEventToken, lheEventProdH)){
-      lheSigEvn=lheEventProdH->hepeup().IDPRUP;
-	}*/
-      edm::Handle<LHEEventProduct>   lheEventInfoProd;
-      if (iEvent.getByToken(lheEventSrc_,lheEventInfoProd)) {
-        //mcWeights_ = genEventInfoProd->weights();
-              if(lheEventInfoProd->weights().size()>0)w=lheEventInfoProd->weights()[0].wgt;
+ 
+     edm::Handle<LHEEventProduct>   lheEventInfoProd;
+      if (iEvent.getByToken(lheEventToken_,lheEventInfoProd)) {
+	double asdd=lheEventInfoProd->originalXWGTUP();
+        if(lheEventInfoProd->weights().size()>0)w=lheEventInfoProd->weights()[0].wgt;
         for(unsigned int size=0;size<lheEventInfoProd->weights().size();size++){
+          double asdde=lheEventInfoProd->weights()[size].wgt;
           mcWeights_.push_back(lheEventInfoProd->weights()[size].wgt);
+          mcWeightsfact_.push_back((lheEventInfoProd->weights()[0].wgt)*asdde/asdd);
 	}
       }
+
 /*
-edm::Handle<LHERunInfoProduct> lheRunInfoH_; 
-//if(iEvent.getByToken( lheRunInfoToken_, lheRunInfoH_ )) {
+std::string weightsHeaderTag="initrwgt";
+	edm::Handle<LHERunInfoProduct> lheRunInfo;
+   	iEvent.getByToken(lheRunInfoToken_, lheRunInfo );
+	bool headerFound = false;
+	for (auto header = lheRunInfo->headers_begin(); header != lheRunInfo->headers_end(); ++header)
+    	{
+
+if (header->tag() != weightsHeaderTag)
+            continue;
+        
+        headerFound = true;
+		
+	}
+
+ //if(iEvent.getByToken( lheRunInfoToken_, lheRunInfoH_ )) {
 iEvent.getByLabel("externalLHEProducer", lheRunInfoH_);
 //LHERunInfoProduct myLHERunInfoProduct = *(lheRunInfoH_.product());
 //for(unsigned int iter=0;iter<lheRunInfoH_->size();iter++){
@@ -1064,14 +1127,40 @@ cout<<"I am here:  "<<endl;
   for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
    std::cout << lines.at(iLine);
   }
+}
+}
 }*/
 
 
   
     }
 
+    int duplicateMuons=0;
+    int badMuons=0;
+    int nev_trigs;
+    vector<string> Filtersname;
+    vector<bool> filtaccept;
+    edm::Handle< edm::TriggerResults > eventFiltersHandle;
+    iEvent.getByToken(eventTokenFilters_, eventFiltersHandle);
+    if ( eventFiltersHandle.isValid() && !eventFiltersHandle.failedToGet() ) {
+      edm::RefProd<edm::TriggerNames> trigNames( &(iEvent.triggerNames( *eventFiltersHandle )) );
+      nev_trigs = (int)trigNames->size();
+      for (int i = 0; i < nev_trigs; i++) {
+	Filtersname.push_back(trigNames->triggerName(i));
+	filtaccept.push_back(eventFiltersHandle->accept(i));
+	if (filtaccept[i]){
+//cout<<"this is Filters name:  "<<Filtersname[i]<<endl;
+	  if(std::string(Filtersname[i]).find("Flag_duplicateMuons")!=std::string::npos)duplicateMuons=1;
+	  if(std::string(Filtersname[i]).find("Flag_badMuons")!=std::string::npos)badMuons=1;
+	}
+      }
+    }
+    Flag_duplicateMuons=duplicateMuons;
+    Flag_badMuons=badMuons;
         //cout<<"ccccccccccccccc"<<endl;
     int Ele32_eta2p1_WPTight_Gsf=0;
+    int Ele25_eta2p1_WPTight_Gsf=0;
+    int Ele27_WPTight_Gsf=0;
     int IsoMu22_v=0;
     int IsoMu24=0;
     int IsoTkMu22_v=0;
@@ -1080,7 +1169,6 @@ cout<<"I am here:  "<<endl;
     vector<string> trigname;
     vector<bool> trigaccept;
     edm::Handle< edm::TriggerResults > HLTResHandle;
-    //edm::InputTag HLTTag = edm::InputTag( "TriggerResults", "", "HLT");
     iEvent.getByToken(HLTToken_, HLTResHandle);
     if ( HLTResHandle.isValid() && !HLTResHandle.failedToGet() ) {
       edm::RefProd<edm::TriggerNames> trigNames( &(iEvent.triggerNames( *HLTResHandle )) );
@@ -1089,14 +1177,13 @@ cout<<"I am here:  "<<endl;
 	trigname.push_back(trigNames->triggerName(i));
 	trigaccept.push_back(HLTResHandle->accept(i));
 	if (trigaccept[i]){
-if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trigname[i]<<endl;}
-//cout<<"this is trigger:  "<<trigname[i]<<endl;
-	  if(std::string(trigname[i]).find("HLT_Ele32_eta2p1_WPTight_Gsf")!=std::string::npos){ Ele32_eta2p1_WPTight_Gsf=1;
-}
-	  if(std::string(trigname[i]).find("HLT_IsoMu22_v")!=std::string::npos){IsoMu22_v=1;
-}
-	  if(std::string(trigname[i]).find("HLT_IsoMu24")!=std::string::npos){IsoMu24=1;
-}
+//		cout<<"I am here:  "<<endl;
+//		cout<<"trigname[i]:  "<<trigname[i]<<endl;
+	  if(std::string(trigname[i]).find("HLT_Ele32_eta2p1_WPTight_Gsf")!=std::string::npos){ Ele32_eta2p1_WPTight_Gsf=1;}
+	  if(std::string(trigname[i]).find("HLT_Ele25_eta2p1_WPTight_Gsf")!=std::string::npos){ Ele25_eta2p1_WPTight_Gsf=1;}
+	  if(std::string(trigname[i]).find("HLT_Ele27_WPTight_Gsf")!=std::string::npos){ Ele27_WPTight_Gsf=1;}
+	  if(std::string(trigname[i]).find("HLT_IsoMu22_v")!=std::string::npos){IsoMu22_v=1;}
+	  if(std::string(trigname[i]).find("HLT_IsoMu24")!=std::string::npos){IsoMu24=1;}
 	  if(std::string(trigname[i]).find("HLT_IsoTkMu22_v")!=std::string::npos)IsoTkMu22_v=1;
 	  if(std::string(trigname[i]).find("HLT_IsoTkMu24")!=std::string::npos)IsoTkMu24=1;
 	}
@@ -1104,13 +1191,14 @@ if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trign
     }
 
       HLT_Ele32_eta2p1_WPTight_Gsf=Ele32_eta2p1_WPTight_Gsf;
+      HLT_Ele25_eta2p1_WPTight_Gsf=Ele25_eta2p1_WPTight_Gsf;
+      HLT_Ele27_WPTight_Gsf=Ele27_WPTight_Gsf;
       HLT_IsoMu22_v=IsoMu22_v;
       HLT_IsoMu24=IsoMu24;
       HLT_IsoTkMu22_v=IsoTkMu22_v;
       HLT_IsoTkMu24=IsoTkMu24;
 
     edm::Handle< edm::TriggerResults > HLTResFiltersHandle;
-    //edm::InputTag HLTTag = edm::InputTag( "TriggerResults", "", "HLT");
     iEvent.getByToken(HLTTokenFilters_, HLTResFiltersHandle);
     Flag_HBHENoiseFilter=0;
     Flag_HBHENoiseIsoFilter=0;
@@ -1126,6 +1214,7 @@ if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trign
       ntrigs = (int)trigNames->size();
       for (int i = 0; i < ntrigs; i++) {
         if(HLTResFiltersHandle->accept(i)){
+
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseFilter")!=std::string::npos)Flag_HBHENoiseFilter=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_HBHENoiseIsoFilter")!=std::string::npos)Flag_HBHENoiseIsoFilter=1.;
           if(std::string(trigNames->triggerName(i)).find("Flag_globalTightHalo2016Filter")!=std::string::npos)Flag_globalTightHalo2016Filter=1.;
@@ -1473,7 +1562,6 @@ if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trign
         // Access up and down variation of the scale factor
         double sf_up = resolution_sf.getScaleFactor({{JME::Binning::JetEta, jet.eta()}}, Variation::UP);
         double sf_dn = resolution_sf.getScaleFactor({{JME::Binning::JetEta, jet.eta()}}, Variation::DOWN);
-
 //        cout<<gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r)<<endl;
         smear=gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r);
 	//float s = gRandom->Gaus(0,1);
@@ -1487,8 +1575,8 @@ if (run==278969 && lumi==1128&& event==1934843069){cout<<"trigname[i]:  "<<trign
     gjet_vv.SetPtEtaPhiE(jet.genJet()->pt(),jet.genJet()->eta(),jet.genJet()->phi(),jet.genJet()->energy());
     double DR_gj_j=jet_vv.DeltaR(gjet_vv);
     double DPt_gj_j=fabs(jet.pt()-jet.genJet()->pt());
-    if( DR_gj_j<0.2 &&DPt_gj_j<3*r*jet.pt() ){
-//    if( DR_gj_j<0.2 ){
+
+   if( DR_gj_j<0.2 &&DPt_gj_j<3*r*jet.pt() ){
 	  matchGen=true;
 	  MGjPt.push_back(jet.genJet()->pt());
 	  MGjeta.push_back(jet.genJet()->eta());
@@ -1537,7 +1625,43 @@ if(
 }
 
 void
-Tupel::beginRun(edm::Run const& iRun, edm::EventSetup const&){
+Tupel::beginRun(edm::Run const& iRun, edm::EventSetup const&)
+	{
+try{
+	edm::Handle<LHERunInfoProduct> lheruninfo;
+    	typedef std::vector<LHERunInfoProduct::Header>::const_iterator headers_const_iterator;
+   	iRun.getByToken(lheRunInfoToken_, lheruninfo );
+	LHERunInfoProduct myLHERunInfoProduct = *(lheruninfo.product());
+    for (headers_const_iterator iter=myLHERunInfoProduct.headers_begin(); 
+	 iter!=myLHERunInfoProduct.headers_end(); 
+	 iter++)
+      {
+	std::string tag("generator");
+	if(iter->tag()!="") tag+="_"+iter->tag();
+
+	std::vector<std::string> lines = iter->lines();
+	std::vector<std::string> prunedLines;
+	for (unsigned int iLine = 0; iLine<lines.size(); iLine++) 
+	  {
+	    if(lines.at(iLine)=="") continue;
+	    if(lines.at(iLine).find("weightgroup")!=std::string::npos) continue;
+	    prunedLines.push_back( lines.at(iLine) );
+cout<<"these are weights:  "<<lines.at(iLine)<<endl;
+	  }
+
+	/*if(histContainer_.find(tag)==histContainer_.end()) 
+	  {
+	    std::cout << "Starting histo for " << tag << std::endl;
+	    histContainer_[tag]=fs->make<TH1F>(tag.c_str(),tag.c_str(),prunedLines.size(),0,prunedLines.size());
+	  }*/
+
+	}
+}
+  catch(std::exception &e){
+    std::cout << e.what() << endl
+	      << "Failed to retrieve LHERunInfoProduct" << std::endl;
+
+  }
 }
 void 
 Tupel::beginJob()
@@ -1646,11 +1770,15 @@ Tupel::beginJob()
     
     //HLT
      myTree->Branch("HLT_Ele32_eta2p1_WPTight_Gsf",&HLT_Ele32_eta2p1_WPTight_Gsf);
+     myTree->Branch("HLT_Ele25_eta2p1_WPTight_Gsf",&HLT_Ele25_eta2p1_WPTight_Gsf);
+     myTree->Branch("HLT_Ele27_WPTight_Gsf",&HLT_Ele27_WPTight_Gsf);
      myTree->Branch("HLT_IsoMu24",&HLT_IsoMu24); 
      myTree->Branch("HLT_IsoTkMu24",&HLT_IsoTkMu24); 
      myTree->Branch("HLT_IsoMu22_v",&HLT_IsoMu22_v); 
      myTree->Branch("HLT_IsoTkMu22_v",&HLT_IsoTkMu22_v); 
 
+     myTree->Branch("Flag_duplicateMuons",&Flag_duplicateMuons); 
+     myTree->Branch("Flag_badMuons",&Flag_badMuons); 
      myTree->Branch("Flag_HBHENoiseFilter",&Flag_HBHENoiseFilter); 
      myTree->Branch("Flag_HBHENoiseIsoFilter",&Flag_HBHENoiseIsoFilter); 
      myTree->Branch("Flag_globalTightHalo2016Filter",&Flag_globalTightHalo2016Filter); 
@@ -1784,6 +1912,7 @@ Tupel::beginJob()
     myTree->Branch("ptHat_",&ptHat_);
     myTree->Branch("mcWeight_",&mcWeight_);
     myTree->Branch("mcWeights_",&mcWeights_);
+    myTree->Branch("mcWeightsfact_",&mcWeightsfact_);
     myTree->Branch("nup",&nup);   
 }
 /*

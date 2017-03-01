@@ -19,32 +19,31 @@ from JetMETCorrections.Configuration.JetCorrectionServices_cff import *
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v5' if options.runOnData else '80X_mcRun2_asymptotic_2016_TrancheIV_v6')
+process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v7' if options.runOnData else '80X_mcRun2_asymptotic_2016_TrancheIV_v8')
 #dataFile='file:pickevents.root'
-
-dataFile='/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
-#dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-15to20_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/00524E06-5BBB-E611-829C-0025905B8590.root'
-#dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/001C9AD4-0AB9-E611-9F03-0242AC130002.root'
-#dataFile='/store/mc/RunIISummer16MiniAODv2/TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/60000/18B56A8D-D0BD-E611-9448-002590DE3AC0.root'
-#dataFile='/store/mc/RunIISummer16MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/002F2CE1-38BB-E611-AF9F-0242AC130005.root'
-#dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/029FD095-D6BB-E611-A642-848F69FD471E.root'
-#dataFile='root://lyogrid06.in2p3.fr//dpm/in2p3.fr/home/cms/data/store/user/aapopov/Production/HToTT-semilep_pseudoscalar-M750-portmanteau_13TeV-madgraph-pythia8/MiniAOD/160829_105936/0000/AToTT_MiniAOD_10.root'
+dataFile='/store/mc/RunIISpring16MiniAODv2/ST_t-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/MINIAODSIM/premix_withHLT_80X_mcRun2_asymptotic_v14_ext1-v1/80000/02236588-E871-E611-BDA6-D8D385AE85C0.root'
+#dataFile='/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
+#dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/02F9F731-90D5-E611-9551-B083FED04D68.root'
 jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-jecFile='sqlite:Summer16_23Sep2016V3_MC.db'
-jecTag='JetCorrectorParametersCollection_Summer16_23Sep2016V2_MC_AK4PFchs'
+#jecFile='sqlite:Summer16_23Sep2016V3_MC.db'
+jerFile='sqlite:jerSpring16_25nsV10_MC.db'
+#jecTag='JetCorrectorParametersCollection_Summer16_23Sep2016V3_MC_AK4PFchs'
 if options.runOnData :
 	jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute','L2L3Residual']
-	jecFile='sqlite:Summer16_23Sep2016AllV3_DATA.db'
-	jecTag='JetCorrectorParametersCollection_Summer16_23Sep2016AllV2_DATA_AK4PFchs'	
-	dataFile='/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/02148252-C198-E611-9790-0CC47A6C0682.root'
-#	dataFile='/store/data/Run2016B/SingleElectron/MINIAOD/23Sep2016-v3/00000/00099863-E799-E611-A876-141877343E6D.root'
+#	jecFile='sqlite:Summer16_23Sep2016AllV3_DATA.db'
+#	jecTag='JetCorrectorParametersCollection_Summer16_23Sep2016AllV3_DATA_AK4PFchs'	
+#	dataFile='/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/02148252-C198-E611-9790-0CC47A6C0682.root'
+	dataFile='/store/data/Run2016H/SingleMuon/MINIAOD/03Feb2017_ver2-v1/110000/0A4364ED-83EA-E611-B619-002481CFE888.root'
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(dataFile)
 
 )
+process.load('Configuration.StandardSequences.Services_cff')
+process.load("JetMETCorrections.Modules.JetResolutionESProducer_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.load("CondCore.CondDB.CondDB_cfi")
+'''
 process.jec = cms.ESSource("PoolDBESSource",
         DBParameters = cms.PSet(
         messageLevel = cms.untracked.int32(0)
@@ -58,8 +57,37 @@ process.jec = cms.ESSource("PoolDBESSource",
         ),
         connect = cms.string(jecFile)
         )
-
 process.es_prefer_jec = cms.ESPrefer('PoolDBESSource', 'jec')
+'''
+#----JER  https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyResolution
+from CondCore.DBCommon.CondDBSetup_cfi import *
+process.jer = cms.ESSource("PoolDBESSource",
+        CondDBSetup,
+        toGet = cms.VPSet(
+            # Resolution
+            cms.PSet(
+                record = cms.string('JetResolutionRcd'),
+                tag    = cms.string('JR_Spring16_25nsV10_MC_PtResolution_AK4PFchs'),
+                label  = cms.untracked.string('AK4PFchs_pt')
+                ),
+            cms.PSet(
+                record = cms.string('JetResolutionRcd'),
+                tag    = cms.string('JR_Spring16_25nsV10_MC_PtResolution_AK4PFchs'),
+                label  = cms.untracked.string('AK4PFchs_phi')
+                ),
+
+            # Scale factors
+            cms.PSet(
+                record = cms.string('JetResolutionScaleFactorRcd'),
+                tag    = cms.string('JR_Spring16_25nsV10_MC_SF_AK4PFchs'),
+                label  = cms.untracked.string('AK4PFchs')
+                ),
+            ),
+        connect = cms.string(jerFile)
+        )
+
+process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
+
 
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
@@ -79,14 +107,13 @@ updateJetCollection(
      )
 #process.updatedPatJetsTransientCorrectedUpdatedJECBTag.addTagInfos = cms.bool(True)
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+#from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import slimmedMETsMuEGClean
 runMetCorAndUncFromMiniAOD(process,
                            isData=options.runOnData,
                            metType = 'PF',
                            postfix=''
                            )
 
-process.load('Configuration.StandardSequences.Services_cff')
-process.load("JetMETCorrections.Modules.JetResolutionESProducer_cfi")
 # Check interactively the good lumis
 #if options.runOnData :
 #	import FWCore.PythonUtilities.LumiList as LumiList
@@ -104,18 +131,19 @@ process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('ntuple.root' )
 )
 
-#jetsrcc="updatedPatJetsUpdatedJEC"
 jetsrcc="selectedUpdatedPatJetsUpdatedJEC"
-#jetsrcc="updatedPatJetsTransientCorrectedUpdatedJEC"
 
 trigPath="HLT"
 trigFiltPath="PAT"
+eventFilter="PAT"
+metTag="slimmedMETs"
 if options.runOnData :
 	trigFiltPath="RECO"
-	trigPath="HLT"
+	eventFilter="PAT"
+	metTag="slimmedMETsMuEGClean"
 process.tupel = cms.EDAnalyzer("Tupel",
   triggerfilters = cms.InputTag("TriggerResults","",trigFiltPath),
-  triggerEvent   = cms.InputTag("patTriggerEvent" ),
+  EvtFilterSrc   = cms.InputTag("TriggerResults","",eventFilter ),
   HLTSrc         = cms.InputTag("TriggerResults","",trigPath), 
   photonSrc      = cms.InputTag("slimmedPhotons"),
   electronSrc    = cms.InputTag("slimmedElectrons"),
@@ -139,11 +167,8 @@ process.tupel = cms.EDAnalyzer("Tupel",
   keepparticlecoll    = cms.bool(False),
   mSrcRho      = cms.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now
   CalojetLabel = cms.InputTag('slimmedJets'), #same collection now BB 
-#  jecunctable = cms.string(jecunctable_),
-  #metSource = cms.VInputTag("slimmedMETs","slimmedMETs","slimmedMETs","slimmedMETs"), #no MET corr yet
-  metSource = cms.VInputTag("slimmedMETs","slimmedMETs"),
+  metSource = cms.VInputTag(metTag,metTag),
   lheSource=cms.InputTag("source")
-#  effAreas_file = cms.string('RecoEgamma/ElectronIdentification/data/Summer16/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_80X.txt')
 )
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
@@ -174,7 +199,7 @@ process.p = cms.Path(
 )
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.MessageLogger.suppressWarning = cms.untracked.vstring('ecalLaserCorrFilter','manystripclus53X','toomanystripclus53X')
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 process.options.allowUnscheduled = cms.untracked.bool(True)

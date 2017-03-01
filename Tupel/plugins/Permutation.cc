@@ -31,6 +31,7 @@ void Permutation::Reset()
 	kinfit_ = false;
 }
 
+
 bool operator<(const Permutation& A, const Permutation& B)
 {
 	return(A.Prob() < B.Prob());
@@ -51,3 +52,4 @@ std::ostream & operator<<(std::ostream &os, const Permutation& p) {
             << ", full discr: " << p.prob_ << ", mass disc: " << p.mass_discriminant_;
 //cout<<"I am testing: "<<endl;
 }
+

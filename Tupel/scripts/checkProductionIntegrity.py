@@ -79,8 +79,8 @@ def main():
                #subgroupMerge = int( raw_input('This set has %d files. Merge into groups? (enter 0 if no merging)' % len(file_list)) )
             if 'Data' in pub:subgroupMerge=70  
             elif 'TTJets' in pub : subgroupMerge=50
-            elif 'TTWJets' in pub : subgroupMerge=10
-            elif 'TTZToLL' in pub : subgroupMerge=10
+            elif 'TTW' in pub : subgroupMerge=10
+            elif 'TTZ' in pub : subgroupMerge=8
             elif 'QCD' in pub : subgroupMerge=50
             elif 'ST_t' in pub : subgroupMerge=10
             elif 'HToTT-semilep' in pub: subgroupMerge=10 # why this line is not working under the following line??
