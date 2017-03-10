@@ -13,8 +13,8 @@ eosmount ~/eos
 
 cd Tupel/Tupel/
 // Make symbolic link if need correction from db
-#ln -s data/era2016/Spring16_25nsV6_DATA.db
-#ln -s data/era2016/Spring16_25nsV6_MC.db
+ln -s data/moriond17/Summer16_23Sep2016AllV2_DATA.db
+ln -s data/moriond17/Summer16_23Sep2016V2_MC.db
 // To run the analyzer locally
 cmsRun scripts/simple_run_80X_cfg.py
 // Make a test for crab using test_samples.json;
@@ -24,8 +24,9 @@ python scripts/submitToGrid.py -j data/era2016/test_samples.json -c ${CMSSW_BASE
 // See the crab status first using the following command and then resubmit with the second command
    tree -d -L 1 grid/ | awk '{printf("crab status -d grid/%s\n",$NF);}' >crab_status.sh && chmod 777 crab_status.sh && ./crab_status.sh
    tree -d -L 1 grid/ | awk '{printf("crab resubmit -d grid/%s\n",$NF);}' >crab_resubmit.sh && chmod 777 crab_resubmit.sh && ./crab_resubmit.sh
-//  get crab report
-crab report grid/crab_Data13TeV_SingleMuon_2016B/
+
+//  get crab report with the following script which will print the resultant files used for merging.
+./scripts/crab_report.sh
 //  Merge json files
 mergeJSON.py grid/crab_Data13TeV_SingleMuon_2016B/results/processedLumis.json grid/crab_Data13TeV_SingleMuon_2016C/results/processedLumis.json grid/crab_Data13TeV_SingleMuon_2016D/results/processedLumis.json --output data/era2016/Data13TeV_SingleMuon_lumis.json
 
