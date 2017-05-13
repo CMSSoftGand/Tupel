@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('python')
-options.register('runOnData', True,
+options.register('runOnData', False,
                  VarParsing.multiplicity.singleton,
                  VarParsing.varType.bool,
                  "Run this on real data"
@@ -21,8 +21,8 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v7' if options.runOnData else '80X_mcRun2_asymptotic_2016_TrancheIV_v8')
 #dataFile='file:pickevents.root'
-dataFile='/store/mc/RunIISpring16MiniAODv2/ST_t-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/MINIAODSIM/premix_withHLT_80X_mcRun2_asymptotic_v14_ext1-v1/80000/02236588-E871-E611-BDA6-D8D385AE85C0.root'
-#dataFile='/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
+#dataFile='/store/mc/RunIISpring16MiniAODv2/ST_t-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1/MINIAODSIM/premix_withHLT_80X_mcRun2_asymptotic_v14_ext1-v1/80000/02236588-E871-E611-BDA6-D8D385AE85C0.root'
+dataFile='/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root'
 #dataFile='/store/mc/RunIISummer16MiniAODv2/QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/02F9F731-90D5-E611-9551-B083FED04D68.root'
 jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
 #jecFile='sqlite:Summer16_23Sep2016V3_MC.db'
@@ -41,7 +41,7 @@ process.source = cms.Source("PoolSource",
 )
 process.load('Configuration.StandardSequences.Services_cff')
 process.load("JetMETCorrections.Modules.JetResolutionESProducer_cfi")
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000) )
 process.load("CondCore.CondDB.CondDB_cfi")
 '''
 process.jec = cms.ESSource("PoolDBESSource",
@@ -90,7 +90,6 @@ process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
 
 
 from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
-from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
 updateJetCollection(
    process,
    jetSource = cms.InputTag('slimmedJets'),
@@ -105,6 +104,11 @@ updateJetCollection(
     'deepFlavourJetTags:probcc'          ,
         ]
      )
+jetsrcc="updatedPatJetsTransientCorrectedUpdatedJEC"
+#jetsrcc="updatedPatJetsTransientCorrectedUpdatedJECBTags"
+#jetsrcc="selectedUpdatedPatJetsUpdatedJEC"
+#jetsrcc="updatedPatJetsUpdatedJEC"
+
 #process.updatedPatJetsTransientCorrectedUpdatedJECBTag.addTagInfos = cms.bool(True)
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 #from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import slimmedMETsMuEGClean
@@ -130,8 +134,6 @@ for idmod in my_id_modules:
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('ntuple.root' )
 )
-
-jetsrcc="selectedUpdatedPatJetsUpdatedJEC"
 
 trigPath="HLT"
 trigFiltPath="PAT"
@@ -201,7 +203,7 @@ process.p = cms.Path(
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.MessageLogger.suppressWarning = cms.untracked.vstring('ecalLaserCorrFilter','manystripclus53X','toomanystripclus53X')
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False) )
 process.options.allowUnscheduled = cms.untracked.bool(True)
 
 
@@ -220,9 +222,9 @@ outputCommands = cms.untracked.vstring(['drop *', 'keep *_slimmedMETs*_*_*'])
 # Switch to selected PAT objects in the trigger matching
 #removeCleaningFromTriggerMatching( process )
 ##############################
+'''
 iFileName = "fileNameDump_cfg.py"
 file = open(iFileName,'w')
 file.write(str(process.dumpPython()))
 file.close()
-
-
+'''

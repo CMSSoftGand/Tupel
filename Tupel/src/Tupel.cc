@@ -71,70 +71,18 @@ class TTree;
 class Tupel : public edm::EDAnalyzer {
 
 public:
-
-
-/*reco::GenJet const *match(reco::Jet const &jet, reco::GenJet const &genJets,double jetConeSize, double maxDPt) const
-{
-    reco::GenJet const *matchedJet = nullptr;
-    double minDR2 = std::numeric_limits<double>::infinity();
-    double const maxDR2 = jetConeSize * jetConeSize / 4.;
-    
-    for (auto const &genJet: genJets)
-    {
-        double const dR2 = ROOT::Math::VectorUtil::DeltaR2(jet.p4(), genJet.p4());
-        
-        if (dR2 > maxDR2 or dR2 > minDR2)
-            continue;
-        
-        if (std::abs(jet.pt() - genJet.pt()) > maxDPt)
-            continue;
-        
-        minDR2 = dR2;
-        matchedJet = &genJet;
-    }
-    
-    
-    return matchedJet;
-}*/
-
   /// default constructor
   explicit Tupel(const edm::ParameterSet&);
   /// default destructor
   ~Tupel();
-
 private:
-double m_dR_max;
-double m_dPt_max_factor;
 /// everything that needs to be done before the event loop
   virtual void beginJob() ;
   /// everything that needs to be done during the event loop 
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
+virtual void endRun(edm::Run const &run, edm::EventSetup const &) override;
+
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
-/*reco::GenJet const *match(reco::Jet const &jet,edm::View<reco::GenJet> const &genJets, double resolution)const
-{
-double min_dR = std::numeric_limits<double>::infinity();
-                const reco::GenJet* matched_genJet = nullptr;
-
-                for (const auto& genJet: genJets) {
-                    double dR = deltaR(genJet, jet);
-
-                    if (dR > min_dR)
-                        continue;
-
-                    if (dR < m_dR_max) {
-                        double dPt = std::abs(genJet.pt() - jet.pt());
-                        if (dPt > m_dPt_max_factor * resolution)
-                            continue;
-
-                        min_dR = dR;
-                        matched_genJet = &genJet;
-                    }
-                }
-
-                return matched_genJet;
-            }
-*/
 /// everything that needs to be done after the event loop
 //   double getJER(double jetEta, int sysType);
   virtual void endJob() ;
@@ -174,7 +122,8 @@ double min_dR = std::numeric_limits<double>::infinity();
   edm::EDGetTokenT<std::vector<PileupSummaryInfo> > PupSrc_;
   bool elecIdsListed_=false;
   //edm::EDGetTokenT<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMapToken_;
-
+  std::unordered_map<std::string,TH1*> histContainer_;
+  edm::Service<TFileService> fs;
   // ----------member data ---------------------------
   TTree *myTree;
   unsigned int event,run,lumi;
@@ -264,6 +213,7 @@ double min_dR = std::numeric_limits<double>::infinity();
   std::vector<double> caloJetEmFrac_;
   std::vector<double> caloJetn90_;*/
   ///pfjets
+  std::vector<double> patJetPfAk04PtJERSmear02;
   std::vector<double> patJetPfAk04PtJERSmear;
   std::vector<double> patJetPfAk04PtJERSmearUp;
   std::vector<double> patJetPfAk04PtJERSmearDn;
@@ -476,8 +426,10 @@ keepparticlecoll_= iConfig.getParameter< bool >( "keepparticlecoll" ) ;
   HLTTokenFilters_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerfilters"));
   eventTokenFilters_=consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("EvtFilterSrc"));
   lheEventToken_=consumes<LHEEventProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
-  lheRunInfoToken_=consumes<LHERunInfoProduct>(edm::InputTag ("externalLHEProducer"));//hardcode
+  lheRunInfoToken_=consumes<LHERunInfoProduct, edm::InRun>({"externalLHEProducer"});//hardcode
   PupSrc_=consumes<std::vector< PileupSummaryInfo> >(edm::InputTag ("slimmedAddPileupInfo"));//hardcode
+
+  for(std::unordered_map<std::string,TH1*>::iterator it=histContainer_.begin(); it!=histContainer_.end(); it++) it->second->Sumw2();
  for (edm::InputTag const & tag : iConfig.getParameter< std::vector<edm::InputTag> > ("metSource"))metSources.push_back(consumes<pat::METCollection>(tag));
 }
 
@@ -511,14 +463,6 @@ JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty(JetCorPar);
   edm::Handle<pat::PackedGenParticleCollection > packedgenParticles_h;
   iEvent.getByToken(packedgenParticleSrc_, packedgenParticles_h);
   const vector<pat::PackedGenParticle>* packedgenParticles  = packedgenParticles_h.failedToGet () ? 0 : &*packedgenParticles_h;
-
-/*  edm::Handle<std::vector <reco::GenJet> >genjetColl;
-  iEvent.getByToken(gjetToken_, genjetColl);
-  std::vector<const reco::GenJet*> genjets_v;
-  for ( auto& x : *genjetColl ) {
-       genjets_v.push_back(&x);
-       }
-*/
   
   // get muon collection
   edm::Handle<pat::MuonCollection > muons;
@@ -671,6 +615,7 @@ St03NumberMom.clear();
     MGjeta.clear();
     MGjphi.clear();
     MGjE.clear();
+    patJetPfAk04PtJERSmear02.clear();
     patJetPfAk04PtJERSmear.clear();
     patJetPfAk04PtJERSmearUp.clear();
     patJetPfAk04PtJERSmearDn.clear();
@@ -944,8 +889,7 @@ if (isfake.at(0)=1 && fabs(z_value.at(0))< 24.0 && rho_vlaue.at(0) < 2. && ndof_
       int id = gen[i].pdgId();
 
       if(gen[i].numberOfMothers()){
- 
-        if (abs(st)==23 ||abs(st)==22||abs(st)==21||abs(st)==61 ||abs(st)==3||abs(st)==2 ){
+        if (abs(st)==23 ||abs(st)==22||abs(st)==21 || abs(st)==44|| abs(st)==52|| abs(st)==61 || abs(st)==62 ||abs(st)==3||abs(st)==2 ){
           TLorentzVector genLep3(0,0,0,0);
 
           if(abs(gen[i].eta())<10)genLep3.SetPtEtaPhiE(gen[i].pt(),gen[i].eta(),gen[i].phi(),gen[i].energy());
@@ -1345,7 +1289,7 @@ cout<<"I am here:  "<<endl;
   const auto el = *electrons->ptrAt(j);
   const auto e = electrons->ptrAt(j);
 
-        if(el.pt()<10 || abs(el.eta())>3.0)continue;
+        if(el.pt()<15 || abs(el.eta())>3.0)continue;
   double dEtaIn_;
   double dPhiIn_;
   double hOverE_;
@@ -1461,7 +1405,6 @@ cout<<"I am here:  "<<endl;
     double cmult = 0;
     double nconst = 0, nNeutralParticles = 0;
     
-    //for(edm::View<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
   edm::Handle<edm::View<pat::Jet> >jets;
   iEvent.getByToken(jetToken_,jets);
 
@@ -1469,7 +1412,7 @@ cout<<"I am here:  "<<endl;
     const auto jet = *jets->ptrAt(i);
     const auto j = jets->ptrAt(i);
       if((channel_!="noselection")&&(jet.pt()<15 || abs(jet.eta())>2.5))continue;
-      if((channel_=="noselection")&&(jet.pt()<15 || abs(jet.eta())>5.0))continue;
+      if((channel_=="noselection")&&(jet.pt()<15 || abs(jet.eta())>3.0))continue;
       chf = jet.chargedHadronEnergyFraction();
       nhf = (jet.neutralHadronEnergy()+jet.HFHadronEnergy())/jet.correctedJet(0).energy();
       cemf = jet.chargedEmEnergyFraction();
@@ -1544,6 +1487,7 @@ cout<<"I am here:  "<<endl;
 
     }
       double smear=jet.pt(), smearUp=jet.pt(),smearDn=jet.pt();
+      double smear02=jet.pt();
       double smearE=jet.energy(), smearUpE=jet.energy(),smearDnE=jet.energy();
   //    smear = getJER(jet.eta(), 0); //JER nominal=0, up=+1, down=-1
   //    smearUp = getJER(jet.eta(), 1); //JER nominal=0, up=+1, down=-1
@@ -1564,6 +1508,7 @@ cout<<"I am here:  "<<endl;
         double sf_dn = resolution_sf.getScaleFactor({{JME::Binning::JetEta, jet.eta()}}, Variation::DOWN);
 //        cout<<gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r)<<endl;
         smear=gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r);
+        smear02=gRandom->Gaus(jet.pt(),sqrt(sf*sf-1)*r);
 	//float s = gRandom->Gaus(0,1);
 	//smear=s*(sqrt(sf*sf-1)*r)+jet.pt();
         smearUp=gRandom->Gaus(jet.pt(),sqrt(sf_up*sf_up-1)*r);
@@ -1575,8 +1520,8 @@ cout<<"I am here:  "<<endl;
     gjet_vv.SetPtEtaPhiE(jet.genJet()->pt(),jet.genJet()->eta(),jet.genJet()->phi(),jet.genJet()->energy());
     double DR_gj_j=jet_vv.DeltaR(gjet_vv);
     double DPt_gj_j=fabs(jet.pt()-jet.genJet()->pt());
-
-   if( DR_gj_j<0.2 &&DPt_gj_j<3*r*jet.pt() ){
+   if( DR_gj_j<0.2 &&DPt_gj_j<3*r*jet.pt() )
+	{
 	  matchGen=true;
 	  MGjPt.push_back(jet.genJet()->pt());
 	  MGjeta.push_back(jet.genJet()->eta());
@@ -1587,13 +1532,19 @@ cout<<"I am here:  "<<endl;
           smearUp=std::max(0.0,jet.genJet()->pt() +sf_up *( jet.pt()-jet.genJet()->pt() ) );
           smearDn=std::max(0.0,jet.genJet()->pt() +sf_dn *( jet.pt()-jet.genJet()->pt() ) );
          // cout<<"Burdayım ulan  "<<smear<<"  "<<smearUp<<"  "<<smearDn<<endl;
-	}}
+	}
+   if( DR_gj_j<0.2 )//to check this conditions at low pt how it response
+	{
+	  smear02=std::max(0.0,jet.genJet()->pt() +sf *( jet.pt()-jet.genJet()->pt() ) );
+	}
+     }
         //cout<<smear<<"  "<<smearUp<<"  "<<smearDn<<endl;
 	matchGjet.push_back(matchGen);
         smearE=jet.energy()*smear/jet.pt();
         smearUpE=jet.energy()*smearUp/jet.pt();
         smearDnE=jet.energy()*smearDn/jet.pt();
       }
+      patJetPfAk04PtJERSmear02.push_back(smear02);
       patJetPfAk04PtJERSmear.push_back(smear);
       patJetPfAk04PtJERSmearUp.push_back(smearUp);
       patJetPfAk04PtJERSmearDn.push_back(smearDn);
@@ -1624,45 +1575,45 @@ if(
    }               //cout<<"hhhhhhhhhhhhhhhhhhhhh"<<endl;
 }
 
+
+//void Tupel::beginRun() {}
 void
-Tupel::beginRun(edm::Run const& iRun, edm::EventSetup const&)
+Tupel::endRun(edm::Run const& iRun, edm::EventSetup const&) 
 	{
 try{
 	edm::Handle<LHERunInfoProduct> lheruninfo;
-    	typedef std::vector<LHERunInfoProduct::Header>::const_iterator headers_const_iterator;
-   	iRun.getByToken(lheRunInfoToken_, lheruninfo );
+ 	typedef std::vector<LHERunInfoProduct::Header>::const_iterator headers_const_iterator;	
+	iRun.getByToken(lheRunInfoToken_, lheruninfo );
 	LHERunInfoProduct myLHERunInfoProduct = *(lheruninfo.product());
-    for (headers_const_iterator iter=myLHERunInfoProduct.headers_begin(); 
-	 iter!=myLHERunInfoProduct.headers_end(); 
-	 iter++)
+	for (headers_const_iterator iter=myLHERunInfoProduct.headers_begin(); 
+         iter!=myLHERunInfoProduct.headers_end(); 
+         iter++)
       {
 	std::string tag("generator");
 	if(iter->tag()!="") tag+="_"+iter->tag();
-
 	std::vector<std::string> lines = iter->lines();
 	std::vector<std::string> prunedLines;
 	for (unsigned int iLine = 0; iLine<lines.size(); iLine++) 
-	  {
-	    if(lines.at(iLine)=="") continue;
-	    if(lines.at(iLine).find("weightgroup")!=std::string::npos) continue;
-	    prunedLines.push_back( lines.at(iLine) );
-cout<<"these are weights:  "<<lines.at(iLine)<<endl;
-	  }
-
-	/*if(histContainer_.find(tag)==histContainer_.end()) 
-	  {
-	    std::cout << "Starting histo for " << tag << std::endl;
-	    histContainer_[tag]=fs->make<TH1F>(tag.c_str(),tag.c_str(),prunedLines.size(),0,prunedLines.size());
-	  }*/
-
+	{
+	if(lines.at(iLine)=="") continue;
+	if(lines.at(iLine).find("weightgroup")!=std::string::npos) continue;
+	prunedLines.push_back( lines.at(iLine) );
 	}
+	if(histContainer_.find(tag)==histContainer_.end()) 
+	{
+	histContainer_[tag]=fs->make<TH1F>(tag.c_str(),tag.c_str(),prunedLines.size(),0,prunedLines.size());
+	}
+	for (unsigned int iLine = 0; iLine<prunedLines.size(); iLine++) 
+{	  histContainer_[tag]->GetXaxis()->SetBinLabel(iLine+1,prunedLines.at(iLine).c_str());  
 }
-  catch(std::exception &e){
+	}
+    }
+catch(std::exception &e){
     std::cout << e.what() << endl
 	      << "Failed to retrieve LHERunInfoProduct" << std::endl;
-
-  }
+    }
 }
+
 void 
 Tupel::beginJob()
 {
@@ -1673,7 +1624,6 @@ Tupel::beginJob()
     myTree->Branch("wtot_write",&wtot_write);
     myTree->Branch("accept",&accept);
 
-    if(keepparticlecoll_){
       myTree->Branch("Packed01Pt",&Packed01Pt);
       myTree->Branch("Packed01Eta",&Packed01Eta);
       myTree->Branch("Packed01Phi",&Packed01Phi);
@@ -1685,6 +1635,7 @@ Tupel::beginJob()
       myTree->Branch("Packed01Charge",&Packed01Charge);
       myTree->Branch("Packed01IsPrompt",&Packed01IsPrompt);
       myTree->Branch("Packed01IsTauProd",&Packed01IsTauProd);
+    if(keepparticlecoll_){
     myTree->Branch("patPfCandPt",&patPfCandPt);
     myTree->Branch("patPfCandEta",&patPfCandEta);
     myTree->Branch("patPfCandPhi",&patPfCandPhi);
@@ -1859,6 +1810,7 @@ Tupel::beginJob()
     myTree->Branch("patElec_mva_presel_",&patElec_mva_presel_);
     
     //PFJet
+    myTree->Branch("patJetPfAk04PtJERSmear02",&patJetPfAk04PtJERSmear02);
     myTree->Branch("patJetPfAk04PtJERSmear",&patJetPfAk04PtJERSmear);
     myTree->Branch("patJetPfAk04PtJERSmearUp",&patJetPfAk04PtJERSmearUp);
     myTree->Branch("patJetPfAk04PtJERSmearDn",&patJetPfAk04PtJERSmearDn);

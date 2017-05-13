@@ -25,6 +25,7 @@ def main():
     os.system("rm -r tmp")
     os.system("mkdir tmp")
     os.chdir("tmp/")
+    bigjob = open('bigjobSub.txt', 'w')
     directory=opt.input
     dir_list=getEOSlslist(directory=opt.input,prepend='')
     for dir in dir_list:
@@ -33,7 +34,7 @@ def main():
       os.system("mkdir "+dsetname)
       print "current time is: "+datetime.now().strftime('%Y-%m-%d %H:%M:%S')
       print 'looking into: '+directory+'/'+dsetname+'...'
-      prepend='/pnfs/iihe/cms'
+      prepend='dcap://maite.iihe.ac.be/pnfs/iihe/cms'
       print 'this is jjpath: %s '% path
       print 'do not worry about folder creation:'
       data = Popen(['ls', '/pnfs/iihe/cms/'+dir],stdout=PIPE)
@@ -45,6 +46,7 @@ def main():
       input_list=[]
       input_list=full_list
       lent=len(input_list)
+#use lent for testing purpose
 #      lent=3
       x=1
       for ifile in xrange(0,lent):
@@ -54,7 +56,7 @@ def main():
         os.system("mkdir -p "+dsetname+"/"+str(x))
 #        os.chdir("tmp/"+dsetname+"/"+str(x))
         os.chdir(dsetname+"/"+str(x))
-        with open('job.sh', 'w') as fout:
+        with open(dsetname+'job.sh', 'w') as fout:
           fout.write("#!/bin/sh\n")
           fout.write("cd "+str(path)+"\n")
           fout.write("source $VO_CMS_SW_DIR/cmsset_default.sh \n")
@@ -62,7 +64,9 @@ def main():
           fout.write("root -l -b <<EOF \n")
 #         fout.write("gSystem->Load("'"libFWCoreFWLite.so"'") \n")
 #         fout.write("FWLiteEnabler::enable() \n")
-          fout.write(".x simpleReader.C+ (" '"'+inF+'"' "," '"'+path+"/root_files"+"/"+dsetname+"/"+outF +'"' " ) \n")
+          fout.write(".x analyzer/simpleReader.cc+ (" '"'+inF+'"' "," '"'+path+"/root_files"+"/"+dsetname+"/"+outF +'"' " ) \n")
+#          fout.write(".x gen_plots/simpleReader.cc+ (" '"'+inF+'"' "," '"'+path+"/root_files"+"/"+dsetname+"/"+outF +'"' " ) \n")
+          bigjob.write("qsub -q localgrid@cream02 "+dsetname+"/"+str(x)+"/"+dsetname+"job.sh \n")
           fout.write(".q; \n")
           fout.write("EOF\n")
 #          fout.write("cp " +outF+".root "+str(path)+"/root_files/"+dsetname+"\n")
@@ -70,10 +74,11 @@ def main():
           fout.write("cd - \n")
 #         fout.write("echo 'STOP---------------'\n")
 #         fout.write("echo\n")
-        os.system("chmod 755 job.sh")
+        os.system("chmod 755 "+dsetname+"job.sh")
    
    ###### sends bjobs ######
-        os.system("qsub -q localgrid@cream02 -o script.stdout -e script.stderr job.sh")
+#        os.system("qsub -q highmem@cream02 -o script.stdout -e script.stderr "+dsetname+"job.sh")
+        #os.system("qsub -q localgrid@cream02 -o script.stdout -e script.stderr "+dsetname+"job.sh")
         #print "job nr " + str(x) + " submitted"
         os.chdir("../..")
         print

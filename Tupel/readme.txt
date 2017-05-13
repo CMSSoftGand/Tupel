@@ -48,6 +48,9 @@ if you want to use /scratch -->[2]: python scripts/submitCheckProductionIntegrit
 // to run the analyzer locally [1] and submit the for the whole sample is [2]:
 [1] ./job.sh 
 [2] python scripts/bash_ttbar.py -i /store/user/mgul/Tupel_8_0_11/1c09f31
+It will create a bigjobSub.txt file in the directory you given as temporary. Now to submit all the jobs on grid use:
+big-submission path/bigjobSub.txt
+http://doc.iihe.ac.be/wiki/t2b/index.php/BigSubmission 
 
 // The output will be saved in root_files directory. To merge the output use the command:
  find root_files/ -type d -maxdepth 1 | awk '{printf("python scripts/mergeOutputs.py %s\n",$NF);}' >merge_output.sh && chmod 777 merge_output.sh && sh merge_output.sh
