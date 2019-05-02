@@ -15,6 +15,7 @@ cd Tupel/Tupel/
 // Make symbolic link if need correction from db
 ln -s data/moriond17/Summer16_23Sep2016AllV2_DATA.db
 ln -s data/moriond17/Summer16_23Sep2016V2_MC.db
+ln -s data/moriond17/jerSpring16_25nsV10_MC.db
 // To run the analyzer locally
 cmsRun scripts/simple_run_80X_cfg.py
 // Make a test for crab using test_samples.json;
